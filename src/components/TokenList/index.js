@@ -3,13 +3,10 @@ import styled from 'styled-components'
 
 import { Box, Flex, Text } from 'rebass'
 import TokenLogo from '../TokenLogo'
-import { CustomLink } from '../Link'
 import Row from '../Row'
 
-import { formattedNum, formattedPercent } from '../../utils'
+import { formattedNum, formattedPercent, getPercentChange } from '../../utils'
 import { useMedia } from 'react-use'
-
-import fetch from 'cross-fetch'
 
 const PageButtons = styled.div`
   width: 100%;
@@ -127,7 +124,7 @@ const TopTokenList = ({ tokens = [], itemMax = 10, useTracked = false }) => {
     const below1080 = useMedia('(max-width: 1080px)')
     const below680 = useMedia('(max-width: 680px)')
     const below600 = useMedia('(max-width: 600px)')
-
+    
     let tmpTokens = []
 
     useEffect(() => {
@@ -140,31 +137,32 @@ const TopTokenList = ({ tokens = [], itemMax = 10, useTracked = false }) => {
         }
     }, [tokens, itemMax])
 
-    // useEffect(() => {
-    //     const now_date = new Date()/1000
-    //     const start_date = now_date - 86400 * 31
-    //     tmpTokens = tokens.map(async (token, idx) => {
-    //         let res = await fetch (`https://server.saucerswap.finance/api/public/tokens/prices/${token.id}?interval=DAY&from=${start_date}&to=${now_date}`)
-    //         if (res.status === 200){
-    //             const jsonData = await res.json()
-    //             return {
-    //                 ...token,
-    //                 dailyData: jsonData
-    //             }
-    //         }
-    //         return {
-    //             ...token,
-    //             dailyData: []
-    //         }
-    //     })
-    // }, [tokens])
+    useEffect(() => {
+        for (let token of tokens) {
+            let o = {}
+            o['liquidity'] = token['liquidity']
+            o['oneDayVolumeUSD'] = token['oneDayVolumeUSD']
+            o['totalVolumeUSD'] = token['totalVolumeUSD']
+            o['symbol'] = token['symbol']
+            o['name'] = token['name']
+            o['priceUsd'] = token['priceUsd']
+            o['priceChangeUSD'] = token['priceChangeUSD']
+            let len = token['dailyPriceData'].length
+            if (len > 0){
+                o['dailyChanged'] = getPercentChange (token['priceUsd'], token['dailyPriceData'][len - 1]['closedUsd'])
+                o['weeklyChanged'] = getPercentChange (token['priceUsd'], token['dailyPriceData'][len - 7]['closedUsd'])
+                o['monthlyChanged'] = getPercentChange (token['priceUsd'], token['dailyPriceData'][len - 30]['closedUsd'])
+            }
+            tmpTokens.push (o)
+        }
+    }, [tokens])
 
     console.log (tmpTokens, ">>>>>>>>>>>>")
 
     const filteredList = useMemo(() => {
         return (
-            tokens &&
-            tokens
+            tmpTokens &&
+            tmpTokens
                 .sort((a, b) => {
                     if (sortedColumn === SORT_FIELD.SYMBOL || sortedColumn === SORT_FIELD.NAME) {
                         return a[sortedColumn] > b[sortedColumn] ? (sortDirection ? -1 : 1) * 1 : (sortDirection ? -1 : 1) * -1
@@ -182,7 +180,7 @@ const TopTokenList = ({ tokens = [], itemMax = 10, useTracked = false }) => {
                 })
                 .slice(itemMax * (page - 1), page * itemMax)
         )
-    }, [tmpTokens, itemMax, page, sortDirection, sortedColumn])
+    }, [tokens, itemMax, page, sortDirection, sortedColumn])
 
     const ListItem = ({ item, index }) => {
         return (
@@ -216,11 +214,11 @@ const TopTokenList = ({ tokens = [], itemMax = 10, useTracked = false }) => {
                 {/* )} */}
                 {/* {!below1080 &&  */}
                 <DataText area="change" color="text" fontWeight="500" style={{ minWidth: 70, paddingRight: 4 }}>
-                    <svg viewBox="0 0 500 100" class="chart">
+                    <svg viewBox="0 0 500 100" className="chart">
                         <polyline
                             fill="none"
                             stroke="#0074d9"
-                            stroke-width="3"
+                            strokeWidth="3"
                             points="
                                 0,120
                                 20,60

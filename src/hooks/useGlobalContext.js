@@ -125,6 +125,8 @@ export async function getAllTokensOnSaucerswap(_allPairs, tokenDailyVolume, pric
       const jsonData = await response.json();
       tokens = jsonData;
     } 
+    const now_date = new Date()/1000
+    const start_date = now_date - 86400 * 31
     for (let token of tokens) {
       if (tokenDailyVolume && Object.keys(tokenDailyVolume).length > 0) {
         token['oneDayVolumeUSD'] = Number(tokenDailyVolume[token['id']]) * (hbarPrice !== undefined ? Number(hbarPrice).toFixed(4) : 0)
@@ -133,7 +135,11 @@ export async function getAllTokensOnSaucerswap(_allPairs, tokenDailyVolume, pric
       else {
         token['oneDayVolumeUSD'] = 0
         token['priceChangeUSD'] = 0
-        // break;
+      }
+      let res = await fetch (`https://api.saucerswap.finance/tokens/prices/${token.id}?interval=DAY&from=${start_date}&to=${now_date}`)
+      if (res.status === 200) {
+        const dailyPrice = await res.json()
+        token['dailyPriceData'] = dailyPrice
       }
 
       tmpTokens.push(token)
