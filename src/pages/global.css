@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.animate-x-slide {
+  animation: x-slide 4s ease-in-out infinite;
+  width: 0;
+}
+.animate-y-slide {
+  animation: y-slide 4s ease-in-out infinite;
+  height: 0;
+}
+@keyframes x-slide {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    width: 100%;
+  }
+}
+@keyframes y-slide {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    height: 100%;
+  }
+}
+
+.panel-shadow {
+  --tw-shadow-color: #000 !important;
+  --tw-shadow: var(--tw-shadow-colored) !important;
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow) !important;
+  --tw-shadow-colored: 0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color) !important;
+  border: none !important;
+}
