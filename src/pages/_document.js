@@ -38,6 +38,31 @@ export default class MyDocument extends Document {
             rel="stylesheet"
           />
 
+          <link
+                href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
+                rel="stylesheet"
+                integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We"
+                crossorigin="anonymous"
+              />
+
+          <script
+            src="/charting_library/charting_library.js"
+            type="text/javascript"
+          ></script>
+          {/* <script
+            async
+            src="https://www.googletagmanager.com/gtag/js?id=G-BLH2FRPRLN"
+          ></script>
+          <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+              dataLayer.push(arguments);
+            }
+            gtag("js", new Date());
+
+            gtag("config", "G-BLH2FRPRLN");
+          </script> */}
+
           <meta
             name="description"
             content="The starting point for your next project with Minimal UI Kit, built on the newest version of Material-UI ©, ready to be customized to your style"

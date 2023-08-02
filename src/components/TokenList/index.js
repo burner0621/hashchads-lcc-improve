@@ -1,9 +1,15 @@
+
+import { useRouter } from 'next/router';
 import React, { useState, useEffect, useMemo } from 'react'
+import { paramCase } from 'change-case';
 import styled from 'styled-components'
 
 import { Box, Flex, Text } from 'rebass'
 import TokenLogo from '../TokenLogo'
 import Row from '../Row'
+import { Link } from '@mui/material';
+
+import { PATH_HASHCHADS } from '../../routes/paths';
 
 import { formattedNum, formattedPercent, getPercentChange } from '../../utils'
 import { useMedia } from 'react-use'
@@ -117,6 +123,7 @@ const SORT_FIELD = {
 }
 
 const TopTokenList = ({ tokens = [], itemMax = 25, useTracked = false, show = 1 }) => {
+    const { push } = useRouter();
 
     const [page, setPage] = useState(1)
     const [maxPage, setMaxPage] = useState(1)
@@ -176,6 +183,10 @@ const TopTokenList = ({ tokens = [], itemMax = 25, useTracked = false, show = 1 
         setFilterData(tmpTokens)
     }, [tokens])
 
+    const redirectTokenPage = (tokenId) => {
+        push(PATH_HASHCHADS.tokens.view(paramCase(tokenId)));
+    };
+
     const filteredList = useMemo(() => {
         return (
             filterData &&
@@ -208,10 +219,10 @@ const TopTokenList = ({ tokens = [], itemMax = 25, useTracked = false, show = 1 
                             <div style={{ marginRight: '1rem', width: '10px' }}>{index}</div>
                         }
                         <TokenLogo path={item.icon} />
-                        <a style={{ marginLeft: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 140, display: 'flex' }} href={'/tokens/' + item.id}>
+                        <Link style={{ marginLeft: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 140, display: 'flex' }} onClick={() => redirectTokenPage(item.id)}>
                             {below680 ? item.symbol : item.name}
                             <TokenLogo diligence={item.dueDiligenceComplete} logoType={"warning"} />
-                        </a>
+                        </Link>
                     </Row>
                 </DataText>
                 {/* {!below680 && ( */}

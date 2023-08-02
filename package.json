@@ -78,6 +78,7 @@
     "react-apexcharts": "^1.4.0",
     "react-beautiful-dnd": "^13.1.0",
     "react-copy-to-clipboard": "^5.1.0",
+    "react-countup": "^6.4.2",
     "react-data-table-component": "^7.5.3",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.2",

@@ -12,7 +12,7 @@ import TopTokenList from '../../../components/TokenList'
 import { Badge, Button, Switch } from '@mui/material';
 import { SwitchProps } from '@mui/material/Switch';
 
-import TokenPage from './TokenPage'
+import TokenPage from './[tokenId]'
 
 import useSettings from '../../../hooks/useSettings';
 // layouts
@@ -201,11 +201,15 @@ export default function GeneralTokens() {
                             <FullWrapper>
                                 <RowBetween>
                                     <Nav tabs className="flex flex-row">
-                                        <NavItem className={tokenType == TOKEN_TYPE.all || tokenType == TOKEN_TYPE.gainer ? "bg-black" : "bg-dark-grey-blue"} style={{ margin: '5px' }}>
-                                            <NavLink className="cursor-pointer" onClick={() => { handleTokenType(TOKEN_TYPE.gainer) }} >
+                                        <NavItem>
+                                            <NavLink className="cursor-pointer p-0 rounded-large" onClick={() => { handleTokenType(TOKEN_TYPE.gainer) }} >
                                                 {/* <Badge pill color="success" className="absolute top-0 left-full translate-middle">{gainerTokens.length}
                                                     <span className="visually-hidden">Gainers</span></Badge> */}
-                                                <Badge color="secondary" badgeContent={gainerTokens.length}>
+                                                <Badge
+                                                    color="secondary"
+                                                    badgeContent={gainerTokens.length}
+                                                    className={tokenType == TOKEN_TYPE.all || tokenType == TOKEN_TYPE.gainer ? "bg-black" : "bg-dark-grey-blue"}
+                                                >
                                                     <Button variant="outlined" className="flex flex-row" color="success">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
                                                             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
@@ -214,9 +218,13 @@ export default function GeneralTokens() {
                                                 </Badge>
                                             </NavLink>
                                         </NavItem>
-                                        <NavItem className={tokenType == TOKEN_TYPE.all || tokenType == TOKEN_TYPE.loser ? "bg-black" : "bg-dark-grey-blue"} style={{ margin: '5px' }}>
-                                            <NavLink className="cursor-pointer" onClick={() => { handleTokenType(TOKEN_TYPE.loser) }} >
-                                                <Badge color="error" badgeContent={loserTokens.length}>
+                                        <NavItem>
+                                            <NavLink className="cursor-pointer p-0 rounded" onClick={() => { handleTokenType(TOKEN_TYPE.loser) }} >
+                                                <Badge
+                                                    color="error"
+                                                    badgeContent={loserTokens.length}
+                                                    className={tokenType == TOKEN_TYPE.all || tokenType == TOKEN_TYPE.loser ? "bg-black" : "bg-dark-grey-blue"}
+                                                >
                                                     <Button variant="outlined" className="flex flex-row" color="success">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
                                                             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181" />

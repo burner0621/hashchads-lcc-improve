@@ -37,8 +37,8 @@ export const PATH_PAGE = {
 export const PATH_HASHCHADS = {
   root: ROOTS_HASHCHADS,
   general: {
-    overview: '/',
-    // overview: path(ROOTS_HASHCHADS, '/overview'),
+    // overview: '/',
+    overview: path(ROOTS_HASHCHADS, '/overview'),
     ecommerce: path(ROOTS_HASHCHADS, '/ecommerce'),
     analytics: path(ROOTS_HASHCHADS, '/analytics'),
     banking: path(ROOTS_HASHCHADS, '/banking'),

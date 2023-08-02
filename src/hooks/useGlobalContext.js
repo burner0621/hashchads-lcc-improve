@@ -22,7 +22,7 @@ import {
 const ETH_PRICE_KEY = 'ETH_PRICE_KEY'
 
 const socket = socketIO.connect(process.env.BASE_URL);
-const priceSocket = socketIO.connect(process.env.BASE_URL, {path: '/prices'});
+const priceSocket = socketIO.connect(process.env.BASE_URL, { path: '/prices' });
 // format dayjs with the libraries that we need
 dayjs.extend(utc)
 dayjs.extend(weekOfYear)
@@ -65,7 +65,7 @@ export function useGlobalData() {
       if (allTokens && allTokens.length > 0) updateAllTokensInSaucerswap(allTokens)
 
       let [hbarP, sauceP] = await getHbarAndSaucePrice()
-      if(hbarP > 0 && sauceP > 0) updateHbarAndSaucePrice(hbarP, sauceP)
+      if (hbarP > 0 && sauceP > 0) updateHbarAndSaucePrice(hbarP, sauceP)
       isFetching = false;
     }
     if (data === undefined && hbarPrice && tmpPrices && tmpPrices.length > 0) {
@@ -175,8 +175,8 @@ export async function getAllTokensOnSaucerswap(_allPairs, tokenDailyVolume, pric
 export function useTokenDailyPriceData() {
   const [state, { updateDailyPriceData }] = useGlobalDataContext()
   const dailyPriceData = state?.dailyPriceData
-  priceSocket.emit ('dailyPriceData')
-  useEffect (() => {
+  priceSocket.emit('dailyPriceData')
+  useEffect(() => {
     priceSocket.on('getDailyPriceData', (p) => {
       updateDailyPriceData(p);
       if (p && Object.keys(p).length > 0) priceSocket.disconnect()
@@ -190,14 +190,15 @@ export function useHbarAndSaucePrice() {
   const hBarPrice = state?.hBarPrice
   const saucePrice = state?.saucePrice;
   if (!hBarPrice) {
-    if (!isUseHbarAndSaucePrice){
+    if (!isUseHbarAndSaucePrice) {
       try {
         isUseHbarAndSaucePrice = true
-        getHbarAndSaucePrice().then((value) => {console.log (value, "!!!!!!!!!!!!!!!!!!!!!!")
+        getHbarAndSaucePrice().then((value) => {
+          console.log(value, "!!!!!!!!!!!!!!!!!!!!!!")
           if (value[0] > 0 && value[1] > 0) updateHbarAndSaucePrice(value[0], value[1])
           isUseHbarAndSaucePrice = false
         })
-      } catch(e) {
+      } catch (e) {
         isUseHbarAndSaucePrice = false
       }
     }
@@ -257,12 +258,10 @@ export function usePriceChanges() {
     if (!isFetchingUsePriceChanges) {
       try {
         isFetchingUsePriceChanges = true
-        fetch("https://api.saucerswap.finance/tokens/price-change").then((response) => {
+        axios.get("https://api.saucerswap.finance/tokens/price-change").then((response) => {
           if (response.status === 200) {
-            response.json().then(priceChangeData => {
-              updatePriceChange(priceChangeData)
-              isFetchingUsePriceChanges = false
-            });
+            updatePriceChange(response.data)
+            isFetchingUsePriceChanges = false
           } else {
             isFetchingUsePriceChanges = false
           }
@@ -303,12 +302,10 @@ export function useTokenDailyVolume() {
     if (!isFetchingUseTokenDailyVolume) {
       try {
         isFetchingUseTokenDailyVolume = true
-        fetch("https://api.saucerswap.finance/tokens/daily-volumes").then((response) => {
+        axios.get("https://api.saucerswap.finance/tokens/daily-volumes").then((response) => {
           if (response.status === 200) {
-            response.json().then((dailyVolData) => {
-              updateTokenDailyVolume(dailyVolData)
-              isFetchingUseTokenDailyVolume = false
-            })
+            updateTokenDailyVolume(response.data)
+            isFetchingUseTokenDailyVolume = false
           } else {
             isFetchingUseTokenDailyVolume = false
           }
@@ -331,10 +328,10 @@ export function usePairDailyVolume() {
   useEffect(() => {
     async function fetchData() {
       try {
-        let response = await fetch("https://api.saucerswap.finance/pools/daily-volumes")
+        let response = await axios.get("https://api.saucerswap.finance/pools/daily-volumes")
 
         if (response.status === 200) {
-          const dailyVolData = await response.json();
+          const dailyVolData = await response.data;
           updatePairDailyVolume(dailyVolData)
         }
       } catch (e) {
@@ -354,10 +351,10 @@ export function usePairWeeklyVolume() {
   useEffect(() => {
     async function fetchData() {
       try {
-        let response = await fetch("https://api.saucerswap.finance/pools/weekly-volumes")
+        let response = await axios.get("https://api.saucerswap.finance/pools/weekly-volumes")
 
         if (response.status === 200) {
-          const dailyVolData = await response.json();
+          const dailyVolData = await response.data;
           updatePairWeeklyVolume(dailyVolData)
         }
       } catch (e) {
@@ -375,12 +372,12 @@ let isUseAllTokensInSaucerswap = false
 export function useAllTokensInSaucerswap() {
   const [state, { updateAllTokensInSaucerswap }] = useGlobalDataContext()
   const tokenDailyVolume = useTokenDailyVolume()
-  const priceChanges = usePriceChanges();console.log ("$$$$$$$$$$$$$$$$$$$$")
+  const priceChanges = usePriceChanges(); console.log("$$$$$$$$$$$$$$$$$$$$")
   const [hbarPrice, saucePrice] = useHbarAndSaucePrice()
   const _allPairs = useAllPairsInSaucerswap()
 
   let allTokens = state?.allTokens || []
-  
+
   useEffect(() => {
     async function fetchData() {
       let data = await getAllTokensOnSaucerswap(_allPairs, state?.tokenDailyVolume, priceChanges, hbarPrice)
@@ -461,9 +458,9 @@ export async function getGlobalData(prices, hbarPrice) {
     let oneDay_totalLiquidityUSD = 0
     let liquidityChangeUSD = 0
     try {
-      let response = await fetch("https://api.saucerswap.finance/stats")
+      let response = await axios.get("https://api.saucerswap.finance/stats")
       if (response.status === 200) {
-        const jsonData = await response.json();
+        const jsonData = await response.data;
         try {
           data.totalVolumeHBAR = (Number(jsonData['tvl']) / 100000000).toFixed(4);
           data.totalVolumeUSD = Number(jsonData['tvlUsd']).toFixed(4);
@@ -476,9 +473,9 @@ export async function getGlobalData(prices, hbarPrice) {
     }
 
     try {
-      let response = await fetch("https://api.saucerswap.finance/stats/volume/daily")
+      let response = await axios.get("https://api.saucerswap.finance/stats/volume/daily")
       if (response.status === 200) {
-        let jsonData = await response.json();
+        let jsonData = await response.data;
         data.todayVolumeUSD = Number(jsonData[0]['dailyVolume'] / 100000000).toFixed(4)
       }
     } catch (e) {
@@ -486,9 +483,9 @@ export async function getGlobalData(prices, hbarPrice) {
     }
 
     try {
-      let response = await fetch(`https://api.saucerswap.finance/stats/platformData?field=VOLUME&interval=DAY&from=${now_date / 1000 - 86400 * 4}&to=${now_date / 1000}`)
+      let response = await axios.get(`https://api.saucerswap.finance/stats/platformData?field=VOLUME&interval=DAY&from=${now_date / 1000 - 86400 * 4}&to=${now_date / 1000}`)
       if (response.status === 200) {
-        let jsonData = await response.json();
+        let jsonData = await response.data;
         nowData_totalVolumeUSD = (Number(jsonData[jsonData.length - 1]['valueHbar']) / 100000000 * prices[prices.length - 2][1]).toFixed(4)
         oneDayData_totalVolumeUSD = (Number(jsonData[jsonData.length - 2]['valueHbar']) / 100000000 * prices[prices.length - 3][1]).toFixed(4)
       }
@@ -497,9 +494,9 @@ export async function getGlobalData(prices, hbarPrice) {
     }
 
     try {
-      let response = await fetch(`https://api.saucerswap.finance/stats/platformData?field=VOLUME&interval=WEEK&from=${now_date / 1000 - 86400 * 30}&to=${now_date / 1000}`)
+      let response = await axios.get(`https://api.saucerswap.finance/stats/platformData?field=VOLUME&interval=WEEK&from=${now_date / 1000 - 86400 * 30}&to=${now_date / 1000}`)
       if (response.status === 200) {
-        let jsonData = await response.json();
+        let jsonData = await response.data;
         nowWeekData_totalVolumeUSD = (Number(jsonData[jsonData.length - 1]['valueHbar']) / 100000000 * prices[prices.length - 2][1]).toFixed(4)
         oneWeekData_totalVolumeUSD = (Number(jsonData[jsonData.length - 2]['valueHbar']) / 100000000 * prices[prices.length - 3][1]).toFixed(4)
       }
@@ -508,9 +505,9 @@ export async function getGlobalData(prices, hbarPrice) {
     }
 
     try {
-      let response = await fetch(`https://api.saucerswap.finance/stats/platformData?field=LIQUIDITY&interval=DAY&from=${now_date / 1000 - 86400 * 3}&to=${now_date / 1000}`)
+      let response = await axios.get(`https://api.saucerswap.finance/stats/platformData?field=LIQUIDITY&interval=DAY&from=${now_date / 1000 - 86400 * 3}&to=${now_date / 1000}`)
       if (response.status === 200) {
-        let jsonData = await response.json();
+        let jsonData = await response.data;
         totalLiquidityUSD = (Number(jsonData[jsonData.length - 1]['valueHbar']) / 100000000 * prices[prices.length - 2][1]).toFixed(4)
         oneDay_totalLiquidityUSD = (Number(jsonData[jsonData.length - 2]['valueHbar']) / 100000000 * prices[prices.length - 3][1]).toFixed(4)
 
@@ -586,10 +583,10 @@ export const getChartData = async (oldestDateToFetch, prices) => {
     let data = []
     let weekelyData = []
     const now_date = Date.now()
-    let response = await fetch(`https://api.saucerswap.finance/stats/platformData?field=LIQUIDITY&interval=DAY&from=${oldestDateToFetch}&to=${now_date}`)
+    let response = await axios.get(`https://api.saucerswap.finance/stats/platformData?field=LIQUIDITY&interval=DAY&from=${oldestDateToFetch}&to=${now_date}`)
     if (response.status === 200) {
       if (prices.length > 0) {
-        let jsonData = await response.json();
+        let jsonData = await response.data;
         jsonData.pop()
         let diff = prices.length - jsonData.length
         for (var i = 0; i < jsonData.length; i++) {
@@ -599,10 +596,10 @@ export const getChartData = async (oldestDateToFetch, prices) => {
 
     }
 
-    response = await fetch(`https://api.saucerswap.finance/stats/platformData?field=VOLUME&interval=DAY&from=${oldestDateToFetch}&to=${now_date}`)
+    response = await axios.get(`https://api.saucerswap.finance/stats/platformData?field=VOLUME&interval=DAY&from=${oldestDateToFetch}&to=${now_date}`)
     if (response.status === 200) {
       if (prices.length > 0) {
-        let jsonData = await response.json();
+        let jsonData = await response.data;
         jsonData.pop()
         let diff = prices.length - jsonData.length
         for (let i = 0; i < jsonData.length; i++) {
@@ -611,10 +608,10 @@ export const getChartData = async (oldestDateToFetch, prices) => {
       }
     }
 
-    response = await fetch(`https://api.saucerswap.finance/stats/platformData?field=VOLUME&interval=WEEK&from=${oldestDateToFetch}&to=${now_date}`)
+    response = await axios.get(`https://api.saucerswap.finance/stats/platformData?field=VOLUME&interval=WEEK&from=${oldestDateToFetch}&to=${now_date}`)
     if (response.status === 200) {
       if (prices.length > 0) {
-        let jsonData = await response.json();
+        let jsonData = await response.data;
         let diff = prices.length - jsonData.length
         for (let i = 0; i < jsonData.length; i++) {
           weekelyData.push({ "weeklyVolumeUSD": Number(jsonData[i]['valueHbar']) / 100000000 * prices[diff + i - 1][1], "date": jsonData[i]['timestampSeconds'] })

@@ -1,15 +1,19 @@
-import React, { useEffect, useState, useMemo } from "react";
-import { Container, NavItem, Nav, NavLink, FormGroup, Input, Label } from "reactstrap";
+import { useRouter } from 'next/router';
+import React, { useEffect, useState } from "react";
+import { paramCase } from 'change-case';
+import { Container, NavItem, Nav, NavLink, FormGroup, Label } from "reactstrap";
 import styled from 'styled-components'
 import { useMedia } from 'react-use'
 
 import Layout from '../../../layouts';
 
+import { PATH_HASHCHADS } from '../../../routes/paths';
+
 import Page from '../../../components/Page';
-import { Badge, Button, Switch } from '@mui/material';
+import { Button, Switch } from '@mui/material';
 import { RowBetween } from '../../../components/Row'
-import classnames from "classnames";
 import DataTable from 'react-data-table-component';
+import { Link } from '@mui/material';
 
 import { useAllPairsInSaucerswap, usePriceChanges, usePairDailyVolume, usePairWeeklyVolume } from "../../../hooks/useGlobalContext";
 
@@ -53,6 +57,7 @@ GeneralPairs.getLayout = function getLayout(page) {
 };
 
 export default function GeneralPairs() {
+    const { push } = useRouter();
 
     const [pairsType, setPairsType] = useState(PAIRS_TYPE.pairs)
     const [timeRangeType, setTimeRangeType] = useState(TIME_RANGE_TYPE.day)
@@ -132,24 +137,28 @@ export default function GeneralPairs() {
         else return value / 1000000000 + 'B'
     }
 
+    const redirectPairPage = (contractId) => {
+        push(PATH_HASHCHADS.pairs.view(paramCase(contractId)));
+    };
+
     const columns = [
 
         {
             name: <span className='font-weight-bold fs-16'>Pair</span>,
-            cell: row => {
+            cell: row => {console.log (row.pair_address, "lllllllllllllllllllllll")
                 return (
-                    <a href={'/pairs/' + row.pair_address}>
+                    <Link onClick={() => redirectPairPage(row.pair_address.replace(/-/g, '.'))} className='cursor-pointer'>
                         <div className="flex flex-row">
                             <TokenLogo path={row.icon} />
-                            <div className="d-flex flex-column" style={{ marginLeft: 4 }}>
-                                <div className="d-flex">
+                            <div className="flex flex-column" style={{ marginLeft: 4 }}>
+                                <div className="flex">
                                     <span className="text-pair-first text-white text-hover">{row.first}</span>
                                     <span className="text-pair-second text-gray-500">{'/' + row.second}</span>
                                 </div>
                                 <span className="text-yellow-weight" style={{ textOverflow: "clip" }} onClick={() => handleCopyAddress()}>{row.pair_address}<i className="mdi mdi-content-copy" /></span>
                             </div>
                         </div>
-                    </a>
+                    </Link>
 
                 )
             },
@@ -163,15 +172,15 @@ export default function GeneralPairs() {
             cell: (row) => {
                 if (row.percent >= 0) {
                     return (
-                        <a href={'/pairs/' + row.pair_address}>
+                        <Link onClick={() => redirectPairPage(row.pair_address)}>
                             <span className="text-green-weight">{row.price ? '$' + row.price.toFixed(4) : ''}</span>
-                        </a>
+                        </Link>
                     );
                 } else {
                     return (
-                        <a href={'/pairs/' + row.pair_address}>
+                        <Link onClick={() => redirectPairPage(row.pair_address)}>
                             <span className="text-red-weight">{row.price ? '$' + row.price.toFixed(4) : ''}</span>
-                        </a>
+                        </Link>
                     );
                 }
             },
@@ -183,7 +192,7 @@ export default function GeneralPairs() {
             sortable: true,
             cell: (row) => {
                 if (row.percent >= 0) {
-                    return <a href={'/pairs/' + row.pair_address} className="flex flex-row">
+                    return <a onClick={() => redirectPairPage(row.pair_address)} className="flex flex-row">
                         <span className='text-green-weight'>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
@@ -193,7 +202,7 @@ export default function GeneralPairs() {
                     </a>
 
                 } else {
-                    return <a href={'/pairs/' + row.pair_address} className="flex flex-row">
+                    return <a onClick={() => redirectPairPage(row.pair_address)} className="flex flex-row">
                         <span className='text-red-weight'>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 4.5l15 15m0 0V8.25m0 11.25H8.25" />
@@ -273,16 +282,14 @@ export default function GeneralPairs() {
                             <RowBetween>
                                 <Nav tabs className="flex flex-row">
                                     <NavItem className={pairsType == PAIRS_TYPE.pairs ? "bg-black" : "bg-dark-grey-blue"}>
-                                        <NavLink style={{ cursor: "pointer" }} onClick={() => { handlePairsType(PAIRS_TYPE.pairs) }} >
+                                        <NavLink style={{ cursor: "pointer", padding: 0 }} onClick={() => { handlePairsType(PAIRS_TYPE.pairs) }} >
                                             <Button variant="outlined" className="flex flex-row" color="success">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
-                                                </svg>  ALL
+                                                <i className="mdi mdi-checkbox-multiple-blank-circle align-middle me-1" />  ALL
                                             </Button>
                                         </NavLink>
                                     </NavItem>
                                     <NavItem className={pairsType == PAIRS_TYPE.gainers ? "bg-black" : "bg-dark-grey-blue"}>
-                                        <NavLink style={{ cursor: "pointer" }} onClick={() => { handlePairsType(PAIRS_TYPE.gainers) }} >
+                                        <NavLink style={{ cursor: "pointer", padding: 0 }} onClick={() => { handlePairsType(PAIRS_TYPE.gainers) }} >
                                             <Button variant="outlined" className="flex flex-row" color="success">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
@@ -291,7 +298,7 @@ export default function GeneralPairs() {
                                         </NavLink>
                                     </NavItem>
                                     <NavItem className={pairsType == PAIRS_TYPE.losers ? "bg-black" : "bg-dark-grey-blue"}>
-                                        <NavLink style={{ cursor: "pointer" }} onClick={() => { handlePairsType(PAIRS_TYPE.losers) }} >
+                                        <NavLink style={{ cursor: "pointer", padding: 0 }} onClick={() => { handlePairsType(PAIRS_TYPE.losers) }} >
                                             <Button variant="outlined" className="flex flex-row" color="success">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181" />
@@ -313,12 +320,12 @@ export default function GeneralPairs() {
                                         <Label check className="text-lg font-medium flex items-center">$500+ Liquidity</Label>
                                     </FormGroup>
                                     <Nav pills className="badge-bg flex flex-row ml-4">
-                                        <NavItem className="flex items-center justify-center w-16">
+                                        <NavItem className={"flex items-center justify-center w-16 " + timeRangeType == TIME_RANGE_TYPE.day ? "active badge-active-bg" : ""}>
                                             <div style={{ cursor: "pointer" }} className={timeRangeType == TIME_RANGE_TYPE.day ? "active badge-active-bg" : ""} onClick={() => { handleTimeRangeType(TIME_RANGE_TYPE.day) }} >
                                                 <span className={timeRangeType == TIME_RANGE_TYPE.day ? "text-white badge p-3" : "text-badge badge p-3"}>24h</span>
                                             </div>
                                         </NavItem>
-                                        <NavItem className="flex items-center justify-center w-16">
+                                        <NavItem className={"flex items-center justify-center w-16 " + timeRangeType == TIME_RANGE_TYPE.week ? "active badge-active-bg" : ""}>
                                             <div style={{ cursor: "pointer" }} className={timeRangeType == TIME_RANGE_TYPE.week ? "active badge-active-bg" : ""} onClick={() => { handleTimeRangeType(TIME_RANGE_TYPE.week) }} >
                                                 <span className={timeRangeType == TIME_RANGE_TYPE.week ? "text-white badge p-3" : "text-badge badge p-3"}>1W</span>
                                             </div>
