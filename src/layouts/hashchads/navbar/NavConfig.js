@@ -24,6 +24,8 @@ const ICONS = {
   analytics: getIcon('ic_analytics'),
   dashboard: getIcon('ic_dashboard'),
   menuItem: getIcon('ic_menu_item'),
+  token: getIcon('ic_token'),
+  pair: getIcon('ic_pair'),
 };
 
 const navConfig = [
@@ -33,10 +35,20 @@ const navConfig = [
     subheader: 'general',
     items: [
       { title: 'overview', path: PATH_HASHCHADS.general.overview, icon: ICONS.dashboard },
-      { title: 'tokens', path: PATH_HASHCHADS.general.ecommerce, icon: ICONS.ecommerce },
-      { title: 'pairs', path: PATH_HASHCHADS.general.analytics, icon: ICONS.analytics },
-      { title: 'banking', path: PATH_HASHCHADS.general.banking, icon: ICONS.banking },
-      { title: 'booking', path: PATH_HASHCHADS.general.booking, icon: ICONS.booking },
+    ],
+  },
+
+  {
+    subheader: 'tokens',
+    items: [
+      { title: 'tokens', path: PATH_HASHCHADS.tokens.root, icon: ICONS.token },
+    ],
+  },
+
+  {
+    subheader: 'pairs',
+    items: [
+      { title: 'pairs', path: PATH_HASHCHADS.pairs.root, icon: ICONS.pair },
     ],
   },
 

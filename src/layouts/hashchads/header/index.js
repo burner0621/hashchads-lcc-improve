@@ -86,7 +86,7 @@ export default function HashchadsHeader({ onOpenSidebar, isCollapse = false, ver
           {/* <NotificationsPopover /> */}
           {/* <ContactsPopover /> */}
           <Search display={'all'} />
-          <AccountPopover />
+          {/* <AccountPopover /> */}
         </Stack>
       </Toolbar>
     </RootStyle>

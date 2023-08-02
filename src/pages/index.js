@@ -47,6 +47,7 @@ export default function Overview() {
   const { themeStretch } = useSettings();
   const [gainerTokens, setGainers] = useState([])
   const [loserTokens, setLosers] = useState([])
+  console.log ("&&&&&&&&&&&&&&&&&")
 
   const allTokens = useAllTokensInSaucerswap()
 

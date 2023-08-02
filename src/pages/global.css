@@ -36,3 +36,43 @@
   --tw-shadow-colored: 0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color) !important;
   border: none !important;
 }
+
+.flex-block {
+  display: flex;
+}
+
+@media only screen and (max-width: 600px) {
+  .flex-block {
+    display: inline-block;
+  }
+}
+
+.ads-banner {
+  border-radius: 12px;
+  width: 100%;
+  max-height: 130px;
+}
+
+@media only screen and (max-width: 600px) {
+  .ads-banner {
+    max-height: 40px;
+  }
+}
+
+.badge-bg {
+  border-radius: 5px;
+  background: #23323c !important;
+  min-height: 2rem;
+}
+
+
+.badge-active-bg {
+  background: #0b1217;
+  border-radius: 5px;
+}
+
+.badge-bg {
+  border-radius: 5px;
+  background: #23323c !important;
+  min-height: 2rem;
+}

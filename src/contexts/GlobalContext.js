@@ -11,6 +11,7 @@ const UPDATE_PRICE_CHANGE = 'UPDATE_PRICE_CHANGE'
 const UPDATE_TOKEN_DATA = 'UPDATE_TOKEN_DATA'
 const UPDATE_PAIR_WEEKLY_VOLUME = 'UPDATE_PAIR_WEEKLY_VOLUME'
 const UPDATE_PAIR_DAILY_VOLUME = 'UPDATE_PAIR_DAILY_VOLUME'
+const UPDATE_TOKEN_DAILY_PRICE_DATA = 'UPDATE_TOKEN_DAILY_PRICE_DATA'
 
 const GlobalDataContext = createContext()
 
@@ -61,6 +62,14 @@ function reducer(state, { type, payload }) {
             return {
                 ...state,
                 priceChange,
+            }
+        }
+
+        case UPDATE_TOKEN_DAILY_PRICE_DATA: {
+            const { dailyPriceData } = payload
+            return {
+                ...state,
+                dailyPriceData
             }
         }
 
@@ -174,6 +183,15 @@ function GlobalProvider({ children }) {
         })
     }, [])
 
+    const updateDailyPriceData = useCallback((data) => { console.log ("121212121212121212121212")
+        dispatch({
+            type: UPDATE_TOKEN_DAILY_PRICE_DATA,
+            payload: {
+                dailyPriceData: data,
+            },
+        })
+    }, [])
+
     const updateAllPairsInSaucerswap = useCallback((allPairs) => { console.log ("777777777777777777777")
         dispatch({
             type: UPDATE_ALL_PAIRS_IN_SAUCERSWAP,
@@ -221,6 +239,7 @@ function GlobalProvider({ children }) {
                         update,
                         updatePrices,
                         updatePriceChange,
+                        updateDailyPriceData,
                         updatePairDailyVolume,
                         updatePairWeeklyVolume,
                         updateTokenDailyVolume,
@@ -235,6 +254,7 @@ function GlobalProvider({ children }) {
                     update,
                     updatePrices,
                     updatePriceChange,
+                    updateDailyPriceData,
                     updatePairDailyVolume,
                     updatePairWeeklyVolume,
                     updateTokenDailyVolume,

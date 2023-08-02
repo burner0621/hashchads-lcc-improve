@@ -8,6 +8,7 @@ const Inline = styled.div`
 `
 
 const Image = styled.img`
+  min-width: ${({ size }) => size};
   width: ${({ size }) => size};
   height: ${({ size }) => size};
   background-color: white;
@@ -26,7 +27,7 @@ export default function TokenLogo({ path, diligence=true, logoType="logo", heade
     if (logoType === "warning" && diligence === false) {
       return (
         <Inline>
-           <span {...rest} alt={''} style={{ fontSize: size }} role="img" aria-label="face"><img src={`assets/noimage.png`} width={24}/></span>
+           <span {...rest} alt={''} style={{ fontSize: size }} role="img" aria-label="face"><img src={`/assets/noimage.png`} width={24}/></span>
         </Inline>
       )
     }
@@ -51,6 +52,7 @@ export default function TokenLogo({ path, diligence=true, logoType="logo", heade
                     setError(true)
                     event.preventDefault()
                 }}
+                className='mx-1'
             />
         </Inline>
     )

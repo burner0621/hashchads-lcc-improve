@@ -48,6 +48,7 @@ import { SettingsProvider } from '../contexts/SettingsContext';
 import { CollapseDrawerProvider } from '../contexts/CollapseDrawerContext';
 import { ApplicationProvider } from '../contexts/ApplicationContext'
 import { GlobalProvider } from '../contexts/GlobalContext'
+import { TokenDataProvider } from '../contexts/TokenData'
 // theme
 import ThemeProvider from '../theme';
 // components
@@ -89,21 +90,23 @@ export default function MyApp(props) {
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <ApplicationProvider>
               <GlobalProvider>
-                <CollapseDrawerProvider>
-                  <SettingsProvider defaultSettings={settings}>
-                    <MotionLazyContainer>
-                      <ThemeProvider>
-                        <ThemeSettings>
-                          <NotistackProvider>
-                            <ChartStyle />
-                            <ProgressBar />
-                            {getLayout(<Component {...pageProps} />)}
-                          </NotistackProvider>
-                        </ThemeSettings>
-                      </ThemeProvider>
-                    </MotionLazyContainer>
-                  </SettingsProvider>
-                </CollapseDrawerProvider>
+                <TokenDataProvider>
+                  <CollapseDrawerProvider>
+                    <SettingsProvider defaultSettings={settings}>
+                      <MotionLazyContainer>
+                        <ThemeProvider>
+                          <ThemeSettings>
+                            <NotistackProvider>
+                              <ChartStyle />
+                              <ProgressBar />
+                              {getLayout(<Component {...pageProps} />)}
+                            </NotistackProvider>
+                          </ThemeSettings>
+                        </ThemeProvider>
+                      </MotionLazyContainer>
+                    </SettingsProvider>
+                  </CollapseDrawerProvider>
+                </TokenDataProvider>
               </GlobalProvider>
             </ApplicationProvider>
           </LocalizationProvider>

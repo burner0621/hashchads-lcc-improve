@@ -38,19 +38,19 @@ export const PATH_HASHCHADS = {
   root: ROOTS_HASHCHADS,
   general: {
     overview: '/',
+    // overview: path(ROOTS_HASHCHADS, '/overview'),
     ecommerce: path(ROOTS_HASHCHADS, '/ecommerce'),
     analytics: path(ROOTS_HASHCHADS, '/analytics'),
     banking: path(ROOTS_HASHCHADS, '/banking'),
     booking: path(ROOTS_HASHCHADS, '/booking'),
   },
-  mail: {
-    root: path(ROOTS_HASHCHADS, '/mail'),
-    all: path(ROOTS_HASHCHADS, '/mail/all'),
+  tokens: {
+    root: path(ROOTS_HASHCHADS, '/tokens'),
+    view: (tokenId) => path(ROOTS_HASHCHADS, `/tokens/${tokenId}`),
   },
-  chat: {
-    root: path(ROOTS_HASHCHADS, '/chat'),
-    new: path(ROOTS_HASHCHADS, '/chat/new'),
-    view: (name) => path(ROOTS_HASHCHADS, `/chat/${name}`),
+  pairs: {
+    root: path(ROOTS_HASHCHADS, '/pairs'),
+    view: (contractId) => path(ROOTS_HASHCHADS, `/pairs/${contractId}`),
   },
   calendar: path(ROOTS_HASHCHADS, '/calendar'),
   kanban: path(ROOTS_HASHCHADS, '/kanban'),

@@ -20,7 +20,7 @@ const Trending = ({ data, title }) => (
                 <span className="self-center">{idx + 1}</span>
                 {
                   item.iconPath &&
-                  <img src={`https://saucerswap.finance${item.iconPath}`} className="w-8 h-8" />
+                  <img src={`https://saucerswap.finance${item.iconPath}`} className="w-8 h-8 mx-1" />
                 }
                 {
                   item.iconPath === null &&

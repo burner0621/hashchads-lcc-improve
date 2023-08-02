@@ -8,7 +8,7 @@ import Row, { RowFixed } from '../Row'
 // import FormattedName from '../FormattedName'
 import TokenLogo from '../TokenLogo'
 import DoubleTokenLogo from '../DoubleLogo'
-import { useAllPairsInSaucerswap, useAllTokensInSaucerswap } from '../../hooks/useGlobalContext'
+import { useAllPairsInSaucerswap, useAllTokensInSaucerswap, useGlobalDataContext } from '../../hooks/useGlobalContext'
 
 const Container = styled.div`
   height: 36px;
@@ -149,11 +149,12 @@ export const Search = ({ small = false, display }) => {
     const below470 = useMedia('(max-width: 470px)')
     const below410 = useMedia('(max-width: 410px)')
 
-    let allPairs = useAllPairsInSaucerswap()
-    let allTokens = useAllTokensInSaucerswap()
-    // const [state] = useGlobalDataContext()
-    // let allPairs = state?.allPairs || [];
-    // let allTokens = state?.allTokens || [];
+    // let allPairs = useAllPairsInSaucerswap()
+    
+    // let allTokens = useAllTokensInSaucerswap()
+    const [state] = useGlobalDataContext()
+    let allPairs = state?.allPairs || [];
+    let allTokens = state?.allTokens || [];
 
     useEffect(() => {
         if (value !== '') {
@@ -166,7 +167,8 @@ export const Search = ({ small = false, display }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     let uniquePairs = []
     let pairsFound = {}
-    allPairs &&
+    useEffect (() => {
+        allPairs &&
         allPairs.map((pair) => {
             if (!pairsFound[pair.id]) {
                 pairsFound[pair.id] = true
@@ -174,12 +176,14 @@ export const Search = ({ small = false, display }) => {
             }
             return true
         })
+    }, [allPairs])
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     let uniqueTokens = []
     let found = {}
 
-    allTokens &&
+    useEffect (() => {
+        allTokens &&
         allTokens.map((token) => {
             if (!found[token.id]) {
                 found[token.id] = true
@@ -187,36 +191,29 @@ export const Search = ({ small = false, display }) => {
             }
             return true
         })
+    }, [allTokens])
+    
 
     // add the searched tokens to the list if not found yet
-    allTokens = allTokens.concat(
-        searchedTokens.filter((searchedToken) => {
-            let included = false
-            allTokens.map((token) => {
-                if (token.id === searchedToken.id) {
-                    included = true
-                }
-                return true
+    useEffect (() => {
+        allTokens = allTokens.concat(
+            searchedTokens.filter((searchedToken) => {
+                let included = false
+                allTokens.map((token) => {
+                    if (token.id === searchedToken.id) {
+                        included = true
+                    }
+                    return true
+                })
+                return !included
             })
-            return !included
-        })
-    )
+        )
+    }, [searchedTokens])
+    
 
     const filteredPairList = useMemo(() => {
         return uniquePairs
             ? uniquePairs
-                // .sort((pairA, pairB) => {
-                //     if (pairA?.trackedReserveETH && pairB?.trackedReserveETH) {
-                //         return parseFloat(pairA.trackedReserveETH) > parseFloat(pairB.trackedReserveETH) ? -1 : 1
-                //     }
-                //     if (pairA?.trackedReserveETH && !pairB?.trackedReserveETH) {
-                //         return -1
-                //     }
-                //     if (!pairA?.trackedReserveETH && pairB?.trackedReserveETH) {
-                //         return 1
-                //     }
-                //     return 0
-                // })
                 .filter((pair) => {
                     if (value && value.includes(' ')) {
                         const pairA = value.split(' ')[0]?.toUpperCase()
@@ -261,18 +258,6 @@ export const Search = ({ small = false, display }) => {
     const filteredTokenList = useMemo(() => {
         return uniqueTokens
             ? uniqueTokens
-                // .sort((tokenA, tokenB) => {
-                //     if (tokenA?.oneDayVolumeUSD && tokenB?.oneDayVolumeUSD) {
-                //         return tokenA.oneDayVolumeUSD > tokenB.oneDayVolumeUSD ? -1 : 1
-                //     }
-                //     if (tokenA?.oneDayVolumeUSD && !tokenB?.oneDayVolumeUSD) {
-                //         return -1
-                //     }
-                //     if (!tokenA?.oneDayVolumeUSD && tokenB?.oneDayVolumeUSD) {
-                //         return tokenA?.totalLiquidity > tokenB?.totalLiquidity ? -1 : 1
-                //     }
-                //     return 1
-                // })
                 .filter((token) => {
                     const regexMatches = Object.keys(token).map((tokenEntryKey) => {
                         const isAddress = value.slice(0, 4) === '0.0.'
@@ -293,14 +278,6 @@ export const Search = ({ small = false, display }) => {
     }, [uniqueTokens, value])
 
     useEffect(() => {
-        if (Object.keys(filteredTokenList).length > 2) {
-            toggleShadow(true)
-        } else {
-            toggleShadow(false)
-        }
-    }, [filteredTokenList])
-
-    useEffect(() => {
         if (Object.keys(filteredPairList).length > 2) {
             toggleBottomShadow(true)
         } else {
@@ -316,31 +293,22 @@ export const Search = ({ small = false, display }) => {
         }
     }, [filteredTokenList])
 
-    allPairs = allPairs.concat(
-        searchedPairs.filter((searchedPair) => {
-            let included = false
-            allPairs.map((pair) => {
-                if (pair.id === searchedPair.id) {
-                    included = true
-                }
-                return true
+    useEffect (() => {
+        allPairs = allPairs.concat(
+            searchedPairs.filter((searchedPair) => {
+                let included = false
+                allPairs.map((pair) => {
+                    if (pair.id === searchedPair.id) {
+                        included = true
+                    }
+                    return true
+                })
+                return !included
             })
-            return !included
-        })
-    )
-
-    allTokens = allTokens.concat(
-        searchedTokens.filter((searchedToken) => {
-            let included = false
-            allTokens.map((token) => {
-                if (token.id === searchedToken.id) {
-                    included = true
-                }
-                return true
-            })
-            return !included
-        })
-    )
+        )
+    }, [searchedPairs])
+   
+    console.log (filteredPairList, filteredTokenList, "MMMMMMMMMMMMMMM")
 
     function escapeRegExp(string) {
         return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // $& means the whole matched string
@@ -406,7 +374,7 @@ export const Search = ({ small = false, display }) => {
                 />
                 {!showMenu ? <SearchIconLarge /> : <CloseIcon onClick={() => { toggleMenu(false); }} />}
             </Wrapper>
-            <Menu hide={!showMenu} ref={menuRef} style={{ zIndex: "300", background: "#0b1217" }}>
+            <Menu hide={!showMenu} ref={menuRef} style={{ zIndex: "300", background: "#0b1217" }} className='absolute'>
                 {
                     (display === "all" || display === "pair") &&
                     <>
