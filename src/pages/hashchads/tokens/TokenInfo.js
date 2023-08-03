@@ -3,9 +3,8 @@ import { Card, CardBody, CardHeader, Col, Input, Label, Nav, NavItem, NavLink, R
 import DataTable from 'react-data-table-component';
 import classnames from 'classnames';
 import fetch from 'cross-fetch'
-import { useAllPairsInSaucerswap } from '../../contexts/GlobalData'
-import * as env from "../../env"
-import { formattedNum } from '../../utils'
+import { useAllPairsInSaucerswap } from '../../../hooks/useGlobalContext'
+import { formattedNum } from '../../../utils'
 
 const TokenInfo = ({ address, tokenPrice }) => {
     //Tab 
@@ -61,7 +60,7 @@ const TokenInfo = ({ address, tokenPrice }) => {
     }
     useEffect(() => {
         async function fetchData() {
-            let response = await fetch(env.MIRROR_NODE_URL + "/api/v1/tokens/" + address);
+            let response = await fetch(process.env.MIRROR_NODE_URL + "/api/v1/tokens/" + address);
             if (response.status === 200) {
                 let jsonData = await response.json()
                 setTokenInfo(jsonData)
@@ -101,7 +100,7 @@ const TokenInfo = ({ address, tokenPrice }) => {
             let l = 0
             let jsonData = []
             while (l < 25 || (jsonData.links && jsonData.links?.next !== null)) {
-                let response = await fetch(env.MIRROR_NODE_URL + `/api/v1/tokens/${address}/balances?account.balance=gt:${t}&order=desc&limit=${limit}`);
+                let response = await fetch(process.env.MIRROR_NODE_URL + `/api/v1/tokens/${address}/balances?account.balance=gt:${t}&order=desc&limit=${limit}`);
                 if (response.status === 200) {
                     jsonData = await response.json()
                     l = jsonData.balances.length
@@ -314,7 +313,7 @@ const TokenInfo = ({ address, tokenPrice }) => {
                                     <div className="mt-3 pt-2">
                                         <div className="d-flex mb-2">
                                             <div className="flex-grow-1">
-                                                <p className="fs-13 mb-0">Treasury<span className="text-muted ms-1 fs-11"></span></p>
+                                                <p className="fs-13 mb-0">Treasury<span className="text-muted ms-1 fs-11" /></p>
                                             </div>
                                             <div className="flex-shrink-0">
                                                 <h6 className="mb-0">{tokenInfo?.treasury_account_id}</h6>
@@ -322,7 +321,7 @@ const TokenInfo = ({ address, tokenPrice }) => {
                                         </div>
                                         <div className="d-flex mb-2">
                                             <div className="flex-grow-1">
-                                                <p className="fs-13 mb-0">Max Supply<span className="text-muted ms-1 fs-11"></span></p>
+                                                <p className="fs-13 mb-0">Max Supply<span className="text-muted ms-1 fs-11" /></p>
                                             </div>
                                             <div className="flex-shrink-0">
                                                 <h6 className="mb-0">{tokenInfo?.max_supply === '0' ? (tokenInfo?.total_supply/Math.pow(10, decimals)).toFixed(4): '0'}</h6>
@@ -330,7 +329,7 @@ const TokenInfo = ({ address, tokenPrice }) => {
                                         </div>
                                         <div className="d-flex">
                                             <div className="flex-grow-1">
-                                                <p className="fs-13 mb-0">Total Supply<span className="text-muted ms-1 fs-11"></span></p>
+                                                <p className="fs-13 mb-0">Total Supply<span className="text-muted ms-1 fs-11" /></p>
                                             </div>
                                             <div className="flex-shrink-0">
                                                 <h6 className="mb-0">{(tokenInfo?.total_supply/Math.pow(10, decimals)).toFixed(4)}</h6>
@@ -338,7 +337,7 @@ const TokenInfo = ({ address, tokenPrice }) => {
                                         </div>
                                         <div className="d-flex mb-2">
                                             <div className="flex-grow-1">
-                                                <p className="fs-13 mb-0">Supply Type<span className="text-muted ms-1 fs-11"></span></p>
+                                                <p className="fs-13 mb-0">Supply Type<span className="text-muted ms-1 fs-11" /></p>
                                             </div>
                                             <div className="flex-shrink-0">
                                                 <h6 className="mb-0">{tokenInfo?.supply_type}</h6>
@@ -350,7 +349,7 @@ const TokenInfo = ({ address, tokenPrice }) => {
                                     <div className="mt-2">
                                         <div className="d-flex mb-2">
                                             <div className="flex-grow-1">
-                                                <p className="fs-13 mb-0">Supply Key<span className="text-muted ms-1 fs-11"></span></p>
+                                                <p className="fs-13 mb-0">Supply Key<span className="text-muted ms-1 fs-11" /></p>
                                             </div>
                                             <div className="flex-shrink-0">
                                                 <h6 className="mb-0">{supplyKey}</h6>
@@ -358,7 +357,7 @@ const TokenInfo = ({ address, tokenPrice }) => {
                                         </div>
                                         <div className="d-flex mb-2">
                                             <div className="flex-grow-1">
-                                                <p className="fs-13 mb-0">Freeze Key<span className="text-muted ms-1 fs-11"></span></p>
+                                                <p className="fs-13 mb-0">Freeze Key<span className="text-muted ms-1 fs-11" /></p>
                                             </div>
                                             <div className="flex-shrink-0">
                                                 <h6 className="mb-0">{freezeKey}</h6>
@@ -366,7 +365,7 @@ const TokenInfo = ({ address, tokenPrice }) => {
                                         </div>
                                         <div className="d-flex mb-2">
                                             <div className="flex-grow-1">
-                                                <p className="fs-13 mb-0">Pause Key<span className="text-muted ms-1 fs-11"></span></p>
+                                                <p className="fs-13 mb-0">Pause Key<span className="text-muted ms-1 fs-11" /></p>
                                             </div>
                                             <div className="flex-shrink-0">
                                                 <h6 className="mb-0">{pauseKey}</h6>
@@ -374,7 +373,7 @@ const TokenInfo = ({ address, tokenPrice }) => {
                                         </div>
                                         <div className="d-flex mb-2">
                                             <div className="flex-grow-1">
-                                                <p className="fs-13 mb-0">Wipe Key<span className="text-muted ms-1 fs-11"></span></p>
+                                                <p className="fs-13 mb-0">Wipe Key<span className="text-muted ms-1 fs-11" /></p>
                                             </div>
                                             <div className="flex-shrink-0">
                                                 <h6 className="mb-0">{wipeKey}</h6>
@@ -382,7 +381,7 @@ const TokenInfo = ({ address, tokenPrice }) => {
                                         </div>
                                         <div className="d-flex mb-2">
                                             <div className="flex-grow-1">
-                                                <p className="fs-13 mb-0">Admin Key<span className="text-muted ms-1 fs-11"></span></p>
+                                                <p className="fs-13 mb-0">Admin Key<span className="text-muted ms-1 fs-11" /></p>
                                             </div>
                                             <div className="flex-shrink-0">
                                                 <h6 className="mb-0">{adminKey}</h6>
@@ -400,14 +399,14 @@ const TokenInfo = ({ address, tokenPrice }) => {
                                                 className='cursor'
                                                 onClick={() => tog_xlarge()}
                                             >
-                                                <span className="fs-24 animate-ping lg:animate-ping md:animate-ping animate-none rounded-md blink"><i className='mdi mdi-hand-pointing-right'></i></span>
+                                                <span className="fs-24 animate-ping lg:animate-ping md:animate-ping animate-none rounded-md blink"><i className='mdi mdi-hand-pointing-right' /></span>
                                             </div>
                                         </div>
                                         <div className="p-3">
                                             <div className="pt-1">
                                                 <div className="d-flex mb-1">
                                                     <div className="flex-grow-1">
-                                                        <p className="fs-13 mb-0 mr-1">{"Created at   "}<span className="text-muted ms-1 fs-11"></span></p>
+                                                        <p className="fs-13 mb-0 mr-1">{"Created at   "}<span className="text-muted ms-1 fs-11" /></p>
                                                     </div>
                                                     <div className="flex-shrink-0">
                                                         <h6 className="mb-0" style={{ width: 140, wordWrap: 'break-word' }}>{feeCreatedAt}</h6>
@@ -417,7 +416,7 @@ const TokenInfo = ({ address, tokenPrice }) => {
                                             <div className="pt-1">
                                                 <div className="d-flex mb-1">
                                                     <div className="flex-grow-1">
-                                                        <p className="fs-13 mb-0">Fixed Fees<span className="text-muted ms-1 fs-11"></span></p>
+                                                        <p className="fs-13 mb-0">Fixed Fees<span className="text-muted ms-1 fs-11" /></p>
                                                     </div>
                                                     <div className="flex-shrink-0">
                                                         <h6 className="mb-0">{tokenInfo?.custom_fees?.fixed_fees?.length > 0 ? tokenInfo?.custom_fees?.fixed_fees[0] : 'None'}</h6>
@@ -432,7 +431,7 @@ const TokenInfo = ({ address, tokenPrice }) => {
                             <TabPane tabId="2">
                                 <div className="p-3 bg-soft-warning">
                                     <div className="float-end ms-2">
-                                        <h6 className="text-danger mb-0"><span className="text-dark"></span></h6>
+                                        <h6 className="text-danger mb-0"><span className="text-dark" /></h6>
                                     </div>
                                     <h6 className="mb-0 text-danger">Keys</h6>
                                 </div>
@@ -440,7 +439,7 @@ const TokenInfo = ({ address, tokenPrice }) => {
                                     <div className="mt-2">
                                         <div className="d-flex mb-2">
                                             <div className="flex-grow-1">
-                                                <p className="fs-13 mb-0">Supply Key<span className="text-muted ms-1 fs-11"></span></p>
+                                                <p className="fs-13 mb-0">Supply Key<span className="text-muted ms-1 fs-11" /></p>
                                             </div>
                                             <div className="flex-shrink-0">
                                                 <h6 className="mb-0">{supplyKey}</h6>
@@ -448,7 +447,7 @@ const TokenInfo = ({ address, tokenPrice }) => {
                                         </div>
                                         <div className="d-flex mb-2">
                                             <div className="flex-grow-1">
-                                                <p className="fs-13 mb-0">Freeze Key<span className="text-muted ms-1 fs-11"></span></p>
+                                                <p className="fs-13 mb-0">Freeze Key<span className="text-muted ms-1 fs-11" /></p>
                                             </div>
                                             <div className="flex-shrink-0">
                                                 <h6 className="mb-0">{freezeKey}</h6>
@@ -456,7 +455,7 @@ const TokenInfo = ({ address, tokenPrice }) => {
                                         </div>
                                         <div className="d-flex mb-2">
                                             <div className="flex-grow-1">
-                                                <p className="fs-13 mb-0">Pause Key<span className="text-muted ms-1 fs-11"></span></p>
+                                                <p className="fs-13 mb-0">Pause Key<span className="text-muted ms-1 fs-11" /></p>
                                             </div>
                                             <div className="flex-shrink-0">
                                                 <h6 className="mb-0">{pauseKey}</h6>
@@ -464,7 +463,7 @@ const TokenInfo = ({ address, tokenPrice }) => {
                                         </div>
                                         <div className="d-flex mb-2">
                                             <div className="flex-grow-1">
-                                                <p className="fs-13 mb-0">Wipe Key<span className="text-muted ms-1 fs-11"></span></p>
+                                                <p className="fs-13 mb-0">Wipe Key<span className="text-muted ms-1 fs-11" /></p>
                                             </div>
                                             <div className="flex-shrink-0">
                                                 <h6 className="mb-0">{wipeKey}</h6>
@@ -472,7 +471,7 @@ const TokenInfo = ({ address, tokenPrice }) => {
                                         </div>
                                         <div className="d-flex mb-2">
                                             <div className="flex-grow-1">
-                                                <p className="fs-13 mb-0">Admin Key<span className="text-muted ms-1 fs-11"></span></p>
+                                                <p className="fs-13 mb-0">Admin Key<span className="text-muted ms-1 fs-11" /></p>
                                             </div>
                                             <div className="flex-shrink-0">
                                                 <h6 className="mb-0">{adminKey}</h6>
@@ -491,7 +490,7 @@ const TokenInfo = ({ address, tokenPrice }) => {
                                         className='cursor'
                                         onClick={() => detail_tog_xlarge()}
                                     >
-                                        <span className="fs-24 animate-ping lg:animate-ping md:animate-ping animate-none rounded-md blink"><i className='mdi mdi-hand-pointing-right'></i></span>
+                                        <span className="fs-24 animate-ping lg:animate-ping md:animate-ping animate-none rounded-md blink"><i className='mdi mdi-hand-pointing-right' /></span>
                                     </div>
                                 </div>
                                 <div className="p-3">
@@ -501,7 +500,7 @@ const TokenInfo = ({ address, tokenPrice }) => {
                                                 return (
                                                     <div className="d-flex mb-2" key={idx} style={{ marginRight: 10 }}>
                                                         <div className="flex-grow-1">
-                                                            <p className="fs-13 mb-0">{item.account}<span className="text-muted ms-1 fs-11"></span></p>
+                                                            <p className="fs-13 mb-0">{item.account}<span className="text-muted ms-1 fs-11" /></p>
                                                         </div>
                                                         <div className="flex-shrink-0">
                                                             <h6 className="mb-0">{Number(item.balance / Math.pow(10, decimals)).toFixed(decimals)}</h6>
