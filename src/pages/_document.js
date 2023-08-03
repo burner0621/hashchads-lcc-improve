@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-sync-scripts */
 import * as React from 'react';
 // next
 import Document, { Html, Head, Main, NextScript } from 'next/document';
@@ -42,13 +43,10 @@ export default class MyDocument extends Document {
                 href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
                 rel="stylesheet"
                 integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We"
-                crossorigin="anonymous"
+                crossOrigin="anonymous"
               />
 
-          <script
-            src="/charting_library/charting_library.js"
-            type="text/javascript"
-          ></script>
+          <script src="/charting_library/charting_library.js" type="text/javascript" />
           {/* <script
             async
             src="https://www.googletagmanager.com/gtag/js?id=G-BLH2FRPRLN"
