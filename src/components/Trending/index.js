@@ -1,5 +1,5 @@
 const Trending = ({ data, title }) => (
-  <div className="my-5">
+  <div className="my-2 sm:my-5">
     <div className="py-2 px-2">
       <div className="flex flex-row justify-between mb-4">
         <span className="flex flex-row font-thin text-lg">

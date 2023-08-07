@@ -280,10 +280,6 @@ body {
   visibility: visible !important;
 }
 
-.hidden {
-  visibility: hidden !important;
-}
-
 .self-end {
   align-self: self-end;
 }

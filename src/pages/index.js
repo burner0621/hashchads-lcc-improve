@@ -47,11 +47,8 @@ export default function Overview() {
   const { themeStretch } = useSettings();
   const [gainerTokens, setGainers] = useState([])
   const [loserTokens, setLosers] = useState([])
-  console.log ("&&&&&&&&&&&&&&&&&")
 
   const allTokens = useAllTokensInSaucerswap()
-
-  const below600 = useMedia('(max-width: 600px)')
 
   useEffect(() => {
     function fetchTopTokenData() {
@@ -128,7 +125,7 @@ export default function Overview() {
   return (
     <Page title="Overview">
       <div className="page-content">
-        <Container maxWidth={themeStretch ? false : 'xl'}>
+        <Container maxWidth="1980">
           {/* <Grid container spacing={3}>
             <Grid item xs={12} lg={12}>
               <div className="h-100">
@@ -136,7 +133,7 @@ export default function Overview() {
               </div>
             </Grid>
           </Grid> */}
-          {below600 && ( // mobile card
+          {/* {below600 && ( // mobile card
             <GridRowMobile>
               <Panel className="panel-shadow bg-dark-grey-blue h-full min-h-[300px] max-h-[500px]" >
                 <div className="animate-x-slide absolute top-0 left-1 h-1 rounded bg-dark-pink blur-xxs" />
@@ -172,9 +169,9 @@ export default function Overview() {
                 <GlobalChart display="volume" id="volume" />
               </Panel>
             </GridRow>
-          )}
+          )} */}
           <TitleMark />
-          <div className="mt-8 grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-2 gap-5">
             <Trending data={gainerTokens} title={"Gainer Tokens"} />
             <Trending data={loserTokens} title={"Loser Tokens"} />
           </div>

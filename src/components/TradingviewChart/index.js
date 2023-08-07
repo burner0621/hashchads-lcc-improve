@@ -78,7 +78,7 @@ const TradingViewChart = ({
             time: dayjs.unix(entry.date).utc().format('YYYY-MM-DD'),
             value: parseFloat(entry[field]),
         }
-    })
+    }).filter((entry) => !isNaN(entry.value))
 
     // adjust the scale based on the type of chart
     const topScale = type === CHART_TYPES.AREA ? 0.32 : 0.2
@@ -261,7 +261,7 @@ const TradingViewChart = ({
                         lineColor: '#ff007a',
                         lineWidth: 3,
                     })
-
+            
             series.setData(formattedData)
             var toolTip = document.createElement('div')
             toolTip.setAttribute('id', 'tooltip-id' + type)

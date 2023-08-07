@@ -64,8 +64,15 @@ const Input = styled.input`
 
   @media screen and (max-width: 640px) {
     ::placeholder {
-      font-size: 1rem;
+      font-size: 14px;
     }
+    font-size: 14px;
+  }
+  @media screen and (max-width: 480px) {
+    ::placeholder {
+      font-size: 12px;
+    }
+    font-size: 12px;
   }
 `
 
@@ -344,7 +351,7 @@ export const Search = ({ small = false, display }) => {
     })
 
     return (
-        <Container small={small}>
+        <Container small={small} className='max-w-[150px] sm:max-w-[360px]'>
             <Wrapper open={showMenu} shadow={true} small={small} style={{ border: "solid 1px #ff007a" }}>
                 <Input
                     large={!small}
