@@ -14,8 +14,6 @@ import { RowBetween, RowFixed, AutoRow } from '../../../components/Row'
 import Link, { BasicLink } from '../../../components/Link'
 import Page from '../../../components/Page';
 
-import { usePairWeeklyVolume, usePairDailyVolume, useGlobalDataContext, getHbarAndSaucePrice } from '../../../hooks/useGlobalContext'
-
 import DoubleTokenLogo from "../../../components/DoubleLogo";
 import TokenLogo from "../../../components/TokenLogo";
 import PairChart from "../../../components/PairChart";
@@ -23,6 +21,7 @@ import { usePairData } from "../../../hooks/usePairData";
 import DropdownSelect from '../../../components/DropdownSelect'
 import { timeframeOptions } from '../../../constants'
 import { OptionButton } from "../../../components/ButtonStyled";
+import axios from 'axios'
 
 const DashboardWrapper = styled.div`
   width: 100%;
@@ -47,11 +46,6 @@ const WarningGrouping = styled.div`
   opacity: ${({ disabled }) => disabled && '0.4'};
   pointer-events: ${({ disabled }) => disabled && 'none'};
 `
-
-const TRADING_TYPE = {
-    sell: 'sell',
-    buy: 'buy'
-}
 
 const OptionsRow = styled.div`
   display: flex;
@@ -91,19 +85,24 @@ export default function PairPage() {
     const [tokenIdA, setTokenIdA] = useState('')
     const [tokenIdB, setTokenIdB] = useState('')
     const _pairData = usePairData(contractId)
-    const dailyVolumes = usePairDailyVolume()
-    const weeklyVolumes = usePairWeeklyVolume()
-    const weeklyData = usePairWeeklyVolume()
-    const [state, { updateHbarAndSaucePrice }] = useGlobalDataContext();
-    const hbarPrice = state?.hBarPrice;
-    const saucePrice = state?.saucePrice;
+    const [dailyVolumes, setDailyVolumes] = useState ([])
+    const [weeklyVolumes, setWeeklyVolumes] = useState ([])
+    const [weeklyData, setWeeklyData] = useState ([])
+    const [hbarPrice, setHbarPrice] = useState (0)
+    
     useEffect(() => {
-        if (!hbarPrice) {
-            getHbarAndSaucePrice().then((hbarP, sauceP) => {
-                updateHbarAndSaucePrice(hbarP, sauceP)
-            })
-        }
+        axios.get(`${process.env.API_URL}/tokens/get_hbar_price`).then((res) => {
+            setHbarPrice(res.data.data)
+        })
+        axios.get(`${process.env.API_URL}/pools/get_weekly_volumes`).then((res) => {
+            setWeeklyVolumes(res.data)
+            setWeeklyData(res.data)
+        })
+        axios.get(`${process.env.API_URL}/pools/get_daily_volumes`).then((res) => {
+            setDailyVolumes(res.data)
+        })
     }, [])
+
     const [showCopyText, setShowCopyText] = useState(false)
 
     const [chartFilter, setChartFilter] = useState(CHART_VIEW.LIQUIDITY)
