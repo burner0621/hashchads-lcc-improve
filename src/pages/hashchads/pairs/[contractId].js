@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/router"
 import styled from 'styled-components'
 import { Col, Container, Row, Card, CardBody, CardHeader, Button } from "reactstrap";
@@ -17,7 +17,6 @@ import Page from '../../../components/Page';
 import DoubleTokenLogo from "../../../components/DoubleLogo";
 import TokenLogo from "../../../components/TokenLogo";
 import PairChart from "../../../components/PairChart";
-import { usePairData } from "../../../hooks/usePairData";
 import DropdownSelect from '../../../components/DropdownSelect'
 import { timeframeOptions } from '../../../constants'
 import { OptionButton } from "../../../components/ButtonStyled";
@@ -84,12 +83,31 @@ export default function PairPage() {
     const [lpReward, setLpReward] = useState(0)
     const [tokenIdA, setTokenIdA] = useState('')
     const [tokenIdB, setTokenIdB] = useState('')
-    const _pairData = usePairData(contractId)
-    const [dailyVolumes, setDailyVolumes] = useState ([])
-    const [weeklyVolumes, setWeeklyVolumes] = useState ([])
-    const [weeklyData, setWeeklyData] = useState ([])
-    const [hbarPrice, setHbarPrice] = useState (0)
-    
+    const [_pairData, setPairData] = useState({})
+    const [dailyVolumes, setDailyVolumes] = useState([])
+    const [weeklyVolumes, setWeeklyVolumes] = useState([])
+    const [weeklyData, setWeeklyData] = useState([])
+    const [hbarPrice, setHbarPrice] = useState(0)
+    console.log(contractId, ">>>>>>>>>>>")
+    const getPairData = useCallback(async () => {
+        let res = await axios.get(`${process.env.API_URL}/pools/get_pool_by_id?poolId=${contractId}`)
+        if (res.status === 200) {
+            const _pair = res.data
+            res = await axios.get(`${process.env.API_URL}/pools/get_conversion_rates?poolId=${contractId}&interval=DAY`)
+            if (res.status === 200) {
+                let jsonData = res.data
+                for (let key of Object.keys(_pair)) {
+                    jsonData[key] = _pair[key]
+                }
+                setPairData (jsonData)
+            }
+        }
+    }, [contractId])
+
+    useEffect (() => {
+        getPairData ()
+    }, [getPairData])
+
     useEffect(() => {
         axios.get(`${process.env.API_URL}/tokens/get_hbar_price`).then((res) => {
             setHbarPrice(res.data.data)
@@ -159,282 +177,285 @@ export default function PairPage() {
 
     return (
         <Page title={`Pair Page: ${contractId}`}>
-            <div className="page-content" style={{ marginBottom: '20px' }}>
-                <Container fluid>
-                    <ContentWrapper>
-                        <div className="d-flex flex-column new-bg br-10" style={{ padding: '15px' }}>
-                            <RowBetween style={{ flexWrap: 'wrap', alingItems: 'start' }}>
-                                <AutoRow align="flex-end" style={{ width: 'fit-content' }}>
-                                    <div style={{ fontWeight: 400, fontSize: 14, color: 'white' }}>
-                                        {/* <BasicLink to="/pairs">{'Pairs '}</BasicLink>/ <BasicLink href={"https://hashscan.io/mainnet/contract/" + pairData.contractId}>{symbol}<span style={{color: "green"}}>{"(" + pairData.contractId + ")"}</span></BasicLink> */}
-                                    </div>
-                                    <Link
-                                        style={{ width: 'fit-content' }}
-                                        color={'red'}
-                                        external
-                                        href={'https://hashscan.io/mainnet/contract/' + contractId}
-                                    >
-                                        <Text style={{ marginLeft: '.15rem' }} fontSize={'14px'} fontWeight={400}>
-                                            {symbol}<span style={{ color: "green" }}>{"(" + contractId + ")"}</span>
-                                        </Text>
-                                    </Link>
-                                </AutoRow>
-                            </RowBetween>
-                            <WarningGrouping disabled={false}>
-                                <DashboardWrapper style={{ marginTop: below1080 ? '0' : '1rem' }}>
-                                    <RowBetween
-                                        style={{
-                                            flexWrap: 'wrap',
-                                            // marginBottom: '2rem',
-                                            alignItems: 'flex-start',
-                                        }}
-                                    >
-                                        <RowFixed style={{ flexWrap: 'wrap' }}>
-                                            <RowFixed style={{ alignItems: 'baseline' }}>
-                                                <   DoubleTokenLogo a0={iconA} a1={iconB} margin={true} style={{ width: 20 }} />
-                                                {/* <TokenLogo path={iconPath} size="32px" style={{ alignSelf: 'center' }} /> */}
-                                                <div fontSize={below1080 ? '1.5rem' : '2rem'} fontWeight={500} style={{ margin: '0 1rem' }}>
-                                                    <RowFixed gap="6px">
-                                                        <div style={{ marginRight: '6px', fontSize: 32, color: 'white' }} >{name}</div>{' '}
-                                                        <span style={{ fontSize: 32 }} className="text-badge">{symbol ? `(${symbol})` : ''}</span>
-                                                    </RowFixed>
-                                                </div>
-                                                {/* {!below1080 && (
-                                                <>
-                                                    <div fontSize={'1.5rem'} fontWeight={500} style={{ marginRight: '1rem' }}>
-                                                        {`$` + priceUSD}
-                                                    </div>
-                                                    <span style={{ color: priceChangeColor }}>{priceChange}</span>
-                                                </>
-                                            )} */}
-                                            </RowFixed>
-                                        </RowFixed>
-                                    </RowBetween>
+            {
+                _pairData &&
+                <div className="page-content" style={{ marginBottom: '20px' }}>
+                    <Container fluid>
+                        <ContentWrapper>
+                            <div className="d-flex flex-column new-bg br-10" style={{ padding: '15px' }}>
+                                <RowBetween style={{ flexWrap: 'wrap', alingItems: 'start' }}>
                                     <AutoRow align="flex-end" style={{ width: 'fit-content' }}>
+                                        <div style={{ fontWeight: 400, fontSize: 14, color: 'white' }}>
+                                            {/* <BasicLink to="/pairs">{'Pairs '}</BasicLink>/ <BasicLink href={"https://hashscan.io/mainnet/contract/" + pairData.contractId}>{symbol}<span style={{color: "green"}}>{"(" + pairData.contractId + ")"}</span></BasicLink> */}
+                                        </div>
                                         <Link
                                             style={{ width: 'fit-content' }}
-                                            color={'grey'}
-                                            external
-                                        >
-                                            <Text style={{ marginLeft: '.15rem' }} className="text-badge" fontSize={'14px'} fontWeight={400}>
-                                                <span className="fc-white">Token:</span>&nbsp;&nbsp;{_pairData?.tokenA?.id}
-                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                                <span className="fc-white">Pair:</span>&nbsp;&nbsp;{_pairData?.tokenB?.id}
-                                            </Text>
-                                        </Link>
-                                    </AutoRow>
-                                </DashboardWrapper>
-                            </WarningGrouping>
-                        </div>
-
-                        <Row>
-                            <Col xl={4} sm={12} >
-                                <h5 className="text-badge">Pool Information</h5>
-                                <Card className="card-animate new-bg br-10">
-                                    <CardBody>
-                                        <div className="d-flex flex-column">
-                                            <Row className="d-flex justify-between" >
-                                                <span className="w-auto fc-white fw-450">Pair Name:</span>
-
-                                                <span className="counter-value w-auto text-badge" style={{ textOverflow: "ellipsis" }}>
-                                                    {symbol}
-                                                </span>
-                                            </Row>
-                                        </div>
-                                        <div className="d-flex flex-column">
-                                            <Row className="d-flex justify-between" >
-                                                <span className="w-auto fc-white fw-450">{symbolA} Address:</span>
-                                                <span className="counter-value w-auto text-badge" style={{ textOverflow: "ellipsis" }}>
-                                                    {tokenIdA}<i className="mdi mdi-content-copy"/>
-                                                </span>
-                                            </Row>
-                                        </div>
-                                        <div className="d-flex flex-column">
-                                            <Row className="d-flex justify-between" >
-                                                <span className="w-auto fc-white fw-450">{symbolB} Address:</span>
-
-                                                <span className="counter-value w-auto text-badge" style={{ textOverflow: "ellipsis" }}>
-                                                    {tokenIdB}<i className="mdi mdi-content-copy"/>
-                                                </span>
-                                            </Row>
-                                        </div>
-                                        <Link
-                                            style={{ width: 'fit-content', display: "flex", justifyContent: "center"}}
-                                            color={'green'}
+                                            color={'red'}
                                             external
                                             href={'https://hashscan.io/mainnet/contract/' + contractId}
                                         >
-                                            <Text className="text-green" style={{ marginLeft: '.15rem' }} fontSize={'20px'} fontWeight={400}>
-                                                View on Hashscan<i className="mdi mdi-arrow-top-right-thin"/>
+                                            <Text style={{ marginLeft: '.15rem' }} fontSize={'14px'} fontWeight={400}>
+                                                {symbol}<span style={{ color: "green" }}>{"(" + contractId + ")"}</span>
                                             </Text>
                                         </Link>
-                                    </CardBody>
-                                </Card>
-                                <h5 className="text-badge">Pooled Tokens</h5>
-                                <Card className="card-animate mb-3 new-bg br-10" style={{ marginBottom: '0px !important' }}>
-                                    <CardBody>
-                                        <div className="d-flex">
-                                            <div className="flex-grow-1 w-full">
-                                                <h6 className="mb-0 d-flex flex-column justify-around">
-                                                    <span className="counter-value d-flex items-center mb-2" style={{ textOverflow: "ellipsis" }}>
-                                                        <TokenLogo path={iconA} size="32px" style={{ alignSelf: 'center', marginRight: 5 }} />
-                                                        <CountUp className="fc-white fw-450 fs-20 ml-15" start={0} end={tokenAReserve} duration={3} decimals={2} />
-                                                        <span className="fc-white fw-450 fs-16" style={{ alignSelf: 'center', marginLeft: 8 }}>{' ' + symbolA}</span>
-                                                    </span>
-                                                    <span className="counter-value d-flex items-center" style={{ textOverflow: "ellipsis" }}>
-                                                        <TokenLogo path={iconB} size="32px" style={{ alignSelf: 'center', marginRight: 5 }} />
-                                                        <CountUp className="fc-white fw-450 fs-20 ml-15" start={0} end={tokenBReserve} duration={3} decimals={2} />
-                                                        <span className="fc-white fw-450 fs-16" style={{ alignSelf: 'center', marginLeft: 8 }}>{' ' + symbolB}</span>
-                                                    </span>
-                                                </h6>
-                                            </div>
-                                        </div>
-                                    </CardBody>
-                                </Card>
-                                <Card className="card-animate mb-0 new-bg br-10">
-                                    <CardBody>
-                                        <div className="d-flex flex-column">
-                                            <Row className="d-flex justify-between" >
-                                                <span className="w-auto fc-white fw-450">TVL:</span>
+                                    </AutoRow>
+                                </RowBetween>
+                                <WarningGrouping disabled={false}>
+                                    <DashboardWrapper style={{ marginTop: below1080 ? '0' : '1rem' }}>
+                                        <RowBetween
+                                            style={{
+                                                flexWrap: 'wrap',
+                                                // marginBottom: '2rem',
+                                                alignItems: 'flex-start',
+                                            }}
+                                        >
+                                            <RowFixed style={{ flexWrap: 'wrap' }}>
+                                                <RowFixed style={{ alignItems: 'baseline' }}>
+                                                    <   DoubleTokenLogo a0={iconA} a1={iconB} margin={true} style={{ width: 20 }} />
+                                                    {/* <TokenLogo path={iconPath} size="32px" style={{ alignSelf: 'center' }} /> */}
+                                                    <div fontSize={below1080 ? '1.5rem' : '2rem'} fontWeight={500} style={{ margin: '0 1rem' }}>
+                                                        <RowFixed gap="6px">
+                                                            <div style={{ marginRight: '6px', fontSize: 32, color: 'white' }} >{name}</div>{' '}
+                                                            <span style={{ fontSize: 32 }} className="text-badge">{symbol ? `(${symbol})` : ''}</span>
+                                                        </RowFixed>
+                                                    </div>
+                                                    {/* {!below1080 && (
+                                                    <>
+                                                        <div fontSize={'1.5rem'} fontWeight={500} style={{ marginRight: '1rem' }}>
+                                                            {`$` + priceUSD}
+                                                        </div>
+                                                        <span style={{ color: priceChangeColor }}>{priceChange}</span>
+                                                    </>
+                                                )} */}
+                                                </RowFixed>
+                                            </RowFixed>
+                                        </RowBetween>
+                                        <AutoRow align="flex-end" style={{ width: 'fit-content' }}>
+                                            <Link
+                                                style={{ width: 'fit-content' }}
+                                                color={'grey'}
+                                                external
+                                            >
+                                                <Text style={{ marginLeft: '.15rem' }} className="text-badge" fontSize={'14px'} fontWeight={400}>
+                                                    <span className="fc-white">Token:</span>&nbsp;&nbsp;{_pairData?.tokenA?.id}
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                    <span className="fc-white">Pair:</span>&nbsp;&nbsp;{_pairData?.tokenB?.id}
+                                                </Text>
+                                            </Link>
+                                        </AutoRow>
+                                    </DashboardWrapper>
+                                </WarningGrouping>
+                            </div>
 
-                                                <span className="counter-value w-auto fc-white" style={{ textOverflow: "ellipsis" }}>
-                                                    $
-                                                    <CountUp className="fc-white" start={0} end={totalLiquidityUsd} duration={1} decimals={2} />
-                                                    (<CountUp className="fc-white" start={0} end={totalLiquidityHbar} duration={1} decimals={2} /> HBAR)
-                                                </span>
-                                            </Row>
-                                            <Row className="d-flex justify-between">
-                                                <span className="w-auto fc-white fw-450">24hr Volume:</span>
-                                                <span className="counter-value w-auto fc-white">
-                                                    $
-                                                    <CountUp className="fc-white" start={0} end={dailyUsd} duration={1} decimals={2} />
-                                                    (<CountUp className="fc-white" start={0} end={dailyHbar} duration={1} decimals={2} /> HBAR)
-                                                </span>
-                                            </Row>
-                                            <Row className="d-flex justify-between">
-                                                <span className="w-auto fc-white fw-450">7D Volume:</span>
-                                                <span className="counter-value w-auto fc-white">
-                                                    $
-                                                    <CountUp className="fc-white" start={0} end={weeklyUsd} duration={1} decimals={2} />
-                                                    (<CountUp className="fc-white" start={0} end={weeklyHbar} duration={1} decimals={2} /> HBAR)
-                                                </span>
-                                            </Row>
-                                            <Row className="d-flex justify-between">
-                                                <span className="w-auto fc-white fw-450">Fees (24hrs):</span>
-                                                <span className="counter-value w-auto fc-white">
-                                                    $
-                                                    <CountUp className="fc-white" start={0} end={dailyUsd / 400} duration={1} decimals={4} />
-                                                    (<CountUp className="fc-white" start={0} end={dailyHbar / 400} duration={1} decimals={4} /> HBAR)
-                                                </span>
-                                            </Row>
-                                            <Row className="d-flex justify-between">
-                                                <span className="w-auto fc-white fw-450">LP Reward APR:</span>
-                                                <span className="counter-value w-auto fc-white">
-                                                    {(dailyUsd * 365 / (4 * totalLiquidityUsd)).toFixed(4) + '%'}
-                                                    {/* <CountUp start={0} end={weeklyUsd} duration={1} decimals={2} />
-                                                    (<CountUp start={0} end={weeklyHbar} duration={1} decimals={2} /> HBAR) */}
-                                                </span>
-                                            </Row>
+                            <Row>
+                                <Col xl={4} sm={12} >
+                                    <h5 className="text-badge">Pool Information</h5>
+                                    <Card className="card-animate new-bg br-10">
+                                        <CardBody>
+                                            <div className="d-flex flex-column">
+                                                <Row className="d-flex justify-between" >
+                                                    <span className="w-auto fc-white fw-450">Pair Name:</span>
+
+                                                    <span className="counter-value w-auto text-badge" style={{ textOverflow: "ellipsis" }}>
+                                                        {symbol}
+                                                    </span>
+                                                </Row>
+                                            </div>
+                                            <div className="d-flex flex-column">
+                                                <Row className="d-flex justify-between" >
+                                                    <span className="w-auto fc-white fw-450">{symbolA} Address:</span>
+                                                    <span className="counter-value w-auto text-badge" style={{ textOverflow: "ellipsis" }}>
+                                                        {tokenIdA}<i className="mdi mdi-content-copy" />
+                                                    </span>
+                                                </Row>
+                                            </div>
+                                            <div className="d-flex flex-column">
+                                                <Row className="d-flex justify-between" >
+                                                    <span className="w-auto fc-white fw-450">{symbolB} Address:</span>
+
+                                                    <span className="counter-value w-auto text-badge" style={{ textOverflow: "ellipsis" }}>
+                                                        {tokenIdB}<i className="mdi mdi-content-copy" />
+                                                    </span>
+                                                </Row>
+                                            </div>
+                                            <Link
+                                                style={{ width: 'fit-content', display: "flex", justifyContent: "center" }}
+                                                color={'green'}
+                                                external
+                                                href={'https://hashscan.io/mainnet/contract/' + contractId}
+                                            >
+                                                <Text className="text-green" style={{ marginLeft: '.15rem' }} fontSize={'20px'} fontWeight={400}>
+                                                    View on Hashscan<i className="mdi mdi-arrow-top-right-thin" />
+                                                </Text>
+                                            </Link>
+                                        </CardBody>
+                                    </Card>
+                                    <h5 className="text-badge">Pooled Tokens</h5>
+                                    <Card className="card-animate mb-3 new-bg br-10" style={{ marginBottom: '0px !important' }}>
+                                        <CardBody>
+                                            <div className="d-flex">
+                                                <div className="flex-grow-1 w-full">
+                                                    <h6 className="mb-0 d-flex flex-column justify-around">
+                                                        <span className="counter-value d-flex items-center mb-2" style={{ textOverflow: "ellipsis" }}>
+                                                            <TokenLogo path={iconA} size="32px" style={{ alignSelf: 'center', marginRight: 5 }} />
+                                                            <CountUp className="fc-white fw-450 fs-20 ml-15" start={0} end={tokenAReserve} duration={3} decimals={2} />
+                                                            <span className="fc-white fw-450 fs-16" style={{ alignSelf: 'center', marginLeft: 8 }}>{' ' + symbolA}</span>
+                                                        </span>
+                                                        <span className="counter-value d-flex items-center" style={{ textOverflow: "ellipsis" }}>
+                                                            <TokenLogo path={iconB} size="32px" style={{ alignSelf: 'center', marginRight: 5 }} />
+                                                            <CountUp className="fc-white fw-450 fs-20 ml-15" start={0} end={tokenBReserve} duration={3} decimals={2} />
+                                                            <span className="fc-white fw-450 fs-16" style={{ alignSelf: 'center', marginLeft: 8 }}>{' ' + symbolB}</span>
+                                                        </span>
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </CardBody>
+                                    </Card>
+                                    <Card className="card-animate mb-0 new-bg br-10">
+                                        <CardBody>
+                                            <div className="d-flex flex-column">
+                                                <Row className="d-flex justify-between" >
+                                                    <span className="w-auto fc-white fw-450">TVL:</span>
+
+                                                    <span className="counter-value w-auto fc-white" style={{ textOverflow: "ellipsis" }}>
+                                                        $
+                                                        <CountUp className="fc-white" start={0} end={totalLiquidityUsd} duration={1} decimals={2} />
+                                                        (<CountUp className="fc-white" start={0} end={totalLiquidityHbar} duration={1} decimals={2} /> HBAR)
+                                                    </span>
+                                                </Row>
+                                                <Row className="d-flex justify-between">
+                                                    <span className="w-auto fc-white fw-450">24hr Volume:</span>
+                                                    <span className="counter-value w-auto fc-white">
+                                                        $
+                                                        <CountUp className="fc-white" start={0} end={dailyUsd} duration={1} decimals={2} />
+                                                        (<CountUp className="fc-white" start={0} end={dailyHbar} duration={1} decimals={2} /> HBAR)
+                                                    </span>
+                                                </Row>
+                                                <Row className="d-flex justify-between">
+                                                    <span className="w-auto fc-white fw-450">7D Volume:</span>
+                                                    <span className="counter-value w-auto fc-white">
+                                                        $
+                                                        <CountUp className="fc-white" start={0} end={weeklyUsd} duration={1} decimals={2} />
+                                                        (<CountUp className="fc-white" start={0} end={weeklyHbar} duration={1} decimals={2} /> HBAR)
+                                                    </span>
+                                                </Row>
+                                                <Row className="d-flex justify-between">
+                                                    <span className="w-auto fc-white fw-450">Fees (24hrs):</span>
+                                                    <span className="counter-value w-auto fc-white">
+                                                        $
+                                                        <CountUp className="fc-white" start={0} end={dailyUsd / 400} duration={1} decimals={4} />
+                                                        (<CountUp className="fc-white" start={0} end={dailyHbar / 400} duration={1} decimals={4} /> HBAR)
+                                                    </span>
+                                                </Row>
+                                                <Row className="d-flex justify-between">
+                                                    <span className="w-auto fc-white fw-450">LP Reward APR:</span>
+                                                    <span className="counter-value w-auto fc-white">
+                                                        {(dailyUsd * 365 / (4 * totalLiquidityUsd)).toFixed(4) + '%'}
+                                                        {/* <CountUp start={0} end={weeklyUsd} duration={1} decimals={2} />
+                                                        (<CountUp start={0} end={weeklyHbar} duration={1} decimals={2} /> HBAR) */}
+                                                    </span>
+                                                </Row>
+                                            </div>
+                                        </CardBody>
+                                    </Card>
+                                </Col>
+                                <Col xl={8} sm={12}>
+                                    {
+                                        <div className="d-flex flex-column new-bg br-10" style={{ padding: '15px' }}>
+                                            {below600 ? (
+                                                <RowBetween mb={40}>
+                                                    <DropdownSelect options={CHART_VIEW} active={chartFilter} setActive={setChartFilter} color={'#ff007a'} />
+                                                    <DropdownSelect options={timeframeOptions} active={timeWindow} setActive={setTimeWindow} color={'#ff007a'} />
+                                                </RowBetween>
+                                            ) : (
+                                                <OptionsRow>
+                                                    <AutoRow gap="6px" style={{ flexWrap: 'nowrap' }}>
+                                                        <OptionButton
+                                                            active={chartFilter === CHART_VIEW.LIQUIDITY}
+                                                            onClick={() => {
+                                                                setTimeWindow(timeframeOptions.WEEK)
+                                                                setChartFilter(CHART_VIEW.LIQUIDITY)
+                                                            }}
+                                                            style={chartFilter === CHART_VIEW.LIQUIDITY ? { background: "green" } : {}}
+                                                        >
+                                                            Liquidity
+                                                        </OptionButton>
+                                                        <OptionButton
+                                                            active={chartFilter === CHART_VIEW.VOLUME}
+                                                            onClick={() => {
+                                                                setTimeWindow(timeframeOptions.WEEK)
+                                                                setChartFilter(CHART_VIEW.VOLUME)
+                                                            }}
+                                                            style={chartFilter === CHART_VIEW.VOLUME ? { background: "green" } : {}}
+                                                        >
+                                                            Volume
+                                                        </OptionButton>
+                                                        <OptionButton
+                                                            active={chartFilter === CHART_VIEW.RATE0}
+                                                            onClick={() => {
+                                                                setTimeWindow(timeframeOptions.WEEK)
+                                                                setChartFilter(CHART_VIEW.RATE0)
+                                                            }}
+                                                            style={chartFilter === CHART_VIEW.RATE0 ? { background: "green" } : {}}
+                                                        >
+                                                            {_pairData.tokenA ? (_pairData?.tokenB?.symbol.length > 6 ? _pairData?.tokenB?.symbol.slice(0, 5) + '...' : _pairData?.tokenB?.symbol) + '/' + (_pairData?.tokenA?.symbol.length > 6 ? _pairData?.tokenA?.symbol.slice(0, 5) + '...' : _pairData?.tokenA?.symbol) : '-'}
+                                                        </OptionButton>
+                                                        <OptionButton
+                                                            active={chartFilter === CHART_VIEW.RATE1}
+                                                            onClick={() => {
+                                                                setTimeWindow(timeframeOptions.WEEK)
+                                                                setChartFilter(CHART_VIEW.RATE1)
+                                                            }}
+                                                            style={chartFilter === CHART_VIEW.RATE1 ? { background: "green" } : {}}
+                                                        >
+                                                            {_pairData.tokenB ? (_pairData?.tokenA?.symbol.length > 6 ? _pairData?.tokenA?.symbol.slice(0, 5) + '...' : _pairData?.tokenA?.symbol) + '/' + (_pairData?.tokenB?.symbol.length > 6 ? _pairData?.tokenB?.symbol.slice(0, 5) + '...' : _pairData?.tokenB?.symbol) : '-'}
+                                                        </OptionButton>
+                                                    </AutoRow>
+                                                    <AutoRow justify="flex-end" gap="6px">
+                                                        <OptionButton
+                                                            active={timeWindow === timeframeOptions.WEEK}
+                                                            onClick={() => setTimeWindow(timeframeOptions.WEEK)}
+                                                            style={timeWindow === timeframeOptions.WEEK ? { background: "green" } : {}}
+                                                        >
+                                                            1W
+                                                        </OptionButton>
+                                                        <OptionButton
+                                                            active={timeWindow === timeframeOptions.MONTH}
+                                                            onClick={() => setTimeWindow(timeframeOptions.MONTH)}
+                                                            style={timeWindow === timeframeOptions.MONTH ? { background: "green" } : {}}
+                                                        >
+                                                            1M
+                                                        </OptionButton>
+                                                        <OptionButton
+                                                            active={timeWindow === timeframeOptions.ALL_TIME}
+                                                            onClick={() => setTimeWindow(timeframeOptions.ALL_TIME)}
+                                                            style={timeWindow === timeframeOptions.ALL_TIME ? { background: "green" } : {}}
+                                                        >
+                                                            All
+                                                        </OptionButton>
+                                                    </AutoRow>
+                                                </OptionsRow>
+                                            )}
+                                            {Object.keys(_pairData).length && Object.keys(weeklyData).length && hbarPrice &&
+                                                <PairChart
+                                                    address={contractId}
+                                                    poolId={_pairData.poolId}
+                                                    pairData={_pairData}
+                                                    color={'#ff007a'}
+                                                    base0={tokenAReserve / tokenBReserve}
+                                                    base1={tokenBReserve / tokenAReserve}
+                                                    chartFilter={chartFilter}
+                                                    timeWindow={timeWindow}
+                                                />
+                                            }
                                         </div>
-                                    </CardBody>
-                                </Card>
-                            </Col>
-                            <Col xl={8} sm={12}>
-                                {
-                                    <div className="d-flex flex-column new-bg br-10" style={{ padding: '15px' }}>
-                                        {below600 ? (
-                                            <RowBetween mb={40}>
-                                                <DropdownSelect options={CHART_VIEW} active={chartFilter} setActive={setChartFilter} color={'#ff007a'} />
-                                                <DropdownSelect options={timeframeOptions} active={timeWindow} setActive={setTimeWindow} color={'#ff007a'} />
-                                            </RowBetween>
-                                        ) : (
-                                            <OptionsRow>
-                                                <AutoRow gap="6px" style={{ flexWrap: 'nowrap' }}>
-                                                    <OptionButton
-                                                        active={chartFilter === CHART_VIEW.LIQUIDITY}
-                                                        onClick={() => {
-                                                            setTimeWindow(timeframeOptions.WEEK)
-                                                            setChartFilter(CHART_VIEW.LIQUIDITY)
-                                                        }}
-                                                        style={chartFilter === CHART_VIEW.LIQUIDITY ? { background: "green" } : {}}
-                                                    >
-                                                        Liquidity
-                                                    </OptionButton>
-                                                    <OptionButton
-                                                        active={chartFilter === CHART_VIEW.VOLUME}
-                                                        onClick={() => {
-                                                            setTimeWindow(timeframeOptions.WEEK)
-                                                            setChartFilter(CHART_VIEW.VOLUME)
-                                                        }}
-                                                        style={chartFilter === CHART_VIEW.VOLUME ? { background: "green" } : {}}
-                                                    >
-                                                        Volume
-                                                    </OptionButton>
-                                                    <OptionButton
-                                                        active={chartFilter === CHART_VIEW.RATE0}
-                                                        onClick={() => {
-                                                            setTimeWindow(timeframeOptions.WEEK)
-                                                            setChartFilter(CHART_VIEW.RATE0)
-                                                        }}
-                                                        style={chartFilter === CHART_VIEW.RATE0 ? { background: "green" } : {}}
-                                                    >
-                                                        {_pairData.tokenA ? (_pairData?.tokenB?.symbol.length > 6 ? _pairData?.tokenB?.symbol.slice(0, 5) + '...' : _pairData?.tokenB?.symbol) + '/' + (_pairData?.tokenA?.symbol.length > 6 ? _pairData?.tokenA?.symbol.slice(0, 5) + '...' : _pairData?.tokenA?.symbol) : '-'}
-                                                    </OptionButton>
-                                                    <OptionButton
-                                                        active={chartFilter === CHART_VIEW.RATE1}
-                                                        onClick={() => {
-                                                            setTimeWindow(timeframeOptions.WEEK)
-                                                            setChartFilter(CHART_VIEW.RATE1)
-                                                        }}
-                                                        style={chartFilter === CHART_VIEW.RATE1 ? { background: "green" } : {}}
-                                                    >
-                                                        {_pairData.tokenB ? (_pairData?.tokenA?.symbol.length > 6 ? _pairData?.tokenA?.symbol.slice(0, 5) + '...' : _pairData?.tokenA?.symbol) + '/' + (_pairData?.tokenB?.symbol.length > 6 ? _pairData?.tokenB?.symbol.slice(0, 5) + '...' : _pairData?.tokenB?.symbol) : '-'}
-                                                    </OptionButton>
-                                                </AutoRow>
-                                                <AutoRow justify="flex-end" gap="6px">
-                                                    <OptionButton
-                                                        active={timeWindow === timeframeOptions.WEEK}
-                                                        onClick={() => setTimeWindow(timeframeOptions.WEEK)}
-                                                        style={timeWindow === timeframeOptions.WEEK ? { background: "green" } : {}}
-                                                    >
-                                                        1W
-                                                    </OptionButton>
-                                                    <OptionButton
-                                                        active={timeWindow === timeframeOptions.MONTH}
-                                                        onClick={() => setTimeWindow(timeframeOptions.MONTH)}
-                                                        style={timeWindow === timeframeOptions.MONTH ? { background: "green" } : {}}
-                                                    >
-                                                        1M
-                                                    </OptionButton>
-                                                    <OptionButton
-                                                        active={timeWindow === timeframeOptions.ALL_TIME}
-                                                        onClick={() => setTimeWindow(timeframeOptions.ALL_TIME)}
-                                                        style={timeWindow === timeframeOptions.ALL_TIME ? { background: "green" } : {}}
-                                                    >
-                                                        All
-                                                    </OptionButton>
-                                                </AutoRow>
-                                            </OptionsRow>
-                                        )}
-                                        {Object.keys(_pairData).length && Object.keys(weeklyData).length && hbarPrice &&
-                                            <PairChart
-                                                address={contractId}
-                                                poolId={_pairData.poolId}
-                                                pairData={_pairData}
-                                                color={'#ff007a'}
-                                                base0={tokenAReserve / tokenBReserve}
-                                                base1={tokenBReserve / tokenAReserve}
-                                                chartFilter={chartFilter}
-                                                timeWindow={timeWindow}
-                                            />
-                                        }
-                                    </div>
-                                }
-                            </Col>
-                        </Row>
-                    </ContentWrapper>
-                </Container>
-            </div>
+                                    }
+                                </Col>
+                            </Row>
+                        </ContentWrapper>
+                    </Container>
+                </div>
+            }
         </Page>
     )
 }

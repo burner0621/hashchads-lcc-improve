@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import styled from 'styled-components'
 import { Area, XAxis, YAxis, ResponsiveContainer, Tooltip, AreaChart, BarChart, Bar } from 'recharts'
 
@@ -51,34 +51,22 @@ const TokenChart = ({ address, color, base, priceData, chartFilter, timeWindow, 
     const aspect = below1080 ? 60 / 32 : below600 ? 60 / 42 : 60 / 22
 
     // chartData = chartData?.filter((entry) => entry.timestampSeconds >= utcStartTime)
+    const fetchData = useCallback(async () => {
+        const utcEndTime = dayjs.utc()
+        let utcStartTime = utcEndTime.subtract(1, 'year')
+        let startTime = utcStartTime.startOf('minute').unix() - 1
+
+        let response = await axios.get(`${process.env.API_URL}/tokens/get_token_prices_dh?address=${address}&from=${startTime}&to=${Date.now() / 1000}`)
+        if (response.status === 200) {
+            const data = response.data
+            setDailyData(data.dailyData)
+            setHourlyData(data.hourlyData)
+        }
+    }, [address])
 
     useEffect(() => {
-        async function fetchData() {
-            const utcEndTime = dayjs.utc()
-            let utcStartTime = utcEndTime.subtract(1, 'year')
-            let startTime = utcStartTime.startOf('minute').unix() - 1
-
-            let response = await axios.get(`${process.env.API_URL}/tokens/get_token_prices_dh?address=${address}&from=${startTime}&to=${Date.now() / 1000}`)
-            if (response.status === 200) {
-                const data = response.data
-                setDailyData(data.dailyData)
-                setHourlyData(data.hourlyData)
-            }
-            // let response = await fetch(`https://api.saucerswap.finance/tokens/prices/${address}?interval=DAY&from=${startTime}&to=${Date.now() / 1000}`)
-            // if (response.status === 200) {
-            //     let jsonData = await response.json()
-            //     let res = await fetch(`https://api.saucerswap.finance/tokens/prices/${address}?interval=HOUR&from=${startTime}&to=${Date.now() / 1000}`)
-            //     if (res.status === 200) {
-            //         let jsonData1 = await res.json()
-            //         return [jsonData, jsonData1]
-            //     }
-            //     return [jsonData, undefined]
-            // } else {
-            //     return [undefined, undefined]
-            // }
-        }
-        fetchData ()
-    })
+        fetchData()
+    }, [fetchData])
     useEffect(() => {
         if (chartFilter === CHART_VIEW.LIQUIDITY || chartFilter === CHART_VIEW.VOLUME) {
             let tmpData = dailyData?.filter((entry) => entry.timestampSeconds >= utcStartTime)

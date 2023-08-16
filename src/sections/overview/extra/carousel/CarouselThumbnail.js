@@ -14,12 +14,12 @@ import { CarouselArrowIndex } from '../../../../components/carousel';
 const THUMB_SIZE = 64;
 
 const RootStyle = styled(Box)(({ theme }) => {
-  const isRTL = theme.direction === 'rtl';
+  const isrtl = theme.direction === 'rtl';
 
   return {
     root: {
       '& .slick-slide': {
-        float: isRTL ? 'right' : 'left',
+        float: isrtl ? 'right' : 'left',
       },
     },
   };

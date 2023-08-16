@@ -129,7 +129,7 @@ GlobalProvider.propTypes = {
 
 function GlobalProvider({ children }) {
     const [state, dispatch] = useReducer(reducer, {})
-    const update = useCallback((data) => { console.log ("11111111111111111")
+    const update = useCallback((data) => {
         dispatch({
             type: UPDATE,
             payload: {
@@ -138,7 +138,7 @@ function GlobalProvider({ children }) {
         })
     }, [])
 
-    const updatePrices = useCallback((data) => { console.log ("22222222222222222")
+    const updatePrices = useCallback((data) => {
         dispatch({
             type: UPDATE_PRICES,
             payload: {
@@ -147,7 +147,7 @@ function GlobalProvider({ children }) {
         })
     }, [])
 
-    const updateTokenDailyVolume = useCallback((data) => { console.log ("333333333333333333")
+    const updateTokenDailyVolume = useCallback((data) => {
         dispatch({
             type: UPDATE_TOKEN_DAILY_VOLUME,
             payload: {
@@ -156,7 +156,7 @@ function GlobalProvider({ children }) {
         })
     }, [])
 
-    const updatePairDailyVolume = useCallback((data) => { console.log ("444444444444444444")
+    const updatePairDailyVolume = useCallback((data) => {
         dispatch({
             type: UPDATE_PAIR_DAILY_VOLUME,
             payload: {
@@ -165,7 +165,7 @@ function GlobalProvider({ children }) {
         })
     }, [])
 
-    const updatePairWeeklyVolume = useCallback((data) => { console.log ("555555555555555555")
+    const updatePairWeeklyVolume = useCallback((data) => {
         dispatch({
             type: UPDATE_PAIR_WEEKLY_VOLUME,
             payload: {
@@ -174,7 +174,7 @@ function GlobalProvider({ children }) {
         })
     }, [])
 
-    const updatePriceChange = useCallback((data) => { console.log ("66666666666666666666")
+    const updatePriceChange = useCallback((data) => {
         dispatch({
             type: UPDATE_PRICE_CHANGE,
             payload: {
@@ -183,7 +183,7 @@ function GlobalProvider({ children }) {
         })
     }, [])
 
-    const updateDailyPriceData = useCallback((data) => { console.log ("121212121212121212121212")
+    const updateDailyPriceData = useCallback((data) => {
         dispatch({
             type: UPDATE_TOKEN_DAILY_PRICE_DATA,
             payload: {
@@ -192,7 +192,7 @@ function GlobalProvider({ children }) {
         })
     }, [])
 
-    const updateAllPairsInSaucerswap = useCallback((allPairs) => { console.log ("777777777777777777777")
+    const updateAllPairsInSaucerswap = useCallback((allPairs) => {
         dispatch({
             type: UPDATE_ALL_PAIRS_IN_SAUCERSWAP,
             payload: {
@@ -201,7 +201,7 @@ function GlobalProvider({ children }) {
         })
     }, [])
 
-    const updateAllTokensInSaucerswap = useCallback((allTokens) => { console.log ("888888888888888888888")
+    const updateAllTokensInSaucerswap = useCallback((allTokens) => {
         dispatch({
             type: UPDATE_ALL_TOKENS_IN_SAUCERSWAP,
             payload: {
@@ -210,7 +210,7 @@ function GlobalProvider({ children }) {
         })
     }, [])
 
-    const updateHbarAndSaucePrice = useCallback((hbarPrice, saucePrice) => { console.log ("999999999999999999999")
+    const updateHbarAndSaucePrice = useCallback((hbarPrice, saucePrice) => {
         dispatch({
             type: UPDATE_HBAR_AND_SAUCE_PRICE,
             payload: {
@@ -220,7 +220,7 @@ function GlobalProvider({ children }) {
         })
     }, [])
 
-    const updateChart = useCallback((daily, weekly) => { console.log ("10101010101010101010101010")
+    const updateChart = useCallback((daily, weekly) => {
         dispatch({
             type: UPDATE_CHART,
             payload: {

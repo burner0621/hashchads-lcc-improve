@@ -131,28 +131,7 @@ export default function TokenPage() {
 
     const [statisticData, setStatisticData] = useState({})
 
-    const timeInterval = useRef(undefined);
-
     const prevWindow = usePrevious(timeWindow)
-
-    // hourly and daily price data based on the current time window
-    // const hourlyWeek = useTokenPriceData(address, timeframeOptions.WEEK, 3600)
-    // const hourlyMonth = useTokenPriceData(address, timeframeOptions.MONTH, 3600)
-    // const hourlyAll = useTokenPriceData(address, timeframeOptions.ALL_TIME, 3600)
-    // const dailyWeek = useTokenPriceData(address, timeframeOptions.WEEK, 86400)
-    // const dailyMonth = useTokenPriceData(address, timeframeOptions.MONTH, 86400)
-    // const dailyAll = useTokenPriceData(address, timeframeOptions.ALL_TIME, 86400)
-
-    const getTokenPriceData = async (tokenId, timeWindow, interval) => {
-        const currentTime = dayjs.utc()
-        const windowSize = timeWindow === timeframeOptions.MONTH ? 'month' : 'week'
-        const startTime =
-            timeWindow === timeframeOptions.ALL_TIME ? 1589760000 : currentTime.subtract(1, windowSize).startOf('min').unix()
-        let res = await fetch(`https://api.saucerswap.finance/tokens/prices/${tokenId}?interval=HOUR&from=${startTime}&to=${Date.now() / 1000}`)
-        if (res.status === 200) {
-            let data = await res.json()
-        }
-    }
 
     const fetchTokensData = useCallback(async () => {
         let response = await axios.get(`${process.env.API_URL}/tokens/simple_all`)
@@ -176,6 +155,7 @@ export default function TokenPage() {
 
     const priceData = [0]
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     async function fetchNameAndSymbolData() {
         let response = await fetch(process.env.MIRROR_NODE_URL + "/api/v1/tokens/" + address);
         if (response.status === 200) {
@@ -198,17 +178,27 @@ export default function TokenPage() {
 
     useEffect(() => {
         fetchNameAndSymbolData()
-    }, [address])
+    }, [address, fetchNameAndSymbolData])
+
+    const fetchData = useCallback(async () => {
+        const res = await fetch(`${process.env.API_URL}/tokens/get_transactions?tokenId=${address}&pageNum=${currentPage}&pageSize=${rowsPerPage}`)
+        if (res.status === 200) {
+            const { data, count } = await res.json();
+            setData(data);
+            setTotalRows(count);
+        }
+        if (beforeAddress !== address || beforeCurrentPage !== currentPage || beforeRowsPerPage !== rowsPerPage) {
+            if (fetchDataTimeout) clearTimeout(fetchDataTimeout)
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            beforeAddress = address;
+            beforeCurrentPage = currentPage;
+            beforeRowsPerPage = rowsPerPage;
+        }
+    }, [address, currentPage, rowsPerPage])
 
     useEffect(() => {
-        setCurrentPage(1)
-        const timeout = setTimeout(async () => {
-            await fetchData()
-        }, 0);
-        return () => {
-            clearTimeout(timeout);
-        };
-    }, [rowsPerPage])
+        fetchData()
+    }, [fetchData])
 
     const calculateSwapImpactUsd = (amount) => {
         let maxSwapImpact = 1
@@ -231,17 +221,17 @@ export default function TokenPage() {
 
         return 1 - maxSwapImpact
     }
+    const fetchTotalData = useCallback(async () => {
+        const response = await fetch(`${process.env.API_URL}/pools/all`)
+        if (response.status === 200) {
+            const jsonData = await response.json()
+            setPairs(jsonData)
+        }
+    },[])
 
     useEffect(() => {
-        const fetchTotalData = async () => {
-            const response = await fetch(`https://api.saucerswap.finance/pools`)
-            if (response.status === 200) {
-                const jsonData = await response.json()
-                setPairs(jsonData)
-            }
-        }
         if (pairs.length === 0) fetchTotalData();
-    }, [pairs])
+    }, [fetchTotalData, pairs])
 
     useEffect(() => {
         async function fetchHolderData() {
@@ -290,15 +280,7 @@ export default function TokenPage() {
                 tmp['balance'] = holder.balance / Math.pow(10, Number(tokenInfo.decimals))
                 tmp['percent'] = (tmp['balance'] / totalBalance * 100).toFixed(2)
                 tmp['usd'] = (tmp['balance'] * priceUSD).toFixed(tokenInfo.decimals)
-                // tmp['impactUsd'] = calculateSwapImpactUsd(tmp['balance'])
-                // if (tmp['impactUsd'] > 0) {
-                //     tmp['impactPercent'] = (100 - (tmp['impactUsd'] / tmp['usd'] * 100)).toFixed(2)
-                //     if (tmp['impactPercent'] > 100) tmp['impactPercent'] = 100
-                // }
-                // else tmp['impactPercent'] = "0"
                 tmp['impactPercent'] = (100 * calculateSwapImpactUsd(tmp['balance'])).toFixed(2)
-                // if (holder.account === "0.0.285576") tmp['impactPercent'] = 100 * calculateSwapImpactUsd(tmp['balance'])
-                // else tmp['impactPercent'] = 0
                 tmp['impactUsd'] = tmp['usd'] * tmp['impactPercent'] / 100
                 tmp['actualUsd'] = tmp['usd'] - tmp['impactUsd']
                 if (tmp['actualUsd'] < 0) tmp['actualUsd'] = 0
@@ -317,53 +299,25 @@ export default function TokenPage() {
     let fetchDataTimeout;
     let beforeAddress, beforeCurrentPage, beforeRowsPerPage;
 
-    const fetchData = async () => {
-        const res = await fetch(`${process.env.API_URL}/tokens/get_transactions?tokenId=${address}&pageNum=${currentPage}&pageSize=${rowsPerPage}`)
-        if (res.status === 200) {
-            const { data, count } = await res.json();
-            setData(data);
-            setTotalRows(count);
-        }
-        if (beforeAddress !== address || beforeCurrentPage !== currentPage || beforeRowsPerPage !== rowsPerPage) {
-            if (fetchDataTimeout) clearTimeout(fetchDataTimeout)
-            beforeAddress = address;
-            beforeCurrentPage = currentPage;
-            beforeRowsPerPage = rowsPerPage;
-        }
-    }
-
-    const fetchStatisticData = async (timeRange) => {
-        fetch(`${process.env.API_URL}/tokens/get_statistics?tokenId=${address}&timeRangeType=${timeRange}`)
-            .then(res => res.json())
+    const fetchStatisticData = useCallback(async () => {
+        axios.get(`${process.env.API_URL}/tokens/get_statistics?tokenId=${address}&timeRangeType=${timeRangeType}`)
             .then(
                 (result) => {
-                    setStatisticData(result);
+                    setStatisticData(result.data);
                 },
                 (error) => {
                     console.log('fetchStatisticData error', error)
                 }
             )
-    }
+    }, [address, timeRangeType])
 
     useEffect(() => {
-        fetchStatisticData(timeRangeType)
-    }, [timeRangeType])
-
-    useEffect(() => {
-        if (timeInterval.current) clearInterval(timeInterval.current);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        timeInterval.current = setInterval(async () => {
-            await fetchData()
-        }, 10000);
-    }, [currentPage, rowsPerPage])
+        fetchStatisticData()
+    }, [fetchStatisticData])
 
     const handlePageChange = (page, totalRows) => {
         setIsLoaded(true);
         setCurrentPage(page)
-        if (timeInterval.current) clearInterval(timeInterval.current);
-        timeInterval.current = setInterval(async () => {
-            await fetchData()
-        }, 10000);
     }
 
     const handlePerRowsChange = async (newPerPage, page) => {
@@ -375,40 +329,35 @@ export default function TokenPage() {
         setDailyVolume(tmpDailyVolue * hbarPrice)
     }, [address, tokenDailyVolume, hbarPrice])
 
-    useEffect(() => {
-        const fetchTotalData = async () => {
-            try {
-                const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=hedera-hashgraph&vs_currencies=usd`)
-                if (response.status === 200) {
-                    const jsonData = await response.json()
-                    setHbarPrice(jsonData["hedera-hashgraph"]["usd"])
-                }
-            } catch (e) {
-                console.error("https://api.coingecko.com/api/v3/simple/price?ids=hedera-hashgraph&vs_currencies=usd", e);
-            }
-        }
-        if (hbarPrice === undefined || hbarPrice === 0) fetchTotalData()
-    }, [hbarPrice])
-
-    useEffect(() => {
-        const fetchTotalData = async () => {
-            const response = await fetch(`https://api.saucerswap.finance/tokens/prices/latest/${address}?interval=DAY`)
+    const fetchTotalPriceData = useCallback(async () => {
+        try {
+            const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=hedera-hashgraph&vs_currencies=usd`)
             if (response.status === 200) {
                 const jsonData = await response.json()
-                setTotalLiquidity(jsonData.liquidityUsd)
-                setPriceUSD(jsonData.closeUsd)
+                setHbarPrice(jsonData["hedera-hashgraph"]["usd"])
             }
-            setTimeout(async () => await fetchTotalData(), 3000)
+        } catch (e) {
+            console.error("https://api.coingecko.com/api/v3/simple/price?ids=hedera-hashgraph&vs_currencies=usd", e);
         }
-        if (totalLiquidity === undefined || totalLiquidity === 0) fetchTotalData()
-        if (priceUSD === undefined || priceUSD === 0) fetchTotalData()
-        const timeout = setTimeout(async () => {
-            await fetchTotalData()
-        }, 0);
-        return () => {
-            clearTimeout(timeout);
-        };
+    }, [])
+
+    useEffect(() => {
+        if (hbarPrice === undefined || hbarPrice === 0) fetchTotalPriceData()
+    }, [hbarPrice, fetchTotalPriceData])
+
+    const fetchTotalPriceLatestData = useCallback(async () => {
+        const response = await fetch(`https://api.saucerswap.finance/tokens/prices/latest/${address}?interval=DAY`)
+        if (response.status === 200) {
+            const jsonData = await response.json()
+            setTotalLiquidity(jsonData.liquidityUsd)
+            setPriceUSD(jsonData.closeUsd)
+        }
     }, [address])
+
+    useEffect(() => {
+        if (totalLiquidity === undefined || totalLiquidity === 0) fetchTotalPriceLatestData()
+        if (priceUSD === undefined || priceUSD === 0) fetchTotalPriceLatestData()
+    }, [address, fetchTotalPriceLatestData, priceUSD, totalLiquidity])
 
     useEffect(() => {
         async function fetchTokenData() {
@@ -539,17 +488,6 @@ export default function TokenPage() {
             sortable: true,
             width: 120
         },
-        // {
-        //     name: <span className='font-weight-bold fs-16'>Pool</span>,
-        //     cell: (row) => {
-        //         return (
-        //             row.state === 'buy' ? <span className="text-buy">{row.poolId}</span> :
-        //                 <span className="text-sell">{row.poolId}</span>
-        //         )
-        //     },
-        //     sortable: true,
-        //     width: 100
-        // },
         {
             name: <span className='font-weight-bold fs-16'>TXID</span>,
             sortable: true,

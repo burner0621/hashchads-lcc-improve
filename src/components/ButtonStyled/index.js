@@ -148,7 +148,7 @@ export const OptionButton = styled.div`
   border: 1px solid ${({ theme }) => theme.bg4};
   background-color: ${({ active, theme }) => active && theme.bg3};
   color: ${({ theme }) => theme.text1};
-  
+  cursor: pointer;
   :hover {
     cursor: pointer;
   }

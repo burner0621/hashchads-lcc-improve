@@ -42,7 +42,7 @@ export function ControlStyle() {
 // ----------------------------------------------------------------------
 
 export const PopupStyle = styled(Popup)(({ theme }) => {
-  const isRTL = theme.direction === 'rtl';
+  const isrtl = theme.direction === 'rtl';
 
   return {
     '& .mapboxgl-popup-content': {
@@ -58,8 +58,8 @@ export const PopupStyle = styled(Popup)(({ theme }) => {
       fontSize: 16,
       opacity: 0.48,
       color: theme.palette.common.white,
-      right: isRTL && '0',
-      left: isRTL && 'auto',
+      right: isrtl && '0',
+      left: isrtl && 'auto',
       '&:hover': {
         opacity: 1,
       },

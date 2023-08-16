@@ -56,7 +56,7 @@ export default function CarouselArrows({
 }) {
   const theme = useTheme();
 
-  const isRTL = theme.direction === 'rtl';
+  const isrtl = theme.direction === 'rtl';
 
   const style = {
     position: 'absolute',
@@ -70,7 +70,7 @@ export default function CarouselArrows({
       <Box {...other}>
         <Box className="arrow left" sx={{ ...style, left: 0 }}>
           <ArrowStyle filled={filled} onClick={onPrevious}>
-            {leftIcon(customIcon, isRTL)}
+            {leftIcon(customIcon, isrtl)}
           </ArrowStyle>
         </Box>
 
@@ -78,7 +78,7 @@ export default function CarouselArrows({
 
         <Box className="arrow right" sx={{ ...style, right: 0 }}>
           <ArrowStyle filled={filled} onClick={onNext}>
-            {rightIcon(customIcon, isRTL)}
+            {rightIcon(customIcon, isrtl)}
           </ArrowStyle>
         </Box>
       </Box>
@@ -88,10 +88,10 @@ export default function CarouselArrows({
   return (
     <Stack direction="row" spacing={1} {...other}>
       <ArrowStyle className="arrow left" filled={filled} onClick={onPrevious}>
-        {leftIcon(customIcon, isRTL)}
+        {leftIcon(customIcon, isrtl)}
       </ArrowStyle>
       <ArrowStyle className="arrow right" filled={filled} onClick={onNext}>
-        {rightIcon(customIcon, isRTL)}
+        {rightIcon(customIcon, isrtl)}
       </ArrowStyle>
     </Stack>
   );
@@ -99,25 +99,25 @@ export default function CarouselArrows({
 
 // ----------------------------------------------------------------------
 
-const leftIcon = (customIcon, isRTL) => (
+const leftIcon = (customIcon, isrtl) => (
   <Iconify
     icon={customIcon ? customIcon : 'eva:arrow-right-fill'}
     sx={{
       width: 20,
       height: 20,
       transform: ' scaleX(-1)',
-      ...(isRTL && { transform: ' scaleX(1)' }),
+      ...(isrtl && { transform: ' scaleX(1)' }),
     }}
   />
 );
 
-const rightIcon = (customIcon, isRTL) => (
+const rightIcon = (customIcon, isrtl) => (
   <Iconify
     icon={customIcon ? customIcon : 'eva:arrow-right-fill'}
     sx={{
       width: 20,
       height: 20,
-      ...(isRTL && { transform: ' scaleX(-1)' }),
+      ...(isrtl && { transform: ' scaleX(-1)' }),
     }}
   />
 );

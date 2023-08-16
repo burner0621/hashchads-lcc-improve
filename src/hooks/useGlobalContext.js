@@ -204,7 +204,6 @@ export function useHbarAndSaucePrice() {
       try {
         isUseHbarAndSaucePrice = true
         getHbarAndSaucePrice().then((value) => {
-          console.log(value, "!!!!!!!!!!!!!!!!!!!!!!")
           if (value[0] > 0 && value[1] > 0) updateHbarAndSaucePrice(value[0], value[1])
           isUseHbarAndSaucePrice = false
         })

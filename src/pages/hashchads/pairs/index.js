@@ -74,7 +74,7 @@ export default function GeneralPairs() {
     useEffect(() => {
         axios.get(`${process.env.API_URL}/pools/all`).then((res) => {
             if (res.status === 200)
-                setTAllPairs(res.data.data)
+                setTAllPairs(res.data)
         })
         axios.get(`${process.env.API_URL}/pools/get_weekly_volumes`).then((res) => {
             if (res.status === 200) setWeeklyPairVolume(res.data)
@@ -186,13 +186,13 @@ export default function GeneralPairs() {
                 if (row.percent >= 0) {
                     return (
                         <Link onClick={() => redirectPairPage(row.pair_address)}>
-                            <span className="text-green-weight">{row.price ? '$' + row.price.toFixed(4) : ''}</span>
+                            <span className="text-green-weight">{row.price ? '$' + parseFloat(row.price).toFixed(4) : ''}</span>
                         </Link>
                     );
                 } else {
                     return (
                         <Link onClick={() => redirectPairPage(row.pair_address)}>
-                            <span className="text-red-weight">{row.price ? '$' + row.price.toFixed(4) : ''}</span>
+                            <span className="text-red-weight">{row.price ? '$' + parseFloat(row.price).toFixed(4) : ''}</span>
                         </Link>
                     );
                 }
@@ -211,7 +211,7 @@ export default function GeneralPairs() {
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
                             </svg>
                         </span>
-                        <span className="text-green-weight">{row.percent ? row.percent.toFixed(4) + '%' : ''}</span>
+                        <span className="text-green-weight">{row.percent ? parseFloat(row.percent).toFixed(4) + '%' : ''}</span>
                     </a>
 
                 } else {
@@ -221,7 +221,7 @@ export default function GeneralPairs() {
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 4.5l15 15m0 0V8.25m0 11.25H8.25" />
                             </svg>
                         </span>
-                        <span className="text-red-weight">{row.percent ? row.percent.toFixed(4) + '%' : ''}</span>
+                        <span className="text-red-weight">{row.percent ? parseFloat(row.percent).toFixed(4) + '%' : ''}</span>
                     </a>
                 }
             },
@@ -253,7 +253,7 @@ export default function GeneralPairs() {
         {
             name: <span className='font-weight-bold fs-13'>Daily Fees</span>,
             sortable: true,
-            cell: row => row.volume ? '$' + (row.volume / 400).toFixed(2) : '',
+            cell: row => row.volume ? '$' + (parseFloat(row.volume) / 400).toFixed(2) : '',
             width: 180,
             // width: 100
         },

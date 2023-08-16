@@ -1,6 +1,8 @@
+import { useRouter } from 'next/router';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { Search as SearchIcon, X } from 'react-feather'
 import styled from 'styled-components'
+import { paramCase } from 'change-case';
 import { useMedia } from 'react-use'
 
 import Row, { RowFixed } from '../Row'
@@ -8,7 +10,8 @@ import Row, { RowFixed } from '../Row'
 // import FormattedName from '../FormattedName'
 import TokenLogo from '../TokenLogo'
 import DoubleTokenLogo from '../DoubleLogo'
-import { useGlobalDataContext } from '../../hooks/useGlobalContext'
+
+import { PATH_HASHCHADS } from '../../routes/paths';
 import axios from 'axios'
 
 const Container = styled.div`
@@ -111,7 +114,7 @@ const Menu = styled.div`
   border-bottom-left-radius: 12px;
   box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.04), 0px 4px 8px rgba(0, 0, 0, 0.04), 0px 16px 24px rgba(0, 0, 0, 0.04),
     0px 24px 32px rgba(0, 0, 0, 0.04);
-  display: ${({ hide }) => hide && 'none'};
+  display: ${({ hide }) => hide === "true" && 'none'};
 `
 
 const MenuItem = styled(Row)`
@@ -143,6 +146,7 @@ const Blue = styled.span`
 `
 
 export const Search = ({ small = false, display }) => {
+    const { push } = useRouter();
 
     const [showMenu, toggleMenu] = useState(false)
     const [value, setValue] = useState('')
@@ -155,6 +159,8 @@ export const Search = ({ small = false, display }) => {
 
     const [allTokens, setAllTokens] = useState([])
     const [allPairs, setAllPairs] = useState([])
+    const [uniquePairs, setUniquePairs] = useState ([])
+    const [uniqueTokens, setUniqueTokens] = useState ([])
 
     const below700 = useMedia('(max-width: 700px)')
     const below470 = useMedia('(max-width: 470px)')
@@ -168,7 +174,7 @@ export const Search = ({ small = false, display }) => {
         }
         response = await axios.get(`${process.env.API_URL}/pools/all`)
         if (response.status === 200) {
-            let jsonData = await response.data;
+            let jsonData = await response.data
             setAllPairs(jsonData)
         }
     }, [])
@@ -186,21 +192,23 @@ export const Search = ({ small = false, display }) => {
     }, [value])
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    let uniquePairs = []
+    let tmpUniquePairs = []
     let pairsFound = {}
     useEffect(() => {
         allPairs &&
             allPairs.map((pair) => {
                 if (!pairsFound[pair.id]) {
                     pairsFound[pair.id] = true
-                    uniquePairs.push(pair)
+                    tmpUniquePairs.push(pair)
                 }
                 return true
             })
+
+        setUniquePairs (tmpUniquePairs)
     }, [allPairs])
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    let uniqueTokens = []
+    let tmpUniqueTokens = []
     let found = {}
 
     useEffect(() => {
@@ -208,10 +216,11 @@ export const Search = ({ small = false, display }) => {
             allTokens.map((token) => {
                 if (!found[token.id]) {
                     found[token.id] = true
-                    uniqueTokens.push(token)
+                    tmpUniqueTokens.push(token)
                 }
                 return true
             })
+        setUniqueTokens (tmpUniqueTokens)
     }, [allTokens])
 
 
@@ -364,6 +373,14 @@ export const Search = ({ small = false, display }) => {
         }
     })
 
+    const redirectPairPage = (contractId) => {
+        push(PATH_HASHCHADS.pairs.view(paramCase(contractId)));
+    };
+
+    const redirectTokenPage = (tokenId) => {
+        push(PATH_HASHCHADS.tokens.view(paramCase(tokenId)));
+    };
+
     return (
         <Container small={small.toString()} className='max-w-[150px] sm:max-w-[360px]'>
             <Wrapper open={showMenu} shadow="true" small={small.toString()} style={{ border: "solid 1px #ff007a" }}>
@@ -413,7 +430,7 @@ export const Search = ({ small = false, display }) => {
                                     //format incorrect names
                                     // updateNameData(pair)
                                     return (
-                                        <a href={'/pairs/' + pair.contractId} key={pair.contractId} onClick={onDismiss}>
+                                        <a key={pair.contractId} onClick={() => {onDismiss();redirectPairPage(pair.contractId)}}>
                                             <MenuItem>
                                                 <DoubleTokenLogo id={index} a0={pair?.tokenA?.icon} a1={pair?.tokenB?.icon} margin={true} />
                                                 <div style={{ marginLeft: '10px' }}>
@@ -454,7 +471,7 @@ export const Search = ({ small = false, display }) => {
                             {filteredTokenList.slice(0, tokensShown).map((token) => {
                                 // update displayed names
                                 return (
-                                    <a href={'/tokens/' + token.id} key={token.id} onClick={onDismiss}>
+                                    <a key={token.id} onClick={() => {onDismiss(); redirectTokenPage(token.id)}}>
                                         <MenuItem>
                                             <RowFixed>
                                                 <TokenLogo path={token.icon} style={{ marginRight: '10px' }} />

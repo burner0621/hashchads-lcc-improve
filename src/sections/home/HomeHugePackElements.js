@@ -73,7 +73,7 @@ export default function HomeHugePackElements() {
 
   const isLight = theme.palette.mode === 'light';
 
-  const isRTL = theme.direction === 'rtl';
+  const isrtl = theme.direction === 'rtl';
 
   const screenLeftAnimate = variantScreenLeft;
 
@@ -146,7 +146,7 @@ export default function HomeHugePackElements() {
                     }}
                     transition={{ duration: 0.72, ease: 'easeOut' }}
                     sx={{
-                      boxShadow: `${isRTL ? -80 : 80}px -40px 80px ${alpha(
+                      boxShadow: `${isrtl ? -80 : 80}px -40px 80px ${alpha(
                         isLight ? theme.palette.grey[600] : theme.palette.common.black,
                         0.48
                       )}`,

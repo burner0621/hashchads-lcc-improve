@@ -39,12 +39,12 @@ CarouselArrowIndex.propTypes = {
 export default function CarouselArrowIndex({ index, total, onNext, onPrevious, customIcon, ...other }) {
   const theme = useTheme();
 
-  const isRTL = theme.direction === 'rtl';
+  const isrtl = theme.direction === 'rtl';
 
   return (
     <RootStyle {...other}>
       <ArrowStyle size="small" onClick={onPrevious}>
-        {leftIcon(customIcon, isRTL)}
+        {leftIcon(customIcon, isrtl)}
       </ArrowStyle>
 
       <Typography variant="subtitle2">
@@ -52,7 +52,7 @@ export default function CarouselArrowIndex({ index, total, onNext, onPrevious, c
       </Typography>
 
       <ArrowStyle size="small" onClick={onNext}>
-        {rightIcon(customIcon, isRTL)}
+        {rightIcon(customIcon, isrtl)}
       </ArrowStyle>
     </RootStyle>
   );
@@ -60,25 +60,25 @@ export default function CarouselArrowIndex({ index, total, onNext, onPrevious, c
 
 // ----------------------------------------------------------------------
 
-const leftIcon = (customIcon, isRTL) => (
+const leftIcon = (customIcon, isrtl) => (
   <Iconify
     icon={customIcon ? customIcon : 'eva:arrow-right-fill'}
     sx={{
       width: 20,
       height: 20,
       transform: ' scaleX(-1)',
-      ...(isRTL && { transform: ' scaleX(1)' }),
+      ...(isrtl && { transform: ' scaleX(1)' }),
     }}
   />
 );
 
-const rightIcon = (customIcon, isRTL) => (
+const rightIcon = (customIcon, isrtl) => (
   <Iconify
     icon={customIcon ? customIcon : 'eva:arrow-right-fill'}
     sx={{
       width: 20,
       height: 20,
-      ...(isRTL && { transform: ' scaleX(-1)' }),
+      ...(isrtl && { transform: ' scaleX(-1)' }),
     }}
   />
 );

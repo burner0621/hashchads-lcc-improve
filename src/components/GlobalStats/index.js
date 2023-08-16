@@ -36,7 +36,6 @@ export default function GlobalStats() {
     const formattedTvlUSD = totalVolumeUSD ? formattedNum(totalVolumeUSD, true) : undefined
     const formattedTvlHBAR = totalVolumeHBAR ? formattedNum(totalVolumeHBAR, false) : undefined
     const formattedTodayVolume = todayVolumeUSD ? formattedNum(todayVolumeUSD, false) : undefined
-    console.log (totalVolumeHBAR, todayVolumeUSD, totalVolumeUSD)
     useEffect(() => {
         async function fetchData() {
             let response = await axios.get(`${process.env.API_URL}/stats`)

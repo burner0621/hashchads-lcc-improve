@@ -199,7 +199,7 @@ const TopTokenList = ({ tokens = [], itemMax = 25, useTracked = false, show = 1 
 
     const ListItem = ({ item, index }) => {
         return (
-            <DashGrid style={{ height: '48px', display: "flex", paddingRight: 4, color: "#ced4da" }} focus="true">
+            <DashGrid style={{ height: '48px', display: "flex", paddingRight: 4, color: "#ced4da", cursor: 'pointer' }} focus="true">
                 <DataText area="name" fontWeight="500" style={{ minWidth: 140 }}>
                     <Row>
                         {!below680 &&

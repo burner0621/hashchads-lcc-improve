@@ -89,7 +89,7 @@ const INTERVAL_SECONDS = {
 };
 
 const channelToSubscription = new Map();
-const socket = socketIO.connect(process.env.BASE_URL);
+const socket = socketIO.connect(process.env.API_URL);
 socket.on("connect", () => {
   console.log("[socket] Connected");
 });

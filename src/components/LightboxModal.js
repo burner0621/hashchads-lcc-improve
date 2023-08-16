@@ -10,7 +10,7 @@ import { Typography, GlobalStyles } from '@mui/material';
 function LightboxModalStyles() {
   const theme = useTheme();
 
-  const isRTL = theme.direction === 'rtl';
+  const isrtl = theme.direction === 'rtl';
 
   const ICON_SIZE = 32;
 
@@ -88,12 +88,12 @@ function LightboxModalStyles() {
             '&.ril__navButtonPrev': {
               right: 'auto',
               left: theme.spacing(2),
-              ...Icon(isRTL ? 'arrow-right' : 'arrow-left'),
+              ...Icon(isrtl ? 'arrow-right' : 'arrow-left'),
             },
             '&.ril__navButtonNext': {
               left: 'auto',
               right: theme.spacing(2),
-              ...Icon(isRTL ? 'arrow-left' : 'arrow-right'),
+              ...Icon(isrtl ? 'arrow-left' : 'arrow-right'),
             },
           },
         },

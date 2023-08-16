@@ -61,7 +61,7 @@ NotistackProvider.propTypes = {
 export default function NotistackProvider({ children }) {
   const { themeDirection } = useSettings();
 
-  const isRTL = themeDirection === 'rtl';
+  const isrtl = themeDirection === 'rtl';
 
   const notistackRef = useRef(null);
 
@@ -79,7 +79,7 @@ export default function NotistackProvider({ children }) {
         maxSnack={5}
         preventDuplicate
         autoHideDuration={3000}
-        TransitionComponent={isRTL ? Collapse : undefined}
+        TransitionComponent={isrtl ? Collapse : undefined}
         variant="success" // Set default variant
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         iconVariant={{
