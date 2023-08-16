@@ -21,8 +21,8 @@ import {
 } from '../apollo/queries'
 const ETH_PRICE_KEY = 'ETH_PRICE_KEY'
 
-const socket = socketIO.connect(process.env.BASE_URL);
-const priceSocket = socketIO.connect(process.env.BASE_URL, { path: '/prices' });
+// const socket = socketIO.connect(process.env.BASE_URL);
+// const priceSocket = socketIO.connect(process.env.BASE_URL, { path: '/prices' });
 // format dayjs with the libraries that we need
 dayjs.extend(utc)
 dayjs.extend(weekOfYear)
@@ -37,7 +37,7 @@ export function useGlobalDataContext() {
 
 let isFetching = false;
 export function useGlobalData() {
-  const [state, { update, updateAllPairsInSaucerswap, updateAllTokensInSaucerswap, updateHbarAndSaucePrice, updatePrices }] = useGlobalDataContext()
+  const [state, { update, updateAllPairsInSaucerswap, updateAllTokensInSaucerswap, updateHbarAndSaucePrice, updatePrices }] = this.useGlobalDataContext()
   const [tmpPrices, setTmpPrices] = useState([])
   const [hbarPrice, saucePrice] = useHbarAndSaucePrice()
   const tokenDailyVolume = useTokenDailyVolume()
@@ -46,11 +46,21 @@ export function useGlobalData() {
   const data = state?.globalData
 
   useEffect(() => {
-    socket.on('getPricesResponse', (p) => {
-      setTmpPrices(p)
-      updatePrices(p);
-      if (p && p.length > 0) socket.disconnect()
-    });
+    async function fetchPrices() {
+      const res = await axios.get(`${process.env.API_URL}/tokens/get_hbar_prices`)
+      if (res.status === 200) {
+        const tmp = res.data
+        setTmpPrices (tmp)
+        updatePrices(tmp);
+      }
+    }
+    fetchPrices ()
+    
+    // socket.on('getPricesResponse', (p) => {
+    //   setTmpPrices(p)
+    //   updatePrices(p);
+    //   if (p && p.length > 0) socket.disconnect()
+    // });
   }, [updatePrices]);
 
   useEffect(() => {
@@ -84,7 +94,7 @@ export async function getHbarAndSaucePrice() {
   if (!isFetchingGetHbarAndSaucePrice) {
     try {
       isFetchingGetHbarAndSaucePrice = true
-      let response = await axios.get(`${process.env.BASE_URL}/api/feed/gettokens`)
+      let response = await axios.get(`${process.env.API_URL}/tokens/all`)
       if (response.status === 200) {
         const jsonData = response.data
         try {
@@ -108,7 +118,7 @@ export async function getHbarAndSaucePrice() {
 export async function getAllPairsOnSaucerswap() {
   try {
     let pairs = []
-    let response = await axios.get(`${process.env.BASE_URL}/api/feed/getpools`)
+    let response = await axios.get(`${process.env.API_URL}/pools/all`)
     if (response.status === 200) {
       const jsonData = await response.data;
       pairs = jsonData;
@@ -123,7 +133,7 @@ export async function getAllTokensOnSaucerswap(_allPairs, tokenDailyVolume, pric
   try {
     let tokens = [], tmpTokens = []
     let rlt = []
-    let response = await axios.get(`${process.env.BASE_URL}/api/feed/gettokens`)
+    let response = await axios.get(`${process.env.API_URL}/tokens/all`)
     if (response.status === 200) {
       const jsonData = await response.data;
       tokens = jsonData;
@@ -173,20 +183,20 @@ export async function getAllTokensOnSaucerswap(_allPairs, tokenDailyVolume, pric
 }
 
 export function useTokenDailyPriceData() {
-  const [state, { updateDailyPriceData }] = useGlobalDataContext()
+  const [state, { updateDailyPriceData }] = this.useGlobalDataContext()
   const dailyPriceData = state?.dailyPriceData
-  priceSocket.emit('dailyPriceData')
-  useEffect(() => {
-    priceSocket.on('getDailyPriceData', (p) => {
-      updateDailyPriceData(p);
-      if (p && Object.keys(p).length > 0) priceSocket.disconnect()
-    });
-  })
+  // priceSocket.emit('dailyPriceData')
+  // useEffect(() => {
+  //   priceSocket.on('getDailyPriceData', (p) => {
+  //     updateDailyPriceData(p);
+  //     if (p && Object.keys(p).length > 0) priceSocket.disconnect()
+  //   });
+  // })
   return dailyPriceData || {}
 }
 let isUseHbarAndSaucePrice = false;
 export function useHbarAndSaucePrice() {
-  const [state, { updateHbarAndSaucePrice }] = useGlobalDataContext()
+  const [state, { updateHbarAndSaucePrice }] = this.useGlobalDataContext()
   const hBarPrice = state?.hBarPrice
   const saucePrice = state?.saucePrice;
   if (!hBarPrice) {
@@ -207,13 +217,13 @@ export function useHbarAndSaucePrice() {
 }
 
 export function usePrices() {
-  const [state] = useGlobalDataContext()
+  const [state] = this.useGlobalDataContext()
   let prices = state?.prices
   return prices
 }
 
 export function useEthPrice() {
-  const [state, { updateEthPrice }] = useGlobalDataContext()
+  const [state, { updateEthPrice }] = this.useGlobalDataContext()
   const ethPrice = state?.[ETH_PRICE_KEY]
   const ethPriceOld = state?.['oneDayPrice']
   useEffect(() => {
@@ -231,7 +241,7 @@ export function useEthPrice() {
 
 let isGettingPairs = false;
 export function useAllPairsInSaucerswap() {
-  const [state, { updateAllPairsInSaucerswap }] = useGlobalDataContext()
+  const [state, { updateAllPairsInSaucerswap }] = this.useGlobalDataContext()
   let allPairs = state?.allPairs
   // useEffect(() => {
   async function fetchData() {
@@ -251,14 +261,14 @@ export function useAllPairsInSaucerswap() {
 
 let isFetchingUsePriceChanges = false;
 export function usePriceChanges() {
-  const [state, { updatePriceChange }] = useGlobalDataContext()
+  const [state, { updatePriceChange }] = this.useGlobalDataContext()
   let priceChange = state?.priceChange
 
   if (!priceChange || priceChange?.length === {}) {
     if (!isFetchingUsePriceChanges) {
       try {
         isFetchingUsePriceChanges = true
-        axios.get("https://api.saucerswap.finance/tokens/price-change").then((response) => {
+        axios.get(`${process.env.API_URL}/tokens/get_price_changes`).then((response) => {
           if (response.status === 200) {
             updatePriceChange(response.data)
             isFetchingUsePriceChanges = false
@@ -277,32 +287,14 @@ export function usePriceChanges() {
 let isFetchingUseTokenDailyVolume = false
 export function useTokenDailyVolume() {
 
-  const [state, { updateTokenDailyVolume }] = useGlobalDataContext()
+  const [state, { updateTokenDailyVolume }] = this.useGlobalDataContext()
   let tokenDailyVolume = state?.tokenDailyVolume
 
-  // useEffect(() => {
-  //   async function fetchData() {
-  //     try {
-  //       let response = await fetch("https://api.saucerswap.finance/tokens/daily-volumes")
-
-  //       if (response.status === 200) {
-  //         const dailyVolData = await response.json();
-  //         updateTokenDailyVolume(dailyVolData)
-  //       }
-  //     } catch (e) {
-  //       console.log(e)
-  //     }
-  //   }
-  //   if (tokenDailyVolume === undefined || tokenDailyVolume === {}) {
-  //     fetchData()
-  //   }
-  // }, [updateTokenDailyVolume, tokenDailyVolume])
-  // return tokenDailyVolume || {}
   if (tokenDailyVolume === undefined || tokenDailyVolume === {}) {
     if (!isFetchingUseTokenDailyVolume) {
       try {
         isFetchingUseTokenDailyVolume = true
-        axios.get("https://api.saucerswap.finance/tokens/daily-volumes").then((response) => {
+        axios.get(`${process.env.API_URL}/tokens/get_daily_volumes`).then((response) => {
           if (response.status === 200) {
             updateTokenDailyVolume(response.data)
             isFetchingUseTokenDailyVolume = false
@@ -323,12 +315,12 @@ export function useTokenDailyVolume() {
 // }
 
 export function usePairDailyVolume() {
-  const [state, { updatePairDailyVolume }] = useGlobalDataContext()
+  const [state, { updatePairDailyVolume }] = this.useGlobalDataContext()
   let pairDailyVolume = state?.pairDailyVolume
   useEffect(() => {
     async function fetchData() {
       try {
-        let response = await axios.get("https://api.saucerswap.finance/pools/daily-volumes")
+        let response = await axios.get(`${process.env.API_URL}/pools/get_daily_volumes`)
 
         if (response.status === 200) {
           const dailyVolData = await response.data;
@@ -346,12 +338,12 @@ export function usePairDailyVolume() {
 }
 
 export function usePairWeeklyVolume() {
-  const [state, { updatePairWeeklyVolume }] = useGlobalDataContext()
+  const [state, { updatePairWeeklyVolume }] = this.useGlobalDataContext()
   let pairWeeklyVolume = state?.pairWeeklyVolume
   useEffect(() => {
     async function fetchData() {
       try {
-        let response = await axios.get("https://api.saucerswap.finance/pools/weekly-volumes")
+        let response = await axios.get(`${process.env.API_URL}/pools/get_weekly_volumes`)
 
         if (response.status === 200) {
           const dailyVolData = await response.data;
@@ -370,9 +362,9 @@ export function usePairWeeklyVolume() {
 
 let isUseAllTokensInSaucerswap = false
 export function useAllTokensInSaucerswap() {
-  const [state, { updateAllTokensInSaucerswap }] = useGlobalDataContext()
+  const [state, { updateAllTokensInSaucerswap }] = this.useGlobalDataContext()
   const tokenDailyVolume = useTokenDailyVolume()
-  const priceChanges = usePriceChanges(); console.log("$$$$$$$$$$$$$$$$$$$$")
+  const priceChanges = usePriceChanges()
   const [hbarPrice, saucePrice] = useHbarAndSaucePrice()
   const _allPairs = useAllPairsInSaucerswap()
 
@@ -393,7 +385,7 @@ export function useAllTokensInSaucerswap() {
 }
 
 export function useGlobalChartData() {
-  const [state, { updateChart, updatePrices }] = useGlobalDataContext()
+  const [state, { updateChart, updatePrices }] = this.useGlobalDataContext()
   const [oldestDateFetch, setOldestDateFetched] = useState()
   const [activeWindow] = useTimeframe()
   const [tmpPrices, setTmpPrices] = useState([])
@@ -401,12 +393,12 @@ export function useGlobalChartData() {
   const chartDataDaily = state?.chartData?.daily
   const chartDataWeekly = state?.chartData?.weekly
 
-  useEffect(() => {
-    socket.on('getPricesResponse', (p) => {
-      setTmpPrices(p)
-      updatePrices(p);
-    });
-  }, [updatePrices]);
+  // useEffect(() => {
+  //   socket.on('getPricesResponse', (p) => {
+  //     setTmpPrices(p)
+  //     updatePrices(p);
+  //   });
+  // }, [updatePrices]);
 
   /**
    * Keep track of oldest date fetched. Used to
@@ -458,7 +450,7 @@ export async function getGlobalData(prices, hbarPrice) {
     let oneDay_totalLiquidityUSD = 0
     let liquidityChangeUSD = 0
     try {
-      let response = await axios.get("https://api.saucerswap.finance/stats")
+      let response = await axios.get(`${process.env.API_URL}/stats`)
       if (response.status === 200) {
         const jsonData = await response.data;
         try {
@@ -473,7 +465,7 @@ export async function getGlobalData(prices, hbarPrice) {
     }
 
     try {
-      let response = await axios.get("https://api.saucerswap.finance/stats/volume/daily")
+      let response = await axios.get(`${process.env.API_URL}/stats/get_daily_volumes`)
       if (response.status === 200) {
         let jsonData = await response.data;
         data.todayVolumeUSD = Number(jsonData[0]['dailyVolume'] / 100000000).toFixed(4)
@@ -483,7 +475,7 @@ export async function getGlobalData(prices, hbarPrice) {
     }
 
     try {
-      let response = await axios.get(`https://api.saucerswap.finance/stats/platformData?field=VOLUME&interval=DAY&from=${now_date / 1000 - 86400 * 4}&to=${now_date / 1000}`)
+      let response = await axios.get(`${process.env.API_URL}/stats/get_interval_info?field=VOLUME&interval=DAY&from=${now_date / 1000 - 86400 * 4}&to=${now_date / 1000}`)
       if (response.status === 200) {
         let jsonData = await response.data;
         nowData_totalVolumeUSD = (Number(jsonData[jsonData.length - 1]['valueHbar']) / 100000000 * prices[prices.length - 2][1]).toFixed(4)
@@ -494,7 +486,7 @@ export async function getGlobalData(prices, hbarPrice) {
     }
 
     try {
-      let response = await axios.get(`https://api.saucerswap.finance/stats/platformData?field=VOLUME&interval=WEEK&from=${now_date / 1000 - 86400 * 30}&to=${now_date / 1000}`)
+      let response = await axios.get(`${process.env.API_URL}/stats/get_interval_info?field=VOLUME&interval=WEEK&from=${now_date / 1000 - 86400 * 30}&to=${now_date / 1000}`)
       if (response.status === 200) {
         let jsonData = await response.data;
         nowWeekData_totalVolumeUSD = (Number(jsonData[jsonData.length - 1]['valueHbar']) / 100000000 * prices[prices.length - 2][1]).toFixed(4)
@@ -505,7 +497,7 @@ export async function getGlobalData(prices, hbarPrice) {
     }
 
     try {
-      let response = await axios.get(`https://api.saucerswap.finance/stats/platformData?field=LIQUIDITY&interval=DAY&from=${now_date / 1000 - 86400 * 3}&to=${now_date / 1000}`)
+      let response = await axios.get(`${process.env.API_URL}/stats/get_interval_info?field=LIQUIDITY&interval=DAY&from=${now_date / 1000 - 86400 * 3}&to=${now_date / 1000}`)
       if (response.status === 200) {
         let jsonData = await response.data;
         totalLiquidityUSD = (Number(jsonData[jsonData.length - 1]['valueHbar']) / 100000000 * prices[prices.length - 2][1]).toFixed(4)
@@ -583,7 +575,7 @@ export const getChartData = async (oldestDateToFetch, prices) => {
     let data = []
     let weekelyData = []
     const now_date = Date.now()
-    let response = await axios.get(`https://api.saucerswap.finance/stats/platformData?field=LIQUIDITY&interval=DAY&from=${oldestDateToFetch}&to=${now_date}`)
+    let response = await axios.get(`${process.env.API_URL}/stats/get_interval_info?field=LIQUIDITY&interval=DAY&from=${oldestDateToFetch}&to=${now_date}`)
     if (response.status === 200) {
       if (prices.length > 0) {
         let jsonData = await response.data;
@@ -596,7 +588,7 @@ export const getChartData = async (oldestDateToFetch, prices) => {
 
     }
 
-    response = await axios.get(`https://api.saucerswap.finance/stats/platformData?field=VOLUME&interval=DAY&from=${oldestDateToFetch}&to=${now_date}`)
+    response = await axios.get(`${process.env.API_URL}/stats/get_interval_info?field=VOLUME&interval=DAY&from=${oldestDateToFetch}&to=${now_date}`)
     if (response.status === 200) {
       if (prices.length > 0) {
         let jsonData = await response.data;
@@ -608,7 +600,7 @@ export const getChartData = async (oldestDateToFetch, prices) => {
       }
     }
 
-    response = await axios.get(`https://api.saucerswap.finance/stats/platformData?field=VOLUME&interval=WEEK&from=${oldestDateToFetch}&to=${now_date}`)
+    response = await axios.get(`${process.env.API_URL}/stats/get_interval_info?field=VOLUME&interval=WEEK&from=${oldestDateToFetch}&to=${now_date}`)
     if (response.status === 200) {
       if (prices.length > 0) {
         let jsonData = await response.data;

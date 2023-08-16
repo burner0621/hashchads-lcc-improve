@@ -15,8 +15,7 @@ import { RowBetween } from '../../../components/Row'
 import DataTable from 'react-data-table-component';
 import { Link } from '@mui/material';
 
-import { useAllPairsInSaucerswap, usePriceChanges, usePairDailyVolume, usePairWeeklyVolume } from "../../../hooks/useGlobalContext";
-
+import axios from 'axios'
 import TokenLogo from "../../../components/TokenLogo";
 import { FullWrapper, PageWrapper } from "../tokens";
 
@@ -67,14 +66,28 @@ export default function GeneralPairs() {
     const [losers, setLosers] = useState([])
     const [showLiquidity, setShowLiquidity] = useState(true)
 
-    const _allPairs = useAllPairsInSaucerswap()
-    const _dailyPairVolume = usePairDailyVolume()
-    const _weeklyPairVolume = usePairWeeklyVolume()
-    const _priceChanges = usePriceChanges()
-    // const _allPairs = []
-    // const _dailyPairVolume = []
-    // const _weeklyPairVolume = []
-    // const _priceChanges = []
+    const [_allPairs, setTAllPairs] = useState ([])
+    const [_dailyPairVolume, setDailyPairVolume] = useState ([])
+    const [_weeklyPairVolume, setWeeklyPairVolume] = useState ([])
+    const [_priceChanges, setPriceChanges] = useState ([])
+    
+    useEffect(() => {
+        axios.get(`${process.env.API_URL}/pools/all`).then((res) => {
+            if (res.status === 200)
+                setTAllPairs(res.data.data)
+        })
+        axios.get(`${process.env.API_URL}/pools/get_weekly_volumes`).then((res) => {
+            if (res.status === 200) setWeeklyPairVolume(res.data)
+        })
+        axios.get(`${process.env.API_URL}/pools/get_daily_volumes`).then((res) => {
+            if (res.status === 200) setDailyPairVolume(res.data)
+        })
+        axios.get(`${process.env.API_URL}/tokens/get_price_changes`).then((res) => {
+            if (res.status === 200) {
+                setPriceChanges(res.data)
+            }
+          })
+    }, [])
 
     useEffect(() => {
         if (_priceChanges && (Object.keys(_priceChanges)).length > 0) {
@@ -145,7 +158,7 @@ export default function GeneralPairs() {
 
         {
             name: <span className='font-weight-bold fs-16'>Pair</span>,
-            cell: row => {console.log (row.pair_address, "lllllllllllllllllllllll")
+            cell: row => {
                 return (
                     <Link onClick={() => redirectPairPage(row.pair_address.replace(/-/g, '.'))} className='cursor-pointer'>
                         <div className="flex flex-row">

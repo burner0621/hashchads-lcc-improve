@@ -1,6 +1,6 @@
 
 import { useRouter } from 'next/router';
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import { paramCase } from 'change-case';
 import styled from 'styled-components'
 
@@ -11,10 +11,9 @@ import { Link } from '@mui/material';
 
 import { PATH_HASHCHADS } from '../../routes/paths';
 
-import { formattedNum, formattedPercent, getPercentChange } from '../../utils'
+import { formattedNum } from '../../utils'
 import { useMedia } from 'react-use'
-
-import { useTokenDailyPriceData } from '../../hooks/useGlobalContext'
+import axios from 'axios'
 
 const PageButtons = styled.div`
   width: 100%;
@@ -111,12 +110,12 @@ const DataText = styled(Flex)`
 
 const SORT_FIELD = {
     LIQ: 'liquidity',
-    VOL: 'oneDayVolumeUSD',
+    VOL: 'dailyVolume',
     VOL_UT: 'totalVolumeUSD',
     SYMBOL: 'symbol',
     NAME: 'name',
     PRICE: 'priceUsd',
-    CHANGE: 'priceChangeUSD',
+    CHANGE: 'dailyPriceChange',
     DAILYCHANGE: 'dailyChanged',
     WEEKLYCHANGE: 'weeklyChanged',
     MONTHLYCHANGE: 'monthlyChanged'
@@ -124,21 +123,28 @@ const SORT_FIELD = {
 
 const TopTokenList = ({ tokens = [], itemMax = 25, useTracked = false, show = 1 }) => {
     const { push } = useRouter();
-
     const [page, setPage] = useState(1)
     const [maxPage, setMaxPage] = useState(1)
 
-    const [sortDirection, setSortDirection] = useState(true)
+    const [sortDirection, setSortDirection] = useState(1)
     const [sortedColumn, setSortedColumn] = useState(SORT_FIELD.VOL)
-    const [filterData, setFilterData] = useState([])
-
-    const dailyPriceData = useTokenDailyPriceData()
+    const [filteredList, setFilteredList] = useState([])
+    const [hbarPrice, setHbarPrice] = useState(0)
 
     const below1080 = useMedia('(max-width: 1080px)')
     const below680 = useMedia('(max-width: 680px)')
     const below600 = useMedia('(max-width: 600px)')
 
-    let tmpTokens = []
+    useEffect(() => {
+        async function fetchHbarPrice() {
+            let response = await axios.get(`${process.env.API_URL}/tokens/get_hbar_price`)
+            if (response.status === 200) {
+                const data = response.data
+                setHbarPrice(data.data)
+            }
+        }
+        fetchHbarPrice()
+    }, [])
 
     useEffect(() => {
         if (tokens && itemMax) {
@@ -151,68 +157,49 @@ const TopTokenList = ({ tokens = [], itemMax = 25, useTracked = false, show = 1 
     }, [tokens, itemMax])
 
     useEffect(() => {
-        for (let token of tokens) {
-            if (dailyPriceData[token['id']]) {
-                let tmpPriceChart = ""
-                let closeUsdList = []
-                let i = 0
-                if (dailyPriceData[token['id']][dailyPriceData[token['id']].length - 7]) token['weeklyChanged'] = getPercentChange(token['priceUsd'], dailyPriceData[token['id']][dailyPriceData[token['id']].length - 7]['closeUsd'])
-                if (dailyPriceData[token['id']][1]) token['monthlyChanged'] = getPercentChange(token['priceUsd'], dailyPriceData[token['id']][1]['closeUsd'])
-                for (let p of dailyPriceData[token['id']]) {
-                    closeUsdList.push(parseFloat(p['closeUsd']))
+        async function fetchData() {
+            let response = await axios.get(`${process.env.API_URL}/tokens/get_tokens_stats_data?sortedColumn=${sortedColumn}&sortDirection=${sortDirection}&pageNum=${page}&pageCount=${itemMax}`)
+            if (response.status === 200) {
+                const data = response.data
+                if (data.success) {
+                    setFilteredList(data.data)
                 }
-                const min = Math.min(...closeUsdList);
-                const max = Math.max(...closeUsdList);
-                let normalised_prices = [];
-
-                for (let p of closeUsdList) {
-                    let new_price = (parseFloat(p) - min) / (min - max);
-                    if (isNaN(new_price)) {
-                        new_price = 0;
-                    }
-                    normalised_prices.push(Math.abs((Math.abs(new_price * 80)) - 80));
-                }
-                for (let p of normalised_prices) {
-                    tmpPriceChart += i.toString() + "," + p + " "
-                    i += 15;
-                }
-                token['priceChart'] = tmpPriceChart
             }
-            tmpTokens.push(token)
         }
-        setFilterData(tmpTokens)
-    }, [tokens])
+        fetchData()
+
+    }, [itemMax, page, sortDirection, sortedColumn])
 
     const redirectTokenPage = (tokenId) => {
         push(PATH_HASHCHADS.tokens.view(paramCase(tokenId)));
     };
 
-    const filteredList = useMemo(() => {
-        return (
-            filterData &&
-            filterData
-                .sort((a, b) => {
-                    if (sortedColumn === SORT_FIELD.SYMBOL || sortedColumn === SORT_FIELD.NAME) {
-                        return a[sortedColumn] > b[sortedColumn] ? (sortDirection ? -1 : 1) * 1 : (sortDirection ? -1 : 1) * -1
-                    }
-                    if (isNaN(a[sortedColumn]) === false && isNaN(b[sortedColumn]) === false)
-                        return parseFloat(a[sortedColumn]) > parseFloat(b[sortedColumn])
-                            ? (sortDirection ? -1 : 1) * 1
-                            : (sortDirection ? -1 : 1) * -1
-                    else if (isNaN(a[sortedColumn]) && isNaN(b[sortedColumn]) === false)
-                        return sortDirection ? 1 : -1
-                    else if (isNaN(a[sortedColumn]) === false && isNaN(b[sortedColumn]))
-                        return sortDirection ? -1 : 1
-                    else
-                        return 0
-                })
-                .slice(itemMax * (page - 1), page * itemMax)
-        )
-    }, [filterData, itemMax, page, sortDirection, sortedColumn])
+    // const filteredList = useMemo(() => {
+    //     return (
+    //         filterData &&
+    //         filterData
+    //             .sort((a, b) => {
+    //                 if (sortedColumn === SORT_FIELD.SYMBOL || sortedColumn === SORT_FIELD.NAME) {
+    //                     return a[sortedColumn] > b[sortedColumn] ? (sortDirection ? -1 : 1) * 1 : (sortDirection ? -1 : 1) * -1
+    //                 }
+    //                 if (isNaN(a[sortedColumn]) === false && isNaN(b[sortedColumn]) === false)
+    //                     return parseFloat(a[sortedColumn]) > parseFloat(b[sortedColumn])
+    //                         ? (sortDirection ? -1 : 1) * 1
+    //                         : (sortDirection ? -1 : 1) * -1
+    //                 else if (isNaN(a[sortedColumn]) && isNaN(b[sortedColumn]) === false)
+    //                     return sortDirection ? 1 : -1
+    //                 else if (isNaN(a[sortedColumn]) === false && isNaN(b[sortedColumn]))
+    //                     return sortDirection ? -1 : 1
+    //                 else
+    //                     return 0
+    //             })
+    //             .slice(itemMax * (page - 1), page * itemMax)
+    //     )
+    // }, [filterData, itemMax, page, sortDirection, sortedColumn])
 
     const ListItem = ({ item, index }) => {
         return (
-            <DashGrid style={{ height: '48px', display: "flex", paddingRight: 4, color: "#ced4da" }} focus={true}>
+            <DashGrid style={{ height: '48px', display: "flex", paddingRight: 4, color: "#ced4da" }} focus="true">
                 <DataText area="name" fontWeight="500" style={{ minWidth: 140 }}>
                     <Row>
                         {!below680 &&
@@ -231,7 +218,7 @@ const TopTokenList = ({ tokens = [], itemMax = 25, useTracked = false, show = 1 
                 </DataText>
                 <DataText area="24H" color="text" fontWeight="500" style={{ minWidth: 40, paddingRight: 4 }}>
                     {
-                        item.priceChangeUSD >= 0 &&
+                        Number(item.dailyPriceChange) >= 0 &&
                         <span className='text-green-weight'>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
@@ -239,7 +226,7 @@ const TopTokenList = ({ tokens = [], itemMax = 25, useTracked = false, show = 1 
                         </span>
                     }
                     {
-                        item.priceChangeUSD < 0 &&
+                        Number(item.dailyPriceChange) < 0 &&
                         <span className='text-red-weight'>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 4.5l15 15m0 0V8.25m0 11.25H8.25" />
@@ -247,15 +234,15 @@ const TopTokenList = ({ tokens = [], itemMax = 25, useTracked = false, show = 1 
                         </span>
                     }
                     {
-                        item.priceChangeUSD >= 0 &&
+                        Number(item.dailyPriceChange) >= 0 &&
                         <span className='text-green-weight'>
-                            {Math.abs(item.priceChangeUSD.toFixed(2)) + "%"}
+                            {Math.abs(Number(item.dailyPriceChange).toFixed(2)) + "%"}
                         </span>
                     }
                     {
-                        item.priceChangeUSD < 0 &&
+                        Number(item.dailyPriceChange) < 0 &&
                         <span className='text-red-weight'>
-                            {Math.abs(item.priceChangeUSD.toFixed(2)) + "%"}
+                            {Math.abs(Number(item.dailyPriceChange).toFixed(2)) + "%"}
                         </span>
                     }
                 </DataText>
@@ -321,13 +308,13 @@ const TopTokenList = ({ tokens = [], itemMax = 25, useTracked = false, show = 1 
                 </DataText>
                 {/* )} */}
                 <DataText area="liq" color="text" fontWeight="500" style={{ minWidth: 120 }}>{formattedNum(item.liquidity, true)}</DataText>
-                <DataText area="vol" color="text" fontWeight="500" style={{ minWidth: 110 }}>{formattedNum(item.oneDayVolumeUSD, true)}</DataText>
+                <DataText area="vol" color="text" fontWeight="500" style={{ minWidth: 110 }}>{formattedNum(item.dailyVolume * hbarPrice, true)}</DataText>
                 {/* {!below1080 &&  */}
                 <DataText area="priceChart" color="text" fontWeight="500" style={{ minWidth: 110, paddingRight: 4 }}>
                     <svg viewBox="0 0 500 100" className="chart">
                         <polyline
                             fill="none"
-                            stroke={item.priceChangeUSD >= 0 ? "#20eb7a" : "#ff422b"}
+                            stroke={Number(item.dailyPriceChange) >= 0 ? "#20eb7a" : "#ff422b"}
                             strokeWidth="13"
                             points={item.priceChart} />
                     </svg>
@@ -340,7 +327,7 @@ const TopTokenList = ({ tokens = [], itemMax = 25, useTracked = false, show = 1 
     return (
         <ListWrapper>
             <div style={{ overflowX: "auto" }}>
-                <DashGrid center={true} style={{ height: 'fit-content', padding: '0 8px 1rem 8px', display: "flex" }}>
+                <DashGrid center="true" style={{ height: 'fit-content', padding: '0 8px 1rem 8px', display: "flex" }}>
                     <Flex alignItems="center" justifyContent="flexStart" style={{ minWidth: 120 }}>
                         <ClickableText
                             color="text"
@@ -443,11 +430,11 @@ const TopTokenList = ({ tokens = [], itemMax = 25, useTracked = false, show = 1 
                 show === 1 &&
                 <PageButtons>
                     <div onClick={() => setPage(page === 1 ? page : page - 1)}>
-                        <Arrow faded={page === 1 ? true : false}>←</Arrow>
+                        <Arrow faded={page === 1 ? "true" : "false"}>←</Arrow>
                     </div>
                     <div>{'Page ' + page + ' of ' + maxPage}</div>
                     <div onClick={() => setPage(page === maxPage ? page : page + 1)}>
-                        <Arrow faded={page === maxPage ? true : false}>→</Arrow>
+                        <Arrow faded={page === maxPage ? "true" : "false"}>→</Arrow>
                     </div>
                 </PageButtons>
             }

@@ -7,7 +7,7 @@ import { getTimeframe } from '../../utils'
 import { ImpulseSpinner } from '../Impulse'
 import { useTimeframe } from '../../hooks/useApplication'
 
-import {useGlobalData, useGlobalChartData} from '../../hooks/useGlobalContext'
+import axios from 'axios'
 
 const CHART_VIEW = {
   VOLUME: 'Volume',
@@ -28,7 +28,7 @@ const GlobalChart = ({ display }) => {
   const timeWindow = timeframeOptions.ALL_TIME
   const [volumeWindow, setVolumeWindow] = useState(VOLUME_WINDOW.DAYS)
 
-  const {totalLiquidityUSD, oneDayVolumeUSD, volumeChangeUSD, liquidityChangeUSD, oneWeekVolume, weeklyVolumeChange} = useGlobalData()
+  // const {totalLiquidityUSD, oneDayVolumeUSD, volumeChangeUSD, liquidityChangeUSD, oneWeekVolume, weeklyVolumeChange} = useGlobalData()
 
   const [stateLiquidityChangeUSD, setStateLiquidityChangeUSD] = useState(0)
   const [stateTotalLiquidityUSD, setStateTotalLiquidityUSD] = useState(0)
@@ -38,21 +38,45 @@ const GlobalChart = ({ display }) => {
   const [stateWeeklyVolumeChange, setStateWeeklyVolumeChange] = useState()
 
   useEffect(() => {
-    setStateLiquidityChangeUSD(liquidityChangeUSD)
-    setStateTotalLiquidityUSD(totalLiquidityUSD)
-    setStateVolumeChangeUSD(volumeChangeUSD ? volumeChangeUSD: '--')
-    setStateOneDayVolumeUSD(oneDayVolumeUSD)
-    setStateOneWeekVolume(oneWeekVolume)
-    setStateWeeklyVolumeChange(weeklyVolumeChange)
-  }, [totalLiquidityUSD, volumeChangeUSD, liquidityChangeUSD, oneDayVolumeUSD, oneWeekVolume, weeklyVolumeChange])
+    axios.get(`${process.env.API_URL}/stats/get_stats_liquidity_data`).then((res) => {
+      if (res.status === 200) {
+        setStateLiquidityChangeUSD (res.data.dl_changeusd)
+        setStateTotalLiquidityUSD (res.data.dtl_usd)
+      }
+    })
+    axios.get(`${process.env.API_URL}/stats/get_stats_dvolume_data`).then((res) => {
+      if (res.status === 200) {
+        setStateVolumeChangeUSD (res.data.dv_changeusd)
+        setStateOneDayVolumeUSD (res.data.dtv_usd)
+      }
+    })
+    axios.get(`${process.env.API_URL}/stats/get_stats_wvolume_data`).then((res) => {
+      if (res.status === 200) {
+        setStateWeeklyVolumeChange (res.data.wv_changeusd)
+        setStateOneWeekVolume (res.data.wtv_usd)
+      }
+    })
+    // setStateLiquidityChangeUSD(liquidityChangeUSD)
+    // setStateTotalLiquidityUSD(totalLiquidityUSD)
+    // setStateVolumeChangeUSD(volumeChangeUSD ? volumeChangeUSD: '--')
+    // setStateOneDayVolumeUSD(oneDayVolumeUSD)
+    // setStateOneWeekVolume(oneWeekVolume)
+    // setStateWeeklyVolumeChange(weeklyVolumeChange)
+  }, [])
   // based on window, get starttim
   let utcStartTime = getTimeframe(timeWindow)
 
   // global historical data
-  const [dailyData, weeklyData] = useGlobalChartData ()
+  const [dailyData, setDailyData] = useState ([])
+  const [weeklyData, setWeeklyData] = useState ([])
+  // const [dailyData, weeklyData] = useGlobalChartData ()
 
   const [oldestDateFetch, setOldestDateFetched] = useState()
   const [activeWindow] = useTimeframe()
+
+  useEffect (() => {
+    
+  }, [])
   
   /**
    * Keep track of oldest date fetched. Used to
@@ -62,7 +86,10 @@ const GlobalChart = ({ display }) => {
   useEffect(() => {
     // based on window, get starttime
     let startTime = getTimeframe(activeWindow)
-
+    axios.get(`${process.env.API_URL}/stats/get_chart_data?start=${startTime}`).then((res) => {
+      setDailyData (res.data[0])
+      setWeeklyData (res.data[1])
+    })
     if ((activeWindow && startTime < oldestDateFetch) || !oldestDateFetch) {
       setOldestDateFetched(startTime)
     }

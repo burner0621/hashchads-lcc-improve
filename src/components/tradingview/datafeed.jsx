@@ -205,7 +205,7 @@ const datafeed = (tokenId) => {
       const { from, to, firstDataRequest } = periodParams;
       try {
         // let url = `https://api.twelvedata.com/time_series?symbol=${symbolInfo.name}&outputsize=1000&interval=${resName}&apikey=${API_KEY}`;
-        let url = `${process.env.BASE_URL}/api/feed/getfeeddata?tokenId=${tokenId}&from=${from}&to=${to}`;
+        let url = `${process.env.API_URL}/tokens/get_feed_data?tokenId=${tokenId}&from=${from}&to=${to}`;
 
         const response = await fetch(url);
         if (response.status !== 200) {

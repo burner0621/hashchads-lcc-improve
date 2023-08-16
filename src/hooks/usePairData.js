@@ -71,7 +71,7 @@ export function usePairData(pairAddress) {
   return pairData || {}
 }
 async function getPairData(pairId, pair) {
-  let res = await fetch(`https://api.saucerswap.finance/pools/conversionRates/latest/${pairId}?interval=DAY`)
+  let res = await fetch(`${process.env.API_URL}/pools/conversionRates/latest/${pairId}?interval=DAY`)
   if (res.status === 200) {
     let jsonData = await res.json()
     for (let key of Object.keys(pair)) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react'
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { Search as SearchIcon, X } from 'react-feather'
 import styled from 'styled-components'
 import { useMedia } from 'react-use'
@@ -8,7 +8,8 @@ import Row, { RowFixed } from '../Row'
 // import FormattedName from '../FormattedName'
 import TokenLogo from '../TokenLogo'
 import DoubleTokenLogo from '../DoubleLogo'
-import { useAllPairsInSaucerswap, useAllTokensInSaucerswap, useGlobalDataContext } from '../../hooks/useGlobalContext'
+import { useGlobalDataContext } from '../../hooks/useGlobalContext'
+import axios from 'axios'
 
 const Container = styled.div`
   height: 36px;
@@ -152,16 +153,29 @@ export const Search = ({ small = false, display }) => {
     const [tokensShown, setTokensShown] = useState(3)
     const [pairsShown, setPairsShown] = useState(3)
 
+    const [allTokens, setAllTokens] = useState([])
+    const [allPairs, setAllPairs] = useState([])
+
     const below700 = useMedia('(max-width: 700px)')
     const below470 = useMedia('(max-width: 470px)')
     const below410 = useMedia('(max-width: 410px)')
 
-    // let allPairs = useAllPairsInSaucerswap()
-    
-    // let allTokens = useAllTokensInSaucerswap()
-    const [state] = useGlobalDataContext()
-    let allPairs = state?.allPairs || [];
-    let allTokens = state?.allTokens || [];
+    const fetchData = useCallback(async () => {
+        let response = await axios.get(`${process.env.API_URL}/tokens/simple_all`)
+        if (response.status === 200) {
+            let jsonData = await response.data;
+            setAllTokens(jsonData)
+        }
+        response = await axios.get(`${process.env.API_URL}/pools/all`)
+        if (response.status === 200) {
+            let jsonData = await response.data;
+            setAllPairs(jsonData)
+        }
+    }, [])
+
+    useEffect(() => {
+        fetchData()
+    }, [fetchData])
 
     useEffect(() => {
         if (value !== '') {
@@ -174,36 +188,36 @@ export const Search = ({ small = false, display }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     let uniquePairs = []
     let pairsFound = {}
-    useEffect (() => {
+    useEffect(() => {
         allPairs &&
-        allPairs.map((pair) => {
-            if (!pairsFound[pair.id]) {
-                pairsFound[pair.id] = true
-                uniquePairs.push(pair)
-            }
-            return true
-        })
+            allPairs.map((pair) => {
+                if (!pairsFound[pair.id]) {
+                    pairsFound[pair.id] = true
+                    uniquePairs.push(pair)
+                }
+                return true
+            })
     }, [allPairs])
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     let uniqueTokens = []
     let found = {}
 
-    useEffect (() => {
+    useEffect(() => {
         allTokens &&
-        allTokens.map((token) => {
-            if (!found[token.id]) {
-                found[token.id] = true
-                uniqueTokens.push(token)
-            }
-            return true
-        })
+            allTokens.map((token) => {
+                if (!found[token.id]) {
+                    found[token.id] = true
+                    uniqueTokens.push(token)
+                }
+                return true
+            })
     }, [allTokens])
-    
+
 
     // add the searched tokens to the list if not found yet
-    useEffect (() => {
-        allTokens = allTokens.concat(
+    useEffect(() => {
+        let tmpAllTokens = allTokens.concat(
             searchedTokens.filter((searchedToken) => {
                 let included = false
                 allTokens.map((token) => {
@@ -215,8 +229,9 @@ export const Search = ({ small = false, display }) => {
                 return !included
             })
         )
+        setAllTokens(tmpAllTokens)
     }, [searchedTokens])
-    
+
 
     const filteredPairList = useMemo(() => {
         return uniquePairs
@@ -300,8 +315,8 @@ export const Search = ({ small = false, display }) => {
         }
     }, [filteredTokenList])
 
-    useEffect (() => {
-        allPairs = allPairs.concat(
+    useEffect(() => {
+        let tmpAllPairs = allPairs.concat(
             searchedPairs.filter((searchedPair) => {
                 let included = false
                 allPairs.map((pair) => {
@@ -313,9 +328,8 @@ export const Search = ({ small = false, display }) => {
                 return !included
             })
         )
+        setAllPairs(tmpAllPairs)
     }, [searchedPairs])
-   
-    console.log (filteredPairList, filteredTokenList, "MMMMMMMMMMMMMMM")
 
     function escapeRegExp(string) {
         return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // $& means the whole matched string
@@ -351,10 +365,10 @@ export const Search = ({ small = false, display }) => {
     })
 
     return (
-        <Container small={small} className='max-w-[150px] sm:max-w-[360px]'>
-            <Wrapper open={showMenu} shadow={true} small={small} style={{ border: "solid 1px #ff007a" }}>
+        <Container small={small.toString()} className='max-w-[150px] sm:max-w-[360px]'>
+            <Wrapper open={showMenu} shadow="true" small={small.toString()} style={{ border: "solid 1px #ff007a" }}>
                 <Input
-                    large={!small}
+                    large={(!small).toString()}
                     type={'text'}
                     ref={wrapperRef}
                     placeholder={
@@ -381,7 +395,7 @@ export const Search = ({ small = false, display }) => {
                 />
                 {!showMenu ? <SearchIconLarge /> : <CloseIcon onClick={() => { toggleMenu(false); }} />}
             </Wrapper>
-            <Menu hide={!showMenu} ref={menuRef} style={{ zIndex: "300", background: "#0b1217" }} className='absolute'>
+            <Menu hide={(!showMenu).toString()} ref={menuRef} style={{ zIndex: "300", background: "#0b1217" }} className='absolute'>
                 {
                     (display === "all" || display === "pair") &&
                     <>
@@ -410,7 +424,7 @@ export const Search = ({ small = false, display }) => {
                                     )
                                 })}
                             <Heading
-                                hide={!(Object.keys(filteredPairList).length > 3 && Object.keys(filteredPairList).length >= pairsShown)}
+                                hide={(!(Object.keys(filteredPairList).length > 3 && Object.keys(filteredPairList).length >= pairsShown)).toString()}
                             >
                                 <Blue
                                     onClick={() => {
@@ -456,7 +470,7 @@ export const Search = ({ small = false, display }) => {
                             })}
 
                             <Heading
-                                hide={!(Object.keys(filteredTokenList).length > 3 && Object.keys(filteredTokenList).length >= tokensShown)}
+                                hide={(!(Object.keys(filteredTokenList).length > 3 && Object.keys(filteredTokenList).length >= tokensShown)).toString()}
                             >
                                 <Blue
                                     onClick={() => {

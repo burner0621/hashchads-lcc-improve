@@ -1,13 +1,12 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { useMedia } from 'react-use'
 import { formattedNum } from '../../utils'
-import { useGlobalDataContext, useHbarAndSaucePrice } from '../../hooks/useGlobalContext'
 import { Spinner } from "reactstrap";
 
 import { RowFixed } from '../Row'
 
-import Badge from '@mui/material/Badge';
+import axios from 'axios'
 
 const Header = styled.div`
   width: 100%;
@@ -28,24 +27,42 @@ export default function GlobalStats() {
     const below600 = useMedia('(max-width: 600px)')
     const below816 = useMedia('(max-width: 816px)')
 
-    const [tvlUsd, setTvlUsd] = useState(0)
-    const [tvlHbar, setTvlHbar] = useState(0)
-    const [dailyVolHbar, setDailyVolHbar] = useState(0)
-
-    const [state] = useGlobalDataContext()
-    const totalVolumeUSD = state?.globalData?.totalVolumeUSD;
-    const totalVolumeHBAR = state?.globalData?.totalVolumeHBAR;
-    const todayVolumeUSD = state?.globalData?.todayVolumeUSD;
-    const hBarPrice = state?.hBarPrice;
-    const saucePrice = state?.saucePrice;
-    // const [hBarPrice, saucePrice] = useHbarAndSaucePrice()
+    const [totalVolumeHBAR, setTotalVolumeHBAR] = useState(0)
+    const [totalVolumeUSD, setTotalVolumeUSD] = useState(0)
+    const [todayVolumeUSD, setTodayVolumeUSD] = useState(0)
+    const [hBarPrice, setHBarPrice] = useState(0)
 
     const formattedHbarPrice = hBarPrice ? formattedNum(hBarPrice, true) : undefined
-    const formattedSaucePrice = saucePrice ? formattedNum(saucePrice, true) : undefined
     const formattedTvlUSD = totalVolumeUSD ? formattedNum(totalVolumeUSD, true) : undefined
     const formattedTvlHBAR = totalVolumeHBAR ? formattedNum(totalVolumeHBAR, false) : undefined
     const formattedTodayVolume = todayVolumeUSD ? formattedNum(todayVolumeUSD, false) : undefined
-    const formattedTodayFees = todayVolumeUSD ? formattedNum(todayVolumeUSD / 400, true) : undefined
+    console.log (totalVolumeHBAR, todayVolumeUSD, totalVolumeUSD)
+    useEffect(() => {
+        async function fetchData() {
+            let response = await axios.get(`${process.env.API_URL}/stats`)
+            if (response.status === 200) {
+                let jsonData = await response.data;
+                try {
+                    setTotalVolumeHBAR((Number(jsonData['tvl']) / 100000000).toFixed(4));
+                    setTotalVolumeUSD(Number(jsonData['tvlUsd']).toFixed(4));
+                } catch (error) {
+                    console.log(error)
+                }
+            }
+            response = await axios.get(`${process.env.API_URL}/stats/get_daily_volumes`)
+            if (response.status === 200) {
+                let jsonData = await response.data;
+                setTodayVolumeUSD(Number(jsonData[0]['dailyVolume'] / 100000000).toFixed(4))
+            }
+            response = await axios.get(`${process.env.API_URL}/tokens/get_hbar_price`)
+            if (response.status === 200) {
+                let jsonData = await response.data;
+                setHBarPrice(Number(jsonData.data).toFixed(4))
+            }
+        }
+
+        fetchData()
+    }, [])
 
     // useHbarAndSaucePrice()
     return (

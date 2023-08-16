@@ -4,12 +4,13 @@ import { Area, XAxis, YAxis, ResponsiveContainer, Tooltip, AreaChart, BarChart, 
 
 import { toK, toNiceDate, toNiceDateYear, formattedNum, getTimeframe } from '../../utils'
 import { darken } from 'polished'
-import { usePairChartData } from '../../hooks/usePairData'
 
 import { useMedia } from 'react-use'
 import CandleStickChart from '../CandleChart'
 import { ImpulseSpinner } from '../Impulse'
 import { timeframeOptions } from '../../constants'
+import dayjs from 'dayjs'
+import axios from 'axios'
 // import CandleStickChart from '../CandleChart'
 // import LocalLoader from '../LocalLoader'
 // import { useDarkModeManager } from '../../contexts/LocalStorage'
@@ -35,8 +36,6 @@ const ChartWrapper = styled.div`
   }
 `
 
-
-
 const CHART_VIEW = {
   VOLUME: 'Volume',
   LIQUIDITY: 'Liquidity',
@@ -48,9 +47,26 @@ const PairChart = ({ poolId, pairData, color, base0, base1, chartFilter, timeWin
 
   const textColor = 'white'
 
-  let hourlyChartData, dailyChartData;
+  const [hourlyChartData, setHourlyChartData] = useState([])
+  const [dailyChartData, setDailyChartData] = useState([])
+
+  useEffect(() => {
+    const utcEndTime = dayjs.utc()
+    let utcStartTime = utcEndTime.subtract(1, 'year').startOf('minute')
+    let startTime = utcStartTime.unix() - 1
+    axios.get(`${process.env.API_URL}/pools/get_chart_data?poolId=${poolId}&from=${startTime}&to=${Date.now() / 1000}`).then((res) => {
+      if (res.status === 200) {
+        setHourlyChartData(res.data[0])
+        let utcStartTime = getTimeframe(timeWindow)
+        const tmpData = res.data[1]?.filter((entry) => entry.timestampSeconds >= utcStartTime)
+        setDailyChartData(tmpData)
+      }
+    })
+  }, [poolId, timeWindow])
+
+  // let hourlyChartData, dailyChartData;
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  if (poolId) [hourlyChartData, dailyChartData] = usePairChartData(poolId)
+  // if (poolId) [hourlyChartData, dailyChartData] = usePairChartData(poolId)
 
   // update the width on a window resize
   const ref = useRef()
@@ -88,16 +104,16 @@ const PairChart = ({ poolId, pairData, color, base0, base1, chartFilter, timeWin
             timestampSeconds: item.timestampSeconds
           }
         })
-        setHourlyRate1 (tmpRateData)
+        setHourlyRate1(tmpRateData)
         tmpRateData = rateData.map((item, idx) => {
-            return {
-              openUsd: 1 / item.open,
-              closeUsd: 1 / item.close,
-              lowUsd: 1 / item.low,
-              highUsd: 1 / item.high,
-              timestampSeconds: item.timestampSeconds
-            }
-          })
+          return {
+            openUsd: 1 / item.open,
+            closeUsd: 1 / item.close,
+            lowUsd: 1 / item.low,
+            highUsd: 1 / item.high,
+            timestampSeconds: item.timestampSeconds
+          }
+        })
         setChartData(tmpData)
         setHourlyRate0(tmpRateData)
       } else if (timeWindow === timeframeOptions.MONTH) {
@@ -113,16 +129,16 @@ const PairChart = ({ poolId, pairData, color, base0, base1, chartFilter, timeWin
             timestampSeconds: item.timestampSeconds
           }
         })
-        setHourlyRate1 (tmpRateData)
+        setHourlyRate1(tmpRateData)
         tmpRateData = rateData.map((item, idx) => {
-            return {
-              openUsd: 1 / item.open,
-              closeUsd: 1 / item.close,
-              lowUsd: 1 / item.low,
-              highUsd: 1 / item.high,
-              timestampSeconds: item.timestampSeconds
-            }
-          })
+          return {
+            openUsd: 1 / item.open,
+            closeUsd: 1 / item.close,
+            lowUsd: 1 / item.low,
+            highUsd: 1 / item.high,
+            timestampSeconds: item.timestampSeconds
+          }
+        })
         setChartData(tmpData)
         setHourlyRate0(tmpRateData)
       } else if (timeWindow === timeframeOptions.ALL_TIME) {
@@ -173,9 +189,6 @@ const PairChart = ({ poolId, pairData, color, base0, base1, chartFilter, timeWin
   const below1080 = useMedia('(max-width: 1080px)')
   const below600 = useMedia('(max-width: 600px)')
 
-  let utcStartTime = getTimeframe(timeWindow)
-  dailyChartData = dailyChartData?.filter((entry) => entry.timestampSeconds >= utcStartTime)
-
   if (dailyChartData && dailyChartData.length === 0) {
     return (
       <ChartWrapper>
@@ -192,14 +205,14 @@ const PairChart = ({ poolId, pairData, color, base0, base1, chartFilter, timeWin
     if (chartFilter === CHART_VIEW.RATE0) {
       return (
         (val ?
-        formattedNum(val) : "") +
+          formattedNum(val) : "") +
         `<span style="font-size: 12px; margin-left: 4px;">${formattedSymbol1}/${formattedSymbol0}<span>`
       )
     }
     if (chartFilter === CHART_VIEW.RATE1) {
       return (
-        (val ? 
-        formattedNum(val) : "") +
+        (val ?
+          formattedNum(val) : "") +
         `<span style="font-size: 12px; margin-left: 4px;">${formattedSymbol0}/${formattedSymbol1}<span>`
       )
     }

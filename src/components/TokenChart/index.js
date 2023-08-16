@@ -6,11 +6,11 @@ import { toK, toNiceDate, toNiceDateYear, formattedNum, getTimeframe } from '../
 import { OptionButton } from '../ButtonStyled'
 import { darken } from 'polished'
 import { useMedia } from 'react-use'
-import { useTokenChartData } from '../../hooks/useTokenData'
-
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
 import Chart from '../tradingview'
 import { ImpulseSpinner } from '../Impulse'
-
+import axios from 'axios'
 const ChartWrapper = styled.div`
   height: 100%;
   min-height: 300px;
@@ -39,8 +39,9 @@ const DATA_FREQUENCY = {
 const TokenChart = ({ address, color, base, priceData, chartFilter, timeWindow, frequency, symbol }) => {
     const textColor = 'white'
 
-    const [chartData, setChartData] = useState ([])
-    let [dailyData, hourlyData] = useTokenChartData(address)
+    const [chartData, setChartData] = useState([])
+    const [dailyData, setDailyData] = useState([])
+    const [hourlyData, setHourlyData] = useState([])
 
     const below1080 = useMedia('(max-width: 1080px)')
     const below600 = useMedia('(max-width: 600px)')
@@ -51,18 +52,45 @@ const TokenChart = ({ address, color, base, priceData, chartFilter, timeWindow, 
 
     // chartData = chartData?.filter((entry) => entry.timestampSeconds >= utcStartTime)
 
-    useEffect (() => {
+    useEffect(() => {
+        async function fetchData() {
+            const utcEndTime = dayjs.utc()
+            let utcStartTime = utcEndTime.subtract(1, 'year')
+            let startTime = utcStartTime.startOf('minute').unix() - 1
+
+            let response = await axios.get(`${process.env.API_URL}/tokens/get_token_prices_dh?address=${address}&from=${startTime}&to=${Date.now() / 1000}`)
+            if (response.status === 200) {
+                const data = response.data
+                setDailyData(data.dailyData)
+                setHourlyData(data.hourlyData)
+            }
+            // let response = await fetch(`https://api.saucerswap.finance/tokens/prices/${address}?interval=DAY&from=${startTime}&to=${Date.now() / 1000}`)
+            // if (response.status === 200) {
+            //     let jsonData = await response.json()
+            //     let res = await fetch(`https://api.saucerswap.finance/tokens/prices/${address}?interval=HOUR&from=${startTime}&to=${Date.now() / 1000}`)
+            //     if (res.status === 200) {
+            //         let jsonData1 = await res.json()
+            //         return [jsonData, jsonData1]
+            //     }
+            //     return [jsonData, undefined]
+            // } else {
+            //     return [undefined, undefined]
+            // }
+        }
+        fetchData ()
+    })
+    useEffect(() => {
         if (chartFilter === CHART_VIEW.LIQUIDITY || chartFilter === CHART_VIEW.VOLUME) {
             let tmpData = dailyData?.filter((entry) => entry.timestampSeconds >= utcStartTime)
-            setChartData (tmpData)
+            setChartData(tmpData)
         } else if (chartFilter === CHART_VIEW.PRICE || chartFilter === CHART_VIEW.LINE_PRICE) {
             if (frequency === DATA_FREQUENCY.DAY) {
                 let tmpData = dailyData?.filter((entry) => entry.timestampSeconds >= utcStartTime)
-                setChartData (tmpData)
+                setChartData(tmpData)
             } else if (frequency === DATA_FREQUENCY.HOUR) {
                 let tmpData = hourlyData?.filter((entry) => entry.timestampSeconds >= utcStartTime)
-                setChartData (tmpData)
-            } 
+                setChartData(tmpData)
+            }
         }
     }, [timeWindow, hourlyData])
     // update the width on a window resize
@@ -120,7 +148,7 @@ const TokenChart = ({ address, color, base, priceData, chartFilter, timeWindow, 
                         <Tooltip
                             cursor={true}
                             formatter={(val) => val ? formattedNum(val, true) : ""}
-                            
+
                             labelFormatter={(label) => toNiceDateYear(label)}
                             labelStyle={{ paddingTop: 4 }}
                             contentStyle={{
@@ -209,7 +237,7 @@ const TokenChart = ({ address, color, base, priceData, chartFilter, timeWindow, 
                 ) : priceData && priceData.length ? (
                     <ResponsiveContainer aspect={aspect} ref={ref}>
                         {/* <CandleStickChart data={priceData} width={width} base={base} /> */}
-                        <Chart stock={"Stock"} interval="60" width="100%" tokenId={address} symbol={symbol.toUpperCase() + "/USD"} height="100%"/>
+                        <Chart stock={"Stock"} interval="60" width="100%" tokenId={address} symbol={symbol.toUpperCase() + "/USD"} height="100%" />
                     </ResponsiveContainer>
                 ) : (
                     // <LocalLoader />

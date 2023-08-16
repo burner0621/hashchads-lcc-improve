@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useTheme } from '@mui/material/styles';
 import { useParams } from 'react-router-dom'
 import { useMedia } from 'react-use'
@@ -19,10 +19,8 @@ import useSettings from '../../../hooks/useSettings';
 import Layout from '../../../layouts';
 import Page from '../../../components/Page';
 
-import { useAllTokensInSaucerswap } from "../../../hooks/useGlobalContext";
-
 import { TOKEN_TYPE, TOKEN_TYPE_NAME } from "../../../constants";
-
+import axios from 'axios'
 export const PageWrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -61,7 +59,7 @@ export default function GeneralTokens() {
     const below600 = useMedia('(max-width: 600px)')
     const below900 = useMedia('(max-width: 900px)')
 
-    const allTokens = useAllTokensInSaucerswap()
+    const [allTokens, setAllTokens] = useState([])
 
     const [tokenType, setTokenType] = useState(TOKEN_TYPE.all)
     const [loadingGainer, setLoadingGainer] = useState(false)
@@ -73,6 +71,18 @@ export default function GeneralTokens() {
     const { tokenAddress } = useParams()
 
     const { themeStretch } = useSettings();
+
+    const fetchData = useCallback(async () => {
+        let response = await axios.get(`${process.env.API_URL}/tokens/simple_all`)
+        if (response.status === 200) {
+            const data = response.data
+            setAllTokens(data)
+        }
+    }, [])
+
+    useEffect(() => {
+        fetchData()
+    }, [fetchData])
 
     const formattedTokens = useMemo(() => {
         let rlt = []
@@ -115,7 +125,7 @@ export default function GeneralTokens() {
         let tokens = [];
         let no = 1;
         for (let i = 0; i < formattedTokens.length; i++) {
-            
+
             let tokenData = formattedTokens[i];
 
             tokens.push({
@@ -289,7 +299,7 @@ export default function GeneralTokens() {
                                 {/* TABLE LOSERS */}
                                 {(tokenType === TOKEN_TYPE.loser) &&
                                     <Panel className="panel-shadow hsla-bg" style={{ marginTop: '6px', padding: '1.125rem 0 ', border: 'none' }}>
-                                        <TopTokenList tokens={loserTokens} itemMax={15} show={1}/>
+                                        <TopTokenList tokens={loserTokens} itemMax={15} show={1} />
                                     </Panel>
                                 }
                                 <div className="text-center">

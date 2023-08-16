@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-html-link-for-pages */
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/router"
 import styled from 'styled-components'
 import { Col, Container, Row, Nav, NavItem, Card, CardBody } from "reactstrap";
@@ -8,7 +8,8 @@ import { Text } from 'rebass'
 import { AlertCircle } from 'react-feather'
 
 import Layout from '../../../layouts';
-
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
 // import TokenChart from './TokenChart';
 import TokenChart from '../../../components/TokenChart';
 
@@ -19,8 +20,7 @@ import Page from '../../../components/Page';
 
 import { formattedNum } from '../../../utils'
 
-import { useAllTokensInSaucerswap, usePriceChanges, useTokenDailyVolume } from '../../../hooks/useGlobalContext'
-import { useTokenPriceData } from '../../../hooks/useTokenData'
+// import { useTokenPriceData } from '../../../hooks/useTokenData'
 import fetch from 'cross-fetch'
 
 import DataTable from 'react-data-table-component';
@@ -30,7 +30,7 @@ import { OptionButton } from '../../../components/ButtonStyled'
 import { Activity } from 'react-feather'
 import { usePrevious } from 'react-use'
 import { ImpulseSpinner } from "../../../components/Impulse";
-
+import axios from 'axios'
 const PriceOption = styled(OptionButton)`
   border-radius: 2px;
 `
@@ -53,61 +53,10 @@ const ContentWrapper = styled.div`
     padding: 0 1rem;
   }
 `
-const PageWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  padding-top: 36px;
-  padding-bottom: 80px;
-
-  @media screen and (max-width: 600px) {
-    & > * {
-      padding: 0 12px;
-    }
-  }
-`
 const WarningGrouping = styled.div`
   opacity: ${({ disabled }) => disabled && '0.4'};
   pointer-events: ${({ disabled }) => disabled && 'none'};
 `
-const Hover = styled.div`
-  :hover {
-    cursor: pointer;
-    opacity: ${({ fade }) => fade && '0.7'};
-  }
-`
-const StyledIcon = styled.div`
-  color: ${({ theme }) => theme.text1};
-`
-const WarningIcon = styled(AlertCircle)`
-  stroke: darkgreen;
-  height: 16px;
-  width: 16px;
-  opacity: 0.6;
-`
-const PanelWrapper = styled.div`
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: max-content;
-  gap: 6px;
-  display: inline-grid;
-  width: 100%;
-  align-items: start;
-  @media screen and (max-width: 1024px) {
-    grid-template-columns: 1fr;
-    align-items: stretch;
-    > * {
-      /* grid-column: 1 / 4; */
-    }
-
-    > * {
-      &:first-child {
-        width: 100%;
-      }
-    }
-  }
-`
-
-const UNTRACKED_COPY = 'Derived USD values may be inaccurate without liquid stablecoin or ETH pairings.'
-
 const TIME_RANGE_TYPE = {
     five: 'five',
     hour: 'hour',
@@ -120,14 +69,6 @@ const TABLE_TYPE = {
     trade: 'trade',
     holder: 'holder',
     fee: 'fee'
-}
-
-const TIME_RANGE_TYPE_NAME = {
-    five: '5m',
-    hour: '1h',
-    six: '6h',
-    day: '24h',
-    week: '1W',
 }
 
 const CHART_VIEW = {
@@ -150,9 +91,9 @@ TokenPage.getLayout = function getLayout(page) {
 export default function TokenPage() {
     const router = useRouter();
     const address = router.query.tokenId.replace(/-/g, '.')
-    const allTokens = useAllTokensInSaucerswap()
-    const priceChanges = usePriceChanges()
-    const tokenDailyVolume = useTokenDailyVolume()
+    const [allTokens, setAllTokens] = useState([])
+    const [priceChanges, setPriceChanges] = useState([])
+    const [tokenDailyVolume, setTokenDailyVolume] = useState()
     const below1080 = useMedia('(max-width: 1080px)')
     const below600 = useMedia('(max-width: 600px)')
 
@@ -195,30 +136,45 @@ export default function TokenPage() {
     const prevWindow = usePrevious(timeWindow)
 
     // hourly and daily price data based on the current time window
-    const hourlyWeek = useTokenPriceData(address, timeframeOptions.WEEK, 3600)
-    const hourlyMonth = useTokenPriceData(address, timeframeOptions.MONTH, 3600)
-    const hourlyAll = useTokenPriceData(address, timeframeOptions.ALL_TIME, 3600)
-    const dailyWeek = useTokenPriceData(address, timeframeOptions.WEEK, 86400)
-    const dailyMonth = useTokenPriceData(address, timeframeOptions.MONTH, 86400)
-    const dailyAll = useTokenPriceData(address, timeframeOptions.ALL_TIME, 86400)
-    let tradeHistoryTimeout;
-    const [count, setCount] = useState(0);
+    // const hourlyWeek = useTokenPriceData(address, timeframeOptions.WEEK, 3600)
+    // const hourlyMonth = useTokenPriceData(address, timeframeOptions.MONTH, 3600)
+    // const hourlyAll = useTokenPriceData(address, timeframeOptions.ALL_TIME, 3600)
+    // const dailyWeek = useTokenPriceData(address, timeframeOptions.WEEK, 86400)
+    // const dailyMonth = useTokenPriceData(address, timeframeOptions.MONTH, 86400)
+    // const dailyAll = useTokenPriceData(address, timeframeOptions.ALL_TIME, 86400)
 
-    const priceData =
-        timeWindow === timeframeOptions.MONTH
-            ? // monthly selected
-            frequency === DATA_FREQUENCY.DAY
-                ? dailyMonth
-                : hourlyMonth
-            : // weekly selected
-            timeWindow === timeframeOptions.WEEK
-                ? frequency === DATA_FREQUENCY.DAY
-                    ? dailyWeek
-                    : hourlyWeek
-                : // all time selected
-                frequency === DATA_FREQUENCY.DAY
-                    ? dailyAll
-                    : hourlyAll
+    const getTokenPriceData = async (tokenId, timeWindow, interval) => {
+        const currentTime = dayjs.utc()
+        const windowSize = timeWindow === timeframeOptions.MONTH ? 'month' : 'week'
+        const startTime =
+            timeWindow === timeframeOptions.ALL_TIME ? 1589760000 : currentTime.subtract(1, windowSize).startOf('min').unix()
+        let res = await fetch(`https://api.saucerswap.finance/tokens/prices/${tokenId}?interval=HOUR&from=${startTime}&to=${Date.now() / 1000}`)
+        if (res.status === 200) {
+            let data = await res.json()
+        }
+    }
+
+    const fetchTokensData = useCallback(async () => {
+        let response = await axios.get(`${process.env.API_URL}/tokens/simple_all`)
+        if (response.status === 200) {
+            let jsonData = await response.data;
+            setAllTokens(jsonData)
+        }
+        response = await axios.get(`${process.env.API_URL}/tokens/get_price_changes`)
+        if (response.status === 200) {
+            setPriceChanges(response.data)
+        }
+        response = await axios.get(`${process.env.API_URL}/tokens/get_daily_volumes`)
+        if (response.status === 200) {
+            setTokenDailyVolume(response.data)
+        }
+    }, [])
+
+    useEffect(() => {
+        fetchTokensData()
+    }, [fetchTokensData])
+
+    const priceData = [0]
 
     async function fetchNameAndSymbolData() {
         let response = await fetch(process.env.MIRROR_NODE_URL + "/api/v1/tokens/" + address);
@@ -231,7 +187,7 @@ export default function TokenPage() {
 
     useEffect(() => {
         async function fetchSocialData() {
-            let res = await fetch(process.env.BASE_URL + `/api/feed/getsocial?tokenId=${address}`)
+            let res = await fetch(process.env.API_URL + `/tokens/get_social?tokenId=${address}`)
             if (res.status === 200) {
                 let jsonData = await res.json()
                 setSocialInfos(jsonData)
@@ -362,7 +318,7 @@ export default function TokenPage() {
     let beforeAddress, beforeCurrentPage, beforeRowsPerPage;
 
     const fetchData = async () => {
-        const res = await fetch(`${process.env.BASE_URL}/api/transaction/get?tokenId=${address}&pageNum=${currentPage}&pageSize=${rowsPerPage}`)
+        const res = await fetch(`${process.env.API_URL}/tokens/get_transactions?tokenId=${address}&pageNum=${currentPage}&pageSize=${rowsPerPage}`)
         if (res.status === 200) {
             const { data, count } = await res.json();
             setData(data);
@@ -377,8 +333,7 @@ export default function TokenPage() {
     }
 
     const fetchStatisticData = async (timeRange) => {
-
-        fetch(`${process.env.BASE_URL}/api/transaction/getStatistic?tokenId=${address}&timeRangeType=${timeRange}`)
+        fetch(`${process.env.API_URL}/tokens/get_statistics?tokenId=${address}&timeRangeType=${timeRange}`)
             .then(res => res.json())
             .then(
                 (result) => {
@@ -573,10 +528,10 @@ export default function TokenPage() {
             cell: (row) => {
                 return (
                     row.state === 'buy' ?
-                        <a href={"https://hashscan.io/mainnet/account/" + row.accountId} target="_blank" style={{color: "#cdffe7"}} rel="noreferrer">
+                        <a href={"https://hashscan.io/mainnet/account/" + row.accountId} target="_blank" style={{ color: "#cdffe7" }} rel="noreferrer">
                             <span className="text-buy link">{row.accountId}</span>
                         </a> :
-                        <a href={"https://hashscan.io/mainnet/account/" + row.accountId} target="_blank" style={{color: "#ffacb1"}} rel="noreferrer">
+                        <a href={"https://hashscan.io/mainnet/account/" + row.accountId} target="_blank" style={{ color: "#ffacb1" }} rel="noreferrer">
                             <span className="text-sell link">{row.accountId}</span>
                         </a>
                 )
@@ -806,7 +761,7 @@ export default function TokenPage() {
                                                             {
                                                                 priceChangeColor === 'red' &&
                                                                 <app-icon _ngcontent-qmb-c89="" name="arrowDown" class="ng-tns-c89-8 flex" >
-                                                                    <svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true" viewBox="0 0 20 15" width="14" transform=""><path d="M16.0312 12.5H13.75C13.109 12.5 12.5806 12.9826 12.5084 13.6042L12.5 13.75C12.5 14.391 12.9826 14.9194 13.6042 14.9916L13.75 15H18.75L18.793 14.9993C18.8251 14.9982 18.8573 14.9959 18.8894 14.9923L18.75 15C18.8172 15 18.8832 14.9947 18.9475 14.9845C18.9722 14.9806 18.9972 14.9758 19.022 14.9703L19.0366 14.967L19.0962 14.9514C19.1212 14.9442 19.1461 14.9362 19.1708 14.9274C19.3111 14.8773 19.4402 14.8025 19.5525 14.7084C19.5562 14.7053 19.5599 14.7022 19.5635 14.6991L19.5816 14.6832C19.6116 14.6565 19.6402 14.6284 19.6675 14.5989L19.5635 14.6991C19.6084 14.6606 19.65 14.6195 19.688 14.5764C19.7132 14.5477 19.7373 14.5177 19.7601 14.4865C19.7675 14.4766 19.7747 14.4666 19.7816 14.4564C19.8012 14.4276 19.8197 14.3981 19.8369 14.3678C19.8454 14.3531 19.8536 14.338 19.8614 14.3227C19.874 14.2982 19.8859 14.2732 19.8969 14.2478C19.9053 14.2284 19.9131 14.209 19.9204 14.1895C19.9323 14.1582 19.9429 14.1262 19.9522 14.0936C19.9554 14.0816 19.9585 14.0699 19.9615 14.0581C19.9751 14.0054 19.9852 13.9511 19.9916 13.8958L20 13.75V8.75001C20 8.05966 19.4403 7.50002 18.75 7.50002C18.1089 7.50002 17.5806 7.98257 17.5084 8.60424L17.5 8.75001L17.5 10.3725L12.1991 4.18653C11.7591 3.67318 10.9997 3.60856 10.4812 4.01418L10.3661 4.11614L7.58377 6.89752L2.2103 0.4498C1.80235 -0.0397492 1.09936 -0.138462 0.57649 0.196858L0.4498 0.289755C-0.0397492 0.697713 -0.138462 1.4007 0.196857 1.92357L0.289754 2.05026L6.53974 9.55024C6.97669 10.0746 7.74412 10.1454 8.26767 9.73673L8.3839 9.63389L11.1788 6.84002L16.0312 12.5Z" fill="currentColor"/></svg>
+                                                                    <svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true" viewBox="0 0 20 15" width="14" transform=""><path d="M16.0312 12.5H13.75C13.109 12.5 12.5806 12.9826 12.5084 13.6042L12.5 13.75C12.5 14.391 12.9826 14.9194 13.6042 14.9916L13.75 15H18.75L18.793 14.9993C18.8251 14.9982 18.8573 14.9959 18.8894 14.9923L18.75 15C18.8172 15 18.8832 14.9947 18.9475 14.9845C18.9722 14.9806 18.9972 14.9758 19.022 14.9703L19.0366 14.967L19.0962 14.9514C19.1212 14.9442 19.1461 14.9362 19.1708 14.9274C19.3111 14.8773 19.4402 14.8025 19.5525 14.7084C19.5562 14.7053 19.5599 14.7022 19.5635 14.6991L19.5816 14.6832C19.6116 14.6565 19.6402 14.6284 19.6675 14.5989L19.5635 14.6991C19.6084 14.6606 19.65 14.6195 19.688 14.5764C19.7132 14.5477 19.7373 14.5177 19.7601 14.4865C19.7675 14.4766 19.7747 14.4666 19.7816 14.4564C19.8012 14.4276 19.8197 14.3981 19.8369 14.3678C19.8454 14.3531 19.8536 14.338 19.8614 14.3227C19.874 14.2982 19.8859 14.2732 19.8969 14.2478C19.9053 14.2284 19.9131 14.209 19.9204 14.1895C19.9323 14.1582 19.9429 14.1262 19.9522 14.0936C19.9554 14.0816 19.9585 14.0699 19.9615 14.0581C19.9751 14.0054 19.9852 13.9511 19.9916 13.8958L20 13.75V8.75001C20 8.05966 19.4403 7.50002 18.75 7.50002C18.1089 7.50002 17.5806 7.98257 17.5084 8.60424L17.5 8.75001L17.5 10.3725L12.1991 4.18653C11.7591 3.67318 10.9997 3.60856 10.4812 4.01418L10.3661 4.11614L7.58377 6.89752L2.2103 0.4498C1.80235 -0.0397492 1.09936 -0.138462 0.57649 0.196858L0.4498 0.289755C-0.0397492 0.697713 -0.138462 1.4007 0.196857 1.92357L0.289754 2.05026L6.53974 9.55024C6.97669 10.0746 7.74412 10.1454 8.26767 9.73673L8.3839 9.63389L11.1788 6.84002L16.0312 12.5Z" fill="currentColor" /></svg>
                                                                 </app-icon>
                                                             }
                                                         </span>

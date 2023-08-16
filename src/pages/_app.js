@@ -46,10 +46,7 @@ import { getSettings } from '../utils/getSettings';
 // contexts
 import { SettingsProvider } from '../contexts/SettingsContext';
 import { CollapseDrawerProvider } from '../contexts/CollapseDrawerContext';
-import { ApplicationProvider } from '../contexts/ApplicationContext'
-import { GlobalProvider } from '../contexts/GlobalContext'
-import { TokenDataProvider } from '../contexts/TokenData'
-import { PairDataProvider } from '../contexts/PairContext'
+// import { ApplicationProvider } from '../contexts/ApplicationContext'
 // theme
 import ThemeProvider from '../theme';
 // components
@@ -89,29 +86,23 @@ export default function MyApp(props) {
       <AuthProvider>
         <ReduxProvider store={store}>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <ApplicationProvider>
-              <GlobalProvider>
-                <PairDataProvider>
-                  <TokenDataProvider>
-                    <CollapseDrawerProvider>
-                      <SettingsProvider defaultSettings={settings}>
-                        <MotionLazyContainer>
-                          <ThemeProvider>
-                            <ThemeSettings>
-                              <NotistackProvider>
-                                <ChartStyle />
-                                <ProgressBar />
-                                {getLayout(<Component {...pageProps} />)}
-                              </NotistackProvider>
-                            </ThemeSettings>
-                          </ThemeProvider>
-                        </MotionLazyContainer>
-                      </SettingsProvider>
-                    </CollapseDrawerProvider>
-                  </TokenDataProvider>
-                </PairDataProvider>
-              </GlobalProvider>
-            </ApplicationProvider>
+            {/* <ApplicationProvider> */}
+              <CollapseDrawerProvider>
+                <SettingsProvider defaultSettings={settings}>
+                  <MotionLazyContainer>
+                    <ThemeProvider>
+                      <ThemeSettings>
+                        <NotistackProvider>
+                          <ChartStyle />
+                          <ProgressBar />
+                          {getLayout(<Component {...pageProps} />)}
+                        </NotistackProvider>
+                      </ThemeSettings>
+                    </ThemeProvider>
+                  </MotionLazyContainer>
+                </SettingsProvider>
+              </CollapseDrawerProvider>
+            {/* </ApplicationProvider> */}
           </LocalizationProvider>
         </ReduxProvider>
       </AuthProvider>

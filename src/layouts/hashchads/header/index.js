@@ -14,8 +14,6 @@ import Logo from '../../../components/Logo';
 import Iconify from '../../../components/Iconify';
 import { IconButtonAnimate } from '../../../components/animate';
 //
-import Searchbar from './Searchbar';
-import AccountPopover from './AccountPopover';
 import GlobalStats from '../../../components/GlobalStats'
 import Search from '../../../components/Search'
 

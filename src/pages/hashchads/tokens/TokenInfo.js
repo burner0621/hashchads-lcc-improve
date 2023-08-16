@@ -1,21 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardBody, CardHeader, Col, Input, Label, Nav, NavItem, NavLink, Row, TabContent, TabPane, Modal } from 'reactstrap';
 import DataTable from 'react-data-table-component';
 import classnames from 'classnames';
 import fetch from 'cross-fetch'
-import { useAllPairsInSaucerswap } from '../../../hooks/useGlobalContext'
 import { formattedNum } from '../../../utils'
+import axios from 'axios'
 
 const TokenInfo = ({ address, tokenPrice }) => {
     //Tab 
     const [activeTab, setActiveTab] = useState('1');
+    const [allPairs, setAllPairs] = useState([])
     const toggleTab = (tab) => {
         if (activeTab !== tab) {
             setActiveTab(tab);
         }
     };
 
-    const allPairs = useAllPairsInSaucerswap()
+    const fetchPairsData = useCallback(async () => {
+        let response = await axios.get(`${process.env.API_URL}/pools/all`)
+        if (response.status === 200) {
+            let jsonData = await response.data;
+            setAllPairs(jsonData)
+        }
+    }, [])
+
+    useEffect(() => {
+        fetchPairsData()
+    }, [fetchPairsData])
 
     const [tokenInfo, setTokenInfo] = useState();
     const [createdAt, setCreatedAt] = useState('')
@@ -324,7 +335,7 @@ const TokenInfo = ({ address, tokenPrice }) => {
                                                 <p className="fs-13 mb-0">Max Supply<span className="text-muted ms-1 fs-11" /></p>
                                             </div>
                                             <div className="flex-shrink-0">
-                                                <h6 className="mb-0">{tokenInfo?.max_supply === '0' ? (tokenInfo?.total_supply/Math.pow(10, decimals)).toFixed(4): '0'}</h6>
+                                                <h6 className="mb-0">{tokenInfo?.max_supply === '0' ? (tokenInfo?.total_supply / Math.pow(10, decimals)).toFixed(4) : '0'}</h6>
                                             </div>
                                         </div>
                                         <div className="d-flex">
@@ -332,7 +343,7 @@ const TokenInfo = ({ address, tokenPrice }) => {
                                                 <p className="fs-13 mb-0">Total Supply<span className="text-muted ms-1 fs-11" /></p>
                                             </div>
                                             <div className="flex-shrink-0">
-                                                <h6 className="mb-0">{(tokenInfo?.total_supply/Math.pow(10, decimals)).toFixed(4)}</h6>
+                                                <h6 className="mb-0">{(tokenInfo?.total_supply / Math.pow(10, decimals)).toFixed(4)}</h6>
                                             </div>
                                         </div>
                                         <div className="d-flex mb-2">
