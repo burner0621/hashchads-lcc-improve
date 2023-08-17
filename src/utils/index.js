@@ -2,9 +2,12 @@ import Numeral from 'numeral'
 import { Text } from 'rebass'
 import { timeframeOptions } from '../constants'
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
 import { GET_BLOCK, GET_BLOCKS, SHARE_VALUE } from '../apollo/queries'
 import { client, blockClient } from '../apollo/client'
 // import { ethers } from 'ethers'
+
+dayjs.extend(utc)
 
 export const toK = (num, digit=4) => {
   if (digit === 4) return Numeral(num).format('0,0.[0000]')
