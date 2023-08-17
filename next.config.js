@@ -24,7 +24,7 @@ module.exports = withTM({
     // HOST
     HOST_API_KEY: 'https://minimal-assets-api-dev.vercel.app',
     // BASE_URL: "https://hashchads.app",
-    API_URL: 'http://65.108.142.188:3001/api',
+    API_URL: 'https://www.hashchads.vip/api',
     // SOCKET_URL: "https://hashchads.app/prices",
     MIRROR_NODE_URL: "https://mainnet-public.mirrornode.hedera.com",
     // MAPBOX
