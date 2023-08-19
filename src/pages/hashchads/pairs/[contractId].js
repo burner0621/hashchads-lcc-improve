@@ -31,12 +31,12 @@ const ContentWrapper = styled.div`
   align-items: start;
   grid-template-columns: 1fr;
   grid-gap: 24px;
-  max-width: 1440px;
+  max-width: 1980px;
   width: 100%;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0;
   box-sizing: border-box;
-  @media screen and (max-width: 1180px) {
+  @media screen and (max-width: 1440px) {
     grid-template-columns: 1fr;
     padding: 0 1rem;
   }
@@ -180,7 +180,7 @@ export default function PairPage() {
             {
                 _pairData &&
                 <div className="page-content" style={{ marginBottom: '20px' }}>
-                    <Container fluid>
+                    <div>
                         <ContentWrapper>
                             <div className="d-flex flex-column new-bg br-10" style={{ padding: '15px' }}>
                                 <RowBetween style={{ flexWrap: 'wrap', alingItems: 'start' }}>
@@ -453,7 +453,7 @@ export default function PairPage() {
                                 </Col>
                             </Row>
                         </ContentWrapper>
-                    </Container>
+                    </div>
                 </div>
             }
         </Page>

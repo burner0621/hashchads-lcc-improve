@@ -66,11 +66,11 @@ export default function GeneralPairs() {
     const [losers, setLosers] = useState([])
     const [showLiquidity, setShowLiquidity] = useState(true)
 
-    const [_allPairs, setTAllPairs] = useState ([])
-    const [_dailyPairVolume, setDailyPairVolume] = useState ([])
-    const [_weeklyPairVolume, setWeeklyPairVolume] = useState ([])
-    const [_priceChanges, setPriceChanges] = useState ([])
-    
+    const [_allPairs, setTAllPairs] = useState([])
+    const [_dailyPairVolume, setDailyPairVolume] = useState([])
+    const [_weeklyPairVolume, setWeeklyPairVolume] = useState([])
+    const [_priceChanges, setPriceChanges] = useState([])
+
     useEffect(() => {
         axios.get(`${process.env.API_URL}/pools/all`).then((res) => {
             if (res.status === 200)
@@ -86,7 +86,7 @@ export default function GeneralPairs() {
             if (res.status === 200) {
                 setPriceChanges(res.data)
             }
-          })
+        })
     }, [])
 
     useEffect(() => {
@@ -289,114 +289,113 @@ export default function GeneralPairs() {
     return (
         <Page title="Tokens">
             <div className="page-content">
-                <Container fluid>
+                <div>
                     <PageWrapper>
-                        <FullWrapper>
-                            <RowBetween>
-                                <Nav tabs className="flex flex-row">
-                                    <NavItem className={pairsType == PAIRS_TYPE.pairs ? "bg-black" : "bg-dark-grey-blue"}>
-                                        <NavLink style={{ cursor: "pointer", padding: 0 }} onClick={() => { handlePairsType(PAIRS_TYPE.pairs) }} >
-                                            <Button variant="outlined" className="flex flex-row" color="success">
-                                                <i className="mdi mdi-checkbox-multiple-blank-circle align-middle me-1" />  ALL
-                                            </Button>
-                                        </NavLink>
+                        <RowBetween className="mb-4 md:mb-2">
+                            <Nav tabs className="flex flex-row">
+                                <NavItem className={pairsType == PAIRS_TYPE.pairs ? "bg-black" : "bg-dark-grey-blue"}>
+                                    <NavLink style={{ cursor: "pointer", padding: 0 }} onClick={() => { handlePairsType(PAIRS_TYPE.pairs) }} >
+                                        <Button variant="outlined" className="flex flex-row" color="success">
+                                            <i className="mdi mdi-checkbox-multiple-blank-circle align-middle me-1" />  ALL
+                                        </Button>
+                                    </NavLink>
+                                </NavItem>
+                                <NavItem className={pairsType == PAIRS_TYPE.gainers ? "bg-black" : "bg-dark-grey-blue"}>
+                                    <NavLink style={{ cursor: "pointer", padding: 0 }} onClick={() => { handlePairsType(PAIRS_TYPE.gainers) }} >
+                                        <Button variant="outlined" className="flex flex-row" color="success">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                                            </svg>  Gainers
+                                        </Button>
+                                    </NavLink>
+                                </NavItem>
+                                <NavItem className={pairsType == PAIRS_TYPE.losers ? "bg-black" : "bg-dark-grey-blue"}>
+                                    <NavLink style={{ cursor: "pointer", padding: 0 }} onClick={() => { handlePairsType(PAIRS_TYPE.losers) }} >
+                                        <Button variant="outlined" className="flex flex-row" color="success">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181" />
+                                            </svg> Losers
+                                        </Button>
+                                    </NavLink>
+                                </NavItem>
+                            </Nav>
+
+                            <div className="flex-block items-center">
+                                <FormGroup switch style={{ marginRight: '5px', display: "flex" }}>
+                                    <Switch
+                                        checked={showLiquidity}
+                                        onChange={() => {
+                                            setShowLiquidity(!showLiquidity)
+                                        }}
+                                        inputProps={{ 'aria-label': 'controlled' }}
+                                    />
+                                    <Label check className="text-lg font-medium flex items-center">$500+ Liquidity</Label>
+                                </FormGroup>
+                                <Nav pills className="badge-bg flex flex-row ml-4">
+                                    <NavItem className={"flex items-center justify-center w-16 " + timeRangeType == TIME_RANGE_TYPE.day ? "active badge-active-bg" : ""}>
+                                        <div style={{ cursor: "pointer" }} className={timeRangeType == TIME_RANGE_TYPE.day ? "active badge-active-bg" : ""} onClick={() => { handleTimeRangeType(TIME_RANGE_TYPE.day) }} >
+                                            <span className={timeRangeType == TIME_RANGE_TYPE.day ? "text-white badge p-3" : "text-badge badge p-3"}>24h</span>
+                                        </div>
                                     </NavItem>
-                                    <NavItem className={pairsType == PAIRS_TYPE.gainers ? "bg-black" : "bg-dark-grey-blue"}>
-                                        <NavLink style={{ cursor: "pointer", padding: 0 }} onClick={() => { handlePairsType(PAIRS_TYPE.gainers) }} >
-                                            <Button variant="outlined" className="flex flex-row" color="success">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
-                                                </svg>  Gainers
-                                            </Button>
-                                        </NavLink>
-                                    </NavItem>
-                                    <NavItem className={pairsType == PAIRS_TYPE.losers ? "bg-black" : "bg-dark-grey-blue"}>
-                                        <NavLink style={{ cursor: "pointer", padding: 0 }} onClick={() => { handlePairsType(PAIRS_TYPE.losers) }} >
-                                            <Button variant="outlined" className="flex flex-row" color="success">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181" />
-                                                </svg> Losers
-                                            </Button>
-                                        </NavLink>
+                                    <NavItem className={"flex items-center justify-center w-16 " + timeRangeType == TIME_RANGE_TYPE.week ? "active badge-active-bg" : ""}>
+                                        <div style={{ cursor: "pointer" }} className={timeRangeType == TIME_RANGE_TYPE.week ? "active badge-active-bg" : ""} onClick={() => { handleTimeRangeType(TIME_RANGE_TYPE.week) }} >
+                                            <span className={timeRangeType == TIME_RANGE_TYPE.week ? "text-white badge p-3" : "text-badge badge p-3"}>1W</span>
+                                        </div>
                                     </NavItem>
                                 </Nav>
-
-                                <div className="flex-block items-center">
-                                    <FormGroup switch style={{ marginRight: '5px', display: "flex" }}>
-                                        <Switch
-                                            checked={showLiquidity}
-                                            onChange={() => {
-                                                setShowLiquidity(!showLiquidity)
-                                            }}
-                                            inputProps={{ 'aria-label': 'controlled' }}
-                                        />
-                                        <Label check className="text-lg font-medium flex items-center">$500+ Liquidity</Label>
-                                    </FormGroup>
-                                    <Nav pills className="badge-bg flex flex-row ml-4">
-                                        <NavItem className={"flex items-center justify-center w-16 " + timeRangeType == TIME_RANGE_TYPE.day ? "active badge-active-bg" : ""}>
-                                            <div style={{ cursor: "pointer" }} className={timeRangeType == TIME_RANGE_TYPE.day ? "active badge-active-bg" : ""} onClick={() => { handleTimeRangeType(TIME_RANGE_TYPE.day) }} >
-                                                <span className={timeRangeType == TIME_RANGE_TYPE.day ? "text-white badge p-3" : "text-badge badge p-3"}>24h</span>
-                                            </div>
-                                        </NavItem>
-                                        <NavItem className={"flex items-center justify-center w-16 " + timeRangeType == TIME_RANGE_TYPE.week ? "active badge-active-bg" : ""}>
-                                            <div style={{ cursor: "pointer" }} className={timeRangeType == TIME_RANGE_TYPE.week ? "active badge-active-bg" : ""} onClick={() => { handleTimeRangeType(TIME_RANGE_TYPE.week) }} >
-                                                <span className={timeRangeType == TIME_RANGE_TYPE.week ? "text-white badge p-3" : "text-badge badge p-3"}>1W</span>
-                                            </div>
-                                        </NavItem>
-                                    </Nav>
-                                </div>
-                            </RowBetween>
-                            {/* PAIRS DATA TABLE */}
-                            <DataTable
-                                customStyles={{
-                                    headRow: {
-                                        style: {
-                                            background: "#142028",
-                                            color: "white"
-                                        }
-                                    },
-                                    table: {
-                                        style: {
-                                            background: "#142028",
-                                            color: "white"
-                                        }
-                                    },
-                                    rows: {
-                                        style: {
-                                            background: "#142028",
-                                            color: "white"
-                                        }
-                                    },
-                                    pagination: {
-                                        style: {
-                                            background: "#142028",
-                                            color: "white"
-                                        },
-                                        pageButtonsStyle: {
-                                            color: "white",
-                                            fill: "white"
-                                        }
-                                    },
-                                    noData: {
-                                        style: {
-                                            background: "#142028",
-                                            color: "white"
-                                        }
-                                    },
-                                    cells: {
-                                        style: {
-                                            paddingRight: "0px",
-                                            color: "white"
-                                        }
+                            </div>
+                        </RowBetween>
+                        {/* PAIRS DATA TABLE */}
+                        <DataTable
+                            customStyles={{
+                                headRow: {
+                                    style: {
+                                        background: "#0b1217",
+                                        color: "white"
                                     }
-                                }}
-                                columns={columns}
-                                data={data || []}
-                                pagination
-                            />
-                        </FullWrapper>
+                                },
+                                table: {
+                                    style: {
+                                        background: "#0b1217",
+                                        color: "white"
+                                    }
+                                },
+                                rows: {
+                                    style: {
+                                        background: "#0b1217",
+                                        color: "white"
+                                    }
+                                },
+                                pagination: {
+                                    style: {
+                                        background: "#0b1217",
+                                        color: "white"
+                                    },
+                                    pageButtonsStyle: {
+                                        color: "white",
+                                        fill: "white"
+                                    }
+                                },
+                                noData: {
+                                    style: {
+                                        background: "#142028",
+                                        color: "white"
+                                    }
+                                },
+                                cells: {
+                                    style: {
+                                        paddingRight: "0px",
+                                        color: "white"
+                                    }
+                                }
+                            }}
+                            columns={columns}
+                            data={data || []}
+                            pagination
+                            className='panel-shadow'
+                        />
                     </PageWrapper>
-                </Container>
+                </div>
             </div>
         </Page >
     )

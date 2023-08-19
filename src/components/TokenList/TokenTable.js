@@ -121,14 +121,11 @@ const SORT_FIELD = {
     MONTHLYCHANGE: 'monthlyChanged'
 }
 
-const TopTokenList = ({ tokens = [], itemMax = 25, useTracked = false, show = 1, type='all', liq='1' }) => {
+const TokenTable = ({ tokens = [], itemMax = 25, useTracked = false, show = 1, type='all', liq='1' }) => {
     const { push } = useRouter();
-    const [page, setPage] = useState(1)
-    const [maxPage, setMaxPage] = useState(1)
 
     const [sortDirection, setSortDirection] = useState(1)
     const [sortedColumn, setSortedColumn] = useState(SORT_FIELD.VOL)
-    const [filteredList, setFilteredList] = useState([])
     const [hbarPrice, setHbarPrice] = useState(0)
 
     const below680 = useMedia('(max-width: 680px)')
@@ -143,30 +140,6 @@ const TopTokenList = ({ tokens = [], itemMax = 25, useTracked = false, show = 1,
         }
         fetchHbarPrice()
     }, [])
-
-    useEffect(() => {
-        if (tokens && itemMax) {
-            let extraPages = 1
-            if (tokens.length % itemMax === 0) {
-                extraPages = 0
-            }
-            setMaxPage(Math.floor(tokens.length / itemMax) + extraPages)
-        }
-    }, [tokens, itemMax])
-
-    const fetchData = useCallback( async() => {
-        let response = await axios.get(`${process.env.API_URL}/tokens/get_tokens_stats_data?sortedColumn=${sortedColumn}&sortDirection=${sortDirection}&pageNum=${page}&pageCount=${itemMax}&type=${type}&liq=${liq}`)
-        if (response.status === 200) {
-            const data = response.data
-            if (data.success) {
-                setFilteredList(data.data)
-            }
-        }
-    }, [itemMax, liq, page, sortDirection, sortedColumn, type])
-
-    useEffect(() => {
-        fetchData()
-    }, [fetchData])
 
     const redirectTokenPage = (tokenId) => {
         push(PATH_HASHCHADS.tokens.view(paramCase(tokenId)));
@@ -388,31 +361,19 @@ const TopTokenList = ({ tokens = [], itemMax = 25, useTracked = false, show = 1,
                     </Flex>
                 </DashGrid>
                 <List p={0}>
-                    {filteredList &&
-                        filteredList.map((item, index) => {
+                    {tokens &&
+                        tokens.map((item, index) => {
                             return (
                                 <div key={index}>
-                                    <ListItem key={index} index={(page - 1) * itemMax + index + 1} item={item} />
+                                    <ListItem key={index} index={index + 1} item={item} />
                                     {/* <Divider /> */}
                                 </div>
                             )
                         })}
                 </List>
             </div>
-            {
-                show === 1 &&
-                <PageButtons>
-                    <div onClick={() => setPage(page === 1 ? page : page - 1)}>
-                        <Arrow faded={page === 1 ? "true" : "false"}>←</Arrow>
-                    </div>
-                    <div>{'Page ' + page + ' of ' + maxPage}</div>
-                    <div onClick={() => setPage(page === maxPage ? page : page + 1)}>
-                        <Arrow faded={page === maxPage ? "true" : "false"}>→</Arrow>
-                    </div>
-                </PageButtons>
-            }
         </ListWrapper>
     )
 }
 
-export default TopTokenList
+export default TokenTable

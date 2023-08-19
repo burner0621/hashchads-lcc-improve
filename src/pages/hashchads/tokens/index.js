@@ -4,8 +4,8 @@ import { useParams } from 'react-router-dom'
 import { useMedia } from 'react-use'
 import styled from 'styled-components'
 import classnames from "classnames";
-import { Container, FormGroup, Spinner, ButtonGroup, NavItem, Nav, NavLink, Input, Label } from "reactstrap";
-
+import { FormGroup, Spinner, ButtonGroup, NavItem, Nav, NavLink, Input, Label } from "reactstrap";
+import { Container } from '@mui/material';
 import { RowBetween } from '../../../components/Row'
 import Panel from '../../../components/Panel'
 import TopTokenList from '../../../components/TokenList'
@@ -88,7 +88,7 @@ export default function GeneralTokens() {
         let rlt = []
         for (let item of allTokens) {
             if (showLiquidity) {
-                if (item['liquidity'] >= 500) rlt.push(item)
+                if (parseFloat(item['liquidity']) >= 500) rlt.push(item)
             } else {
                 rlt.push(item)
             }
@@ -135,7 +135,7 @@ export default function GeneralTokens() {
                 liquidity: tokenData.liquidity || 0,
                 volume: tokenData.oneDayVolumeUSD || 0,
                 price: tokenData.priceUsd || 0,
-                price_change: tokenData.priceChangeUSD || 0
+                price_change: tokenData.dailyPriceChange || 0
             });
             no++
         }
@@ -184,7 +184,7 @@ export default function GeneralTokens() {
         let gainers = [];
         let losers = [];
         for (let i = 0; i < formattedTokens.length; i++) {
-            if (formattedTokens[i].priceChangeUSD >= 0) {
+            if (parseFloat(formattedTokens[i].dailyPriceChange) >= 0) {
                 gainers.push(formattedTokens[i]);
             } else {
                 losers.push(formattedTokens[i]);
@@ -196,119 +196,111 @@ export default function GeneralTokens() {
             setLosers(losers);
     }, [formattedTokens]);
 
-    const [checked, setChecked] = React.useState(true);
-
-    const handleChange = (event) => {
-        setChecked(event.target.checked);
-    };
-
     if (tokenAddress === undefined)
         return (
             <Page title="Tokens">
                 <div className="page-content">
-                    <Container fluid>
+                    <Container maxWidth="1980">
                         <PageWrapper>
-                            <FullWrapper>
-                                <RowBetween>
-                                    <Nav tabs className="flex flex-row">
-                                        <NavItem>
-                                            <NavLink className="cursor-pointer p-0 rounded-large" onClick={() => { handleTokenType(TOKEN_TYPE.gainer) }} >
-                                                {/* <Badge pill color="success" className="absolute top-0 left-full translate-middle">{gainerTokens.length}
+                            <RowBetween>
+                                <Nav tabs className="flex flex-row">
+                                    <NavItem>
+                                        <NavLink className="cursor-pointer p-0 rounded-large" onClick={() => { handleTokenType(TOKEN_TYPE.gainer) }} >
+                                            {/* <Badge pill color="success" className="absolute top-0 left-full translate-middle">{gainerTokens.length}
                                                     <span className="visually-hidden">Gainers</span></Badge> */}
-                                                <Badge
-                                                    color="secondary"
-                                                    badgeContent={gainerTokens.length}
-                                                    className={tokenType == TOKEN_TYPE.all || tokenType == TOKEN_TYPE.gainer ? "bg-black" : "bg-dark-grey-blue"}
-                                                >
-                                                    <Button variant="outlined" className="flex flex-row" color="success">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
-                                                        </svg> Gainers
-                                                    </Button>
-                                                </Badge>
-                                            </NavLink>
-                                        </NavItem>
-                                        <NavItem>
-                                            <NavLink className="cursor-pointer p-0 rounded" onClick={() => { handleTokenType(TOKEN_TYPE.loser) }} >
-                                                <Badge
-                                                    color="error"
-                                                    badgeContent={loserTokens.length}
-                                                    className={tokenType == TOKEN_TYPE.all || tokenType == TOKEN_TYPE.loser ? "bg-black" : "bg-dark-grey-blue"}
-                                                >
-                                                    <Button variant="outlined" className="flex flex-row" color="success">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181" />
-                                                        </svg> Losers
-                                                    </Button>
-                                                </Badge>
-                                            </NavLink>
-                                        </NavItem>
-                                    </Nav>
-                                    <div className="items-center flex-block">
-                                        <FormGroup switch style={{ marginRight: '5px', display: "flex" }}>
-                                            <Switch
-                                                checked={showLiquidity}
-                                                onChange={() => {
-                                                    setShowLiquidity(!showLiquidity)
-                                                }}
-                                                inputProps={{ 'aria-label': 'controlled' }}
-                                            />
-                                            <Label check className="text-lg font-medium flex items-center">$500+ Liquidity</Label>
-                                        </FormGroup>
-                                        <Button variant="contained" onClick={exportToCsv} className="btn-download btn-animation" size="md" color="warning" style={{ marginLeft: '5px' }} outline>
-                                            {
-                                                loadingExport &&
-                                                <span className="d-flex align-items-center">
-                                                    <span className="flex-grow-1 me-2">
-                                                        Loading...
-                                                    </span>
-                                                    <Spinner size="sm" className="flex-shrink-0" role="status"> Loading... </Spinner>
+                                            <Badge
+                                                color="secondary"
+                                                badgeContent={gainerTokens.length}
+                                                className={tokenType == TOKEN_TYPE.all || tokenType == TOKEN_TYPE.gainer ? "bg-black" : "bg-dark-grey-blue"}
+                                            >
+                                                <Button variant="outlined" className="flex flex-row" color="success">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                                                    </svg> Gainers
+                                                </Button>
+                                            </Badge>
+                                        </NavLink>
+                                    </NavItem>
+                                    <NavItem>
+                                        <NavLink className="cursor-pointer p-0 rounded" onClick={() => { handleTokenType(TOKEN_TYPE.loser) }} >
+                                            <Badge
+                                                color="error"
+                                                badgeContent={loserTokens.length}
+                                                className={tokenType == TOKEN_TYPE.all || tokenType == TOKEN_TYPE.loser ? "bg-black" : "bg-dark-grey-blue"}
+                                            >
+                                                <Button variant="outlined" className="flex flex-row" color="success">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181" />
+                                                    </svg> Losers
+                                                </Button>
+                                            </Badge>
+                                        </NavLink>
+                                    </NavItem>
+                                </Nav>
+                                <div className="items-center flex-block">
+                                    <FormGroup switch style={{ marginRight: '5px', display: "flex" }}>
+                                        <Switch
+                                            checked={showLiquidity}
+                                            onChange={() => {
+                                                setShowLiquidity(!showLiquidity)
+                                            }}
+                                            inputProps={{ 'aria-label': 'controlled' }}
+                                        />
+                                        <Label check className="text-lg font-medium flex items-center">$500+ Liquidity</Label>
+                                    </FormGroup>
+                                    <Button variant="contained" onClick={exportToCsv} className="btn-download btn-animation" size="md" color="warning" style={{ marginLeft: '5px' }} outline>
+                                        {
+                                            loadingExport &&
+                                            <span className="d-flex align-items-center">
+                                                <span className="flex-grow-1 me-2">
+                                                    Loading...
                                                 </span>
-                                            }
-                                            {
-                                                !loadingExport && (<>Download CSV</>)
-                                            }
+                                                <Spinner size="sm" className="flex-shrink-0" role="status"> Loading... </Spinner>
+                                            </span>
+                                        }
+                                        {
+                                            !loadingExport && (<>Download CSV</>)
+                                        }
 
-                                        </Button>
-                                    </div>
-                                </RowBetween>
-                                {/* TABLE ALL TOKENS */}
-                                {(tokenType === TOKEN_TYPE.all) &&
-                                    <Panel className="panel-shadow hsla-bg" style={{ marginTop: '6px', padding: '1.125rem 0 ', border: 'none' }}>
-                                        <TopTokenList tokens={formattedTokens} />
-                                    </Panel>
-                                }
-                                {/* TEXT GAINERS */}
-                                {/* {tokenType == TOKEN_TYPE.all &&
+                                    </Button>
+                                </div>
+                            </RowBetween>
+                            {/* TABLE ALL TOKENS */}
+                            {(tokenType === TOKEN_TYPE.all) &&
+                                <Panel className="panel-shadow hsla-bg" style={{ marginTop: '6px', padding: '1.125rem 0 ', border: 'none' }}>
+                                    <TopTokenList tokens={formattedTokens} itemMax={15} type="all" liq={showLiquidity? '1' : '0'}/>
+                                </Panel>
+                            }
+                            {/* TEXT GAINERS */}
+                            {/* {tokenType == TOKEN_TYPE.all &&
                                     <RowBetween>
                                         <span style={{fontSize: 18, fontWeight: 450}}>Gainers</span>
                                     </RowBetween>
                                 } */}
-                                {/* TABLE GAINERS */}
-                                {(tokenType === TOKEN_TYPE.gainer) &&
-                                    <Panel className="panel-shadow hsla-bg" style={{ marginTop: '6px', padding: '1.125rem 0 ', border: 'none' }}>
-                                        <TopTokenList tokens={gainerTokens} />
-                                    </Panel>
-                                }
-                                {/* TEXT LOSERS */}
-                                {/* {tokenType == TOKEN_TYPE.all &&
+                            {/* TABLE GAINERS */}
+                            {(tokenType === TOKEN_TYPE.gainer) &&
+                                <Panel className="panel-shadow hsla-bg" style={{ marginTop: '6px', padding: '1.125rem 0 ', border: 'none' }}>
+                                    <TopTokenList tokens={gainerTokens} itemMax={15} type="gainer" liq={showLiquidity? '1' : '0'}/>
+                                </Panel>
+                            }
+                            {/* TEXT LOSERS */}
+                            {/* {tokenType == TOKEN_TYPE.all &&
                                     <RowBetween>
                                         <span style={{fontSize: 18, fontWeight: 450}}>Losers</span>
                                     </RowBetween>
                                 } */}
-                                {/* TABLE LOSERS */}
-                                {(tokenType === TOKEN_TYPE.loser) &&
-                                    <Panel className="panel-shadow hsla-bg" style={{ marginTop: '6px', padding: '1.125rem 0 ', border: 'none' }}>
-                                        <TopTokenList tokens={loserTokens} itemMax={15} show={1} />
-                                    </Panel>
-                                }
-                                <div className="text-center">
-                                    <a target="_blank" href="https://www.tradingview.com" rel="noreferrer"><img src="/assets/images/tradingview.png" width="200" className="m-auto" /></a>
-                                </div>
-                                <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 1000, fontStyle: "oblique" }}>
-                                    The charts are provided by TradingView, a platform for traders and investors with versatile research tools and sophisticated data that helps you track coins like <a href="https://www.tradingview.com/symbols/BTCUSD/" style={{ color: '#0a58ca' }}>BTC USD</a> and <a href="https://www.tradingview.com/symbols/HBARUSD/" style={{ color: '#0a58ca' }}>HBAR USD</a> on charts to stay up-to-date on where crypto markets are moving.
-                                </div>
-                            </FullWrapper>
+                            {/* TABLE LOSERS */}
+                            {(tokenType === TOKEN_TYPE.loser) &&
+                                <Panel className="panel-shadow hsla-bg" style={{ marginTop: '6px', padding: '1.125rem 0 ', border: 'none' }}>
+                                    <TopTokenList tokens={loserTokens} itemMax={15} show={1} type="loser" liq={showLiquidity? '1' : '0'} />
+                                </Panel>
+                            }
+                            <div className="text-center">
+                                <a target="_blank" href="https://www.tradingview.com" rel="noreferrer"><img src="/assets/images/tradingview.png" width="200" className="m-auto" /></a>
+                            </div>
+                            <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 1000, fontStyle: "oblique" }}>
+                                The charts are provided by TradingView, a platform for traders and investors with versatile research tools and sophisticated data that helps you track coins like <a href="https://www.tradingview.com/symbols/BTCUSD/" style={{ color: '#0a58ca' }}>BTC USD</a> and <a href="https://www.tradingview.com/symbols/HBARUSD/" style={{ color: '#0a58ca' }}>HBAR USD</a> on charts to stay up-to-date on where crypto markets are moving.
+                            </div>
                         </PageWrapper>
                     </Container>
                 </div>

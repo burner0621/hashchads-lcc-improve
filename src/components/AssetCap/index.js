@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
-import TopTokenList from '../TokenList'
+import TokenTable from '../TokenList/TokenTable'
 import Panel from '../Panel'
 
 import axios from 'axios'
@@ -8,18 +8,40 @@ const AssetCap = () => {
     const [listType, setListType] = useState(0) // 0: tokens, 1: pairs
     const [dtype, setDtype] = useState(0) // 0: top, 1: gainer, 2: loser, 3: recently
     const [tokens, setTokens] = useState([])
+    const [topTokens, setTopTokens] = useState([])
+    const [gainers, setGainers] = useState([])
+    const [losers, setLosers] = useState([])
+    const [newers, setNewers] = useState([])
+    const [filteredList, setFilteredList] = useState([])
 
-    const fetchData = useCallback(async () => {
-        let response = await axios.get(`${process.env.API_URL}/tokens/simple_all`)
+    const fetchData = useCallback( async() => {
+        let response = await axios.get(`${process.env.API_URL}/tokens/get_top_stats_data?count=25`)
         if (response.status === 200) {
             const data = response.data
-            setTokens(data)
+            if (data.success) {console.log (data.data)
+                setTopTokens(data.data.tops)
+                setGainers(data.data.gainers)
+                setLosers(data.data.losers)
+                setNewers(data.data.newers)
+            }
         }
     }, [])
 
     useEffect(() => {
         fetchData()
     }, [fetchData])
+
+    useEffect(() => {
+        if (dtype === 0) {
+            setFilteredList (topTokens)
+        } else if (dtype === 1) {
+            setFilteredList (gainers)
+        } else if (dtype === 2) {
+            setFilteredList (losers)
+        } else if (dtype === 3) {
+            setFilteredList (newers)
+        }
+    }, [dtype, gainers, losers, newers, topTokens])
 
     return (
         <>
@@ -85,7 +107,7 @@ const AssetCap = () => {
             </div>
             <div>
                 <Panel className="panel-shadow hsla-bg" style={{ marginTop: '6px', padding: '1.125rem 0 ', border: 'none' }}>
-                    <TopTokenList tokens={tokens} />
+                    <TokenTable tokens={filteredList} show={0}/>
                 </Panel>
             </div>
         </>

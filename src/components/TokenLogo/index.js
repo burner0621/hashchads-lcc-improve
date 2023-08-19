@@ -46,7 +46,7 @@ export default function TokenLogo({ path, diligence=true, logoType="logo", heade
             <Image
                 {...rest}
                 alt={''}
-                src={path1}
+                src={path?path1:''}
                 size={size}
                 onError={(event) => {
                     setError(true)

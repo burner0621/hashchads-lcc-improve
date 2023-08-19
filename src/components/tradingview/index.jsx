@@ -5,7 +5,7 @@ import Datafeed from "./datafeed";
 const Chart = (props) => {
 
   const { symbol, tokenId, interval, width, height } = props;
-
+  console.log (width, height, "?????????")
   useEffect(() => {
     if (symbol && interval) {
 
@@ -19,7 +19,12 @@ const Chart = (props) => {
         container_id: "tv_chart_container",
         datafeed: Datafeed(tokenId),
         library_path: "/charting_library/",
+        toolbar_bg: '#0b1217',
         overrides: {
+          "paneProperties.background": "#0b1217",
+          "paneProperties.backgroundType": "solid",
+          "paneProperties.backgroundGradientEndColor": "#0b1217",
+          "paneProperties.backgroundGradientStartColor": "#0b1217",
           "paneProperties.vertGridProperties.color": "#E3E3E5", // Grid Vertical Lines Color
           "paneProperties.horzGridProperties.color": "#E3E3E5", // Grid Horizontal Lines Color
           "mainSeriesProperties.candleStyle.upColor": "#11CC9A", // Up Candle Color
@@ -40,7 +45,7 @@ const Chart = (props) => {
       })
     }
   }, [symbol, interval]);
-  return <div id="tv_chart_container" height={height} width={width} style={{ height: 400 }} />;
+  return <div id="tv_chart_container" height={height} width={width} style={{ height: 400, backgroundColor: "black" }} />;
 }
 
 export default Chart;

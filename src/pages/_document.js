@@ -71,7 +71,7 @@ export default class MyDocument extends Document {
           <meta name="author" content="Minimal UI Kit" />
         </Head>
 
-        <body className='bg-[#0b1217]'>
+        <body className='bg-[#0b1217]' style={{fontFamily: "'Nurito Sans', sans-serif", color: 'white', lineHeight: 1.5, fontSize: 13, fontWeigth: 400}}>
           <Main />
           <NextScript />
         </body>

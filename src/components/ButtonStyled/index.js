@@ -145,7 +145,6 @@ export const OptionButton = styled.div`
   white-space: nowrap;
   padding: 6px;
   border-radius: 6px;
-  border: 1px solid ${({ theme }) => theme.bg4};
   background-color: ${({ active, theme }) => active && theme.bg3};
   color: ${({ theme }) => theme.text1};
   cursor: pointer;

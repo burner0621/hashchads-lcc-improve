@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/router"
 import styled from 'styled-components'
-import { Col, Container, Row, Nav, NavItem, Card, CardBody } from "reactstrap";
+import { Col, Row, Nav, NavItem, Card, CardBody } from "reactstrap";
+import { Container, Grid } from '@mui/material';
 import { useMedia } from 'react-use'
 import { Text } from 'rebass'
 import { AlertCircle } from 'react-feather'
@@ -18,7 +19,7 @@ import TokenLogo from '../../../components/TokenLogo'
 import Page from '../../../components/Page';
 // import { ButtonLight, ButtonDark } from '../../Components/ButtonStyled'
 
-import { formattedNum } from '../../../utils'
+import { formattedNum, getPercentChange } from '../../../utils'
 
 // import { useTokenPriceData } from '../../../hooks/useTokenData'
 import fetch from 'cross-fetch'
@@ -43,12 +44,12 @@ const ContentWrapper = styled.div`
   align-items: start;
   grid-template-columns: 1fr;
   grid-gap: 24px;
-  max-width: 1440px;
+  max-width: 1980px;
   width: 100%;
   margin: 0 0;
   padding: 0 0;
   box-sizing: border-box;
-  @media screen and (max-width: 1180px) {
+  @media screen and (max-width: 1440px) {
     grid-template-columns: 1fr;
     padding: 0 1rem;
   }
@@ -58,11 +59,11 @@ const WarningGrouping = styled.div`
   pointer-events: ${({ disabled }) => disabled && 'none'};
 `
 const TIME_RANGE_TYPE = {
-    five: 'five',
-    hour: 'hour',
-    six: 'six',
-    day: 'day',
-    week: 'week',
+    five: '5m',
+    hour: '1h',
+    six: '6h',
+    day: '1d',
+    week: '1w',
 }
 
 const TABLE_TYPE = {
@@ -83,6 +84,10 @@ const DATA_FREQUENCY = {
     HOUR: 'HOUR',
     LINE: 'LINE',
 }
+
+const PRICE_PERIOD = [
+    '24 H', '1 W', '1 M'
+]
 
 TokenPage.getLayout = function getLayout(page) {
     return <Layout>{page}</Layout>;
@@ -130,8 +135,27 @@ export default function TokenPage() {
     const [socialInfos, setSocialInfos] = useState(undefined)
 
     const [statisticData, setStatisticData] = useState({})
+    const [tokenInDb, setTokenInDb] = useState()
+
+    const [dropdownShow, setDropdownShow] = useState("hidden")
+    const [statsDropdownShow, setStatsDropdownShow] = useState("hidden")
+
+    const [period, setPeriod] = useState(PRICE_PERIOD[0])
 
     const prevWindow = usePrevious(timeWindow)
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const fetchTokenByAddress = useCallback(async () => {
+        let response = await axios.get(`${process.env.API_URL}/tokens/get_token_by_address?address=${address}`)
+        if (response.status === 200) {
+            let jsonData = await response.data;
+            setTokenInDb(jsonData)
+        }
+    })
+
+    useEffect(() => {
+        fetchTokenByAddress()
+    }, [fetchTokenByAddress])
 
     const fetchTokensData = useCallback(async () => {
         let response = await axios.get(`${process.env.API_URL}/tokens/simple_all`)
@@ -227,7 +251,7 @@ export default function TokenPage() {
             const jsonData = await response.json()
             setPairs(jsonData)
         }
-    },[])
+    }, [])
 
     useEffect(() => {
         if (pairs.length === 0) fetchTotalData();
@@ -329,6 +353,23 @@ export default function TokenPage() {
         setDailyVolume(tmpDailyVolue * hbarPrice)
     }, [address, tokenDailyVolume, hbarPrice])
 
+    const periodItemClick = (str) => {
+        setPeriod(str)
+        setDropdownShow("hidden")
+        let tmpChange = priceChange
+        if (tokenInDb && tokenInDb['monthlyPrice']) {
+            if (str === PRICE_PERIOD[0] && tokenInDb['monthlyPrice'].length > 0) {
+                tmpChange = priceChanges[address]
+            } else if (str === PRICE_PERIOD[1] && tokenInDb['monthlyPrice'].length > 6) {
+                tmpChange = getPercentChange(priceUSD, tokenInDb['monthlyPrice'][tokenInDb['monthlyPrice'].length - 7]['closeUsd'])
+            } else if (str === PRICE_PERIOD[2] && tokenInDb['monthlyPrice'].length > 30) {
+                tmpChange = getPercentChange(priceUSD, tokenInDb['monthlyPrice'][0]['closeUsd'])
+            }
+        }
+        if (Number(tmpChange) > 0) { setPriceChange('+' + Math.abs(Number(tmpChange)).toFixed(4) + '%'); setPriceChangeColor('green') }
+        else { setPriceChange(Math.abs(Number(tmpChange)).toFixed(4) + '%'); setPriceChangeColor('red') }
+    }
+
     const fetchTotalPriceData = useCallback(async () => {
         try {
             const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=hedera-hashgraph&vs_currencies=usd`)
@@ -417,6 +458,7 @@ export default function TokenPage() {
     const formattedSymbol = symbol?.length > LENGTH ? symbol.slice(0, LENGTH) + '...' : symbol
 
     const handleTimeRangeType = (type) => {
+        setStatsDropdownShow('hidden')
         if (timeRangeType !== type) setTimeRangeType(type)
     }
 
@@ -634,88 +676,73 @@ export default function TokenPage() {
     return (
         <Page title={`Token Page: ${address}`}>
             <div className="page-content">
-                <Container fluid>
+                <div className="max-w-[1980px] p-0">
                     <ContentWrapper style={{ margin: "auto" }}>
-                        <div className="flex flex-col new-bg rounded p-4">
-                            <RowBetween style={{ flexWrap: 'wrap', alingItems: 'start', marginBottom: '1rem' }}>
-                                <AutoRow align="flex-end" style={{ width: 'fit-content' }}>
-                                    <div style={{ fontWeight: 400, fontSize: 14, color: 'white' }}>
-                                        <a href="/hashchads/tokens">{'Tokens '}</a>→ {symbol}
-                                    </div>
-                                    <a
-                                        style={{ width: 'fit-content' }}
-                                        color={'red'}
-                                        external
-                                        href={'https://hashscan.io/mainnet/token/' + address}
-                                    >
-                                        <Text style={{ marginLeft: '.15rem' }} fontSize={'14px'} fontWeight={400}>
-                                            ({address.slice(0, 8) + '...' + address.slice(36, 42)})
-                                        </Text>
-                                    </a>
-                                </AutoRow>
-                            </RowBetween>
+                        <div className="flex flex-col rounded ">
+
                             <WarningGrouping disabled={false}>
                                 <DashboardWrapper style={{ marginTop: below1080 ? '0' : '0' }}>
                                     <Row >
                                         <Col sm={12} md={6} style={{ alignItems: 'baseline' }}>
                                             <div className="flex flex-col">
                                                 <div className="flex flex-row">
-                                                    <TokenLogo path={iconPath} size="32px" style={{ alignSelf: 'center' }} />
+                                                    <TokenLogo path={iconPath} size="48px" style={{ alignSelf: 'center' }} />
                                                     <div fontSize={below1080 ? '1.5rem' : '2rem'} fontWeight={500} style={{ margin: '0 1rem' }}>
                                                         <RowFixed gap="6px">
-                                                            <div className="mr-3 text-[32px] text-white">{name}</div>{' '}
-                                                            <span className="text-[32px] text-gray-600">{formattedSymbol ? `(${formattedSymbol})` : ''}</span>
+                                                            <div className="mr-3 text-[24px] text-white">{name}</div>{' '}
+                                                            <span className="text-[18px] text-gray-600">{formattedSymbol ? `(${formattedSymbol})` : ''}</span>
+                                                        </RowFixed>
+                                                        <RowFixed>
+                                                            <span className="mr-4 text-[16px] font-medium">
+                                                                {`$` + priceUSD.toFixed(8)}
+                                                            </span>
+                                                            <span className="flex flex-row text-white px-[5px] py-[3px] rounded-3xl" style={{ background: priceChangeColor }}>
+                                                                {priceChange}
+                                                            </span>
+                                                            <span>
+                                                                <button id="period" dataDropdownToggle="dropdown" className="text-gray-400 bg-transparent text-xs p-1.5 text-center inline-flex items-center" type="button" onClick={() => { dropdownShow === "hidden" ? setDropdownShow('') : setDropdownShow('hidden') }}>
+                                                                    {period}
+                                                                    <svg className="w-2.5 h-2.5 ml-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                                                                    </svg>
+                                                                </button>
+                                                                <div id="dropdown" className={dropdownShow + " absolute z-10 bg-transparent divide-y divide-gray-100 rounded-lg shadow w-10"} >
+                                                                    <ul className="py-2 text-xs text-gray-400 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
+                                                                        {
+                                                                            PRICE_PERIOD.map((item, idx) => {
+                                                                                return (
+                                                                                    <li key={idx} onClick={() => periodItemClick(item)}>
+                                                                                        <a href="#" className="block py-2 hover:bg-gray-700 hover:text-gray-300 rounded-lg text-center">{item}</a>
+                                                                                    </li>
+                                                                                )
+                                                                            })
+                                                                        }
+                                                                    </ul>
+                                                                </div>
+                                                            </span>
                                                         </RowFixed>
                                                     </div>
-                                                    {
-                                                        socialInfos !== undefined && socialInfos['DeepLink'] !== undefined &&
-                                                        <a target="_blank" className="tooltipp" style={{ marginRight: 10, flexDirection: "column", justifyContent: 'end', display: 'flex', marginBottom: 8 }} href={socialInfos['DeepLink']} rel="noreferrer">
-                                                            <span className="tooltiptext">Swap</span>
-                                                            <img src="/assets/images/trade.png" width="28" height="28" />
-                                                        </a>
-                                                    }
-                                                    {
-                                                        socialInfos !== undefined && socialInfos['Saucerswap'] !== undefined &&
-                                                        <a target="_blank" className="tooltipp" style={{ flexDirection: "column", justifyContent: 'end', display: 'flex', marginBottom: 8 }} href={socialInfos['Saucerswap']} rel="noreferrer">
-                                                            <span className="tooltiptext">Trade</span>
-                                                            <img src="/assets/images/saucerswap.png" width="28" height="28" />
-                                                        </a>
-                                                    }
                                                 </div>
-                                                <div className="flex items-center">
-                                                    <span className="mr-4 text-[32px] font-medium">
-                                                        {`$` + priceUSD.toFixed(8)}
-                                                    </span>
-                                                    <div className="flex flex-row self-end mb-[10px]">
-                                                        {/* <span style={{ color: priceChangeColor }}>{priceChange}</span> */}
-                                                        <span style={{ color: priceChangeColor }} className="flex flex-row">
-                                                            {priceChange}
-                                                            {
-                                                                priceChangeColor === 'green' &&
-                                                                <app-icon _ngcontent-qmb-c89="" name="arrowUp" class="ng-tns-c89-8 flex" _nghost-qmb-c2="">
-                                                                    <svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true" viewBox="0 0 20 15" width="14" transform=""><path d="M16.0312 2.49999H13.75C13.109 2.49999 12.5806 2.01745 12.5084 1.39577L12.5 1.25C12.5 0.608954 12.9826 0.0806158 13.6042 0.0084096L13.75 0H18.75L18.793 0.000692605C18.8251 0.00177866 18.8573 0.00410228 18.8894 0.00766991L18.75 0C18.8172 0 18.8832 0.0053031 18.9475 0.0155139C18.9722 0.0194401 18.9972 0.0241854 19.022 0.0297021L19.0366 0.0330132L19.0962 0.0485783C19.1212 0.0557812 19.1461 0.0637897 19.1708 0.0726061C19.3111 0.122685 19.4402 0.19745 19.5525 0.291591C19.5562 0.294733 19.5599 0.297819 19.5635 0.300929L19.5816 0.316754C19.6116 0.343469 19.6402 0.371604 19.6675 0.401055L19.5635 0.300929C19.6084 0.339449 19.65 0.380466 19.688 0.423601C19.7132 0.452273 19.7373 0.482345 19.7601 0.51351C19.7675 0.523392 19.7747 0.533435 19.7816 0.543562C19.8012 0.57242 19.8197 0.601934 19.8369 0.632241C19.8454 0.646939 19.8536 0.662048 19.8614 0.677292C19.874 0.70181 19.8859 0.726766 19.8969 0.75216C19.9053 0.77163 19.9131 0.791011 19.9204 0.810547C19.9323 0.841821 19.9429 0.873831 19.9522 0.906383C19.9554 0.918355 19.9585 0.930116 19.9615 0.941916C19.9751 0.994628 19.9852 1.04887 19.9916 1.10422L20 1.25V6.24999C20 6.94034 19.4403 7.49998 18.75 7.49998C18.1089 7.49998 17.5806 7.01743 17.5084 6.39576L17.5 6.24999L17.5 4.62749L12.1991 10.8135C11.7591 11.3268 10.9997 11.3914 10.4812 10.9858L10.3661 10.8839L7.58377 8.10248L2.2103 14.5502C1.80235 15.0397 1.09936 15.1385 0.57649 14.8031L0.4498 14.7102C-0.0397492 14.3023 -0.138462 13.5993 0.196857 13.0764L0.289754 12.9497L6.53974 5.44976C6.97669 4.92542 7.74412 4.85457 8.26767 5.26327L8.3839 5.36611L11.1788 8.15998L16.0312 2.49999Z" fill="currentColor" /></svg>
-                                                                </app-icon>
-                                                            }
-                                                            {
-                                                                priceChangeColor === 'red' &&
-                                                                <app-icon _ngcontent-qmb-c89="" name="arrowDown" class="ng-tns-c89-8 flex" >
-                                                                    <svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true" viewBox="0 0 20 15" width="14" transform=""><path d="M16.0312 12.5H13.75C13.109 12.5 12.5806 12.9826 12.5084 13.6042L12.5 13.75C12.5 14.391 12.9826 14.9194 13.6042 14.9916L13.75 15H18.75L18.793 14.9993C18.8251 14.9982 18.8573 14.9959 18.8894 14.9923L18.75 15C18.8172 15 18.8832 14.9947 18.9475 14.9845C18.9722 14.9806 18.9972 14.9758 19.022 14.9703L19.0366 14.967L19.0962 14.9514C19.1212 14.9442 19.1461 14.9362 19.1708 14.9274C19.3111 14.8773 19.4402 14.8025 19.5525 14.7084C19.5562 14.7053 19.5599 14.7022 19.5635 14.6991L19.5816 14.6832C19.6116 14.6565 19.6402 14.6284 19.6675 14.5989L19.5635 14.6991C19.6084 14.6606 19.65 14.6195 19.688 14.5764C19.7132 14.5477 19.7373 14.5177 19.7601 14.4865C19.7675 14.4766 19.7747 14.4666 19.7816 14.4564C19.8012 14.4276 19.8197 14.3981 19.8369 14.3678C19.8454 14.3531 19.8536 14.338 19.8614 14.3227C19.874 14.2982 19.8859 14.2732 19.8969 14.2478C19.9053 14.2284 19.9131 14.209 19.9204 14.1895C19.9323 14.1582 19.9429 14.1262 19.9522 14.0936C19.9554 14.0816 19.9585 14.0699 19.9615 14.0581C19.9751 14.0054 19.9852 13.9511 19.9916 13.8958L20 13.75V8.75001C20 8.05966 19.4403 7.50002 18.75 7.50002C18.1089 7.50002 17.5806 7.98257 17.5084 8.60424L17.5 8.75001L17.5 10.3725L12.1991 4.18653C11.7591 3.67318 10.9997 3.60856 10.4812 4.01418L10.3661 4.11614L7.58377 6.89752L2.2103 0.4498C1.80235 -0.0397492 1.09936 -0.138462 0.57649 0.196858L0.4498 0.289755C-0.0397492 0.697713 -0.138462 1.4007 0.196857 1.92357L0.289754 2.05026L6.53974 9.55024C6.97669 10.0746 7.74412 10.1454 8.26767 9.73673L8.3839 9.63389L11.1788 6.84002L16.0312 12.5Z" fill="currentColor" /></svg>
-                                                                </app-icon>
-                                                            }
-                                                        </span>
-                                                    </div>
-                                                </div>
+                                            </div>
 
-                                                <div className="flex space-around mt-4">
-                                                    {/* {
-                                                        socialInfos !== undefined && socialInfos['Saucerswap'] !== undefined &&
-                                                        <div className="flex ml-10">
-                                                            <a target="_blank" className="tooltipp" style={{ justifyContent: 'center', display: 'flex' }} href={socialInfos['Saucerswap']}>
-                                                                <span className="tooltiptext">Trade</span>
-                                                                <img src="/socials/saucerswap.png" width="20" />
-                                                            </a>
-                                                        </div>
-                                                    } */}
+                                        </Col>
+                                        <Col sm={12} md={6}>
+                                            <div className="flex-wrap items-end mb-4 flex flex-col">
+                                                <AutoRow align="flex-end" style={{ width: 'fit-content' }}>
+                                                    <div className="font-medium, text-sm text-white">
+                                                        <a href="/hashchads/tokens">{'Tokens '}</a>→ {symbol}
+                                                    </div>
+                                                    <a
+                                                        className="text-red w-fit"
+                                                        external
+                                                        href={'https://hashscan.io/mainnet/token/' + address}
+                                                    >
+                                                        <Text style={{ marginLeft: '.15rem' }} fontSize={'14px'} fontWeight={400}>
+                                                            ({address.slice(0, 8) + '...' + address.slice(36, 42)})
+                                                        </Text>
+                                                    </a>
+                                                </AutoRow>
+                                                <div className="flex space-around mt-3">
                                                     {
                                                         socialInfos && socialInfos['Linktree'] &&
                                                         <div className="flex ml-[10px]">
@@ -781,159 +808,18 @@ export default function TokenPage() {
                                                     }
                                                 </div>
                                             </div>
-
-                                        </Col>
-                                        <Col sm={12} md={6}>
-                                            <div className="flex flex-col items-end">
-
-                                                <Nav pills className="badge-bg flex flex-row ml-4">
-                                                    <NavItem className="flex items-center justify-center" style={{ width: "4rem" }}>
-                                                        <div style={{ cursor: "pointer" }} className={timeRangeType == TIME_RANGE_TYPE.five ? "active badge-active-bg" : ""} onClick={() => { handleTimeRangeType(TIME_RANGE_TYPE.five) }} >
-                                                            <span className={timeRangeType === TIME_RANGE_TYPE.five ? "text-white badge" : "text-badge badge"} style={{ fontSize: 14, padding: 20 }}>5m</span>
-                                                        </div>
-                                                    </NavItem>
-                                                    <NavItem className="flex items-center justify-center" style={{ width: "4rem" }}>
-                                                        <div style={{ cursor: "pointer" }} className={timeRangeType == TIME_RANGE_TYPE.hour ? "active badge-active-bg" : ""} onClick={() => { handleTimeRangeType(TIME_RANGE_TYPE.hour) }} >
-                                                            <span className={timeRangeType === TIME_RANGE_TYPE.hour ? "text-white badge" : "text-badge badge"} style={{ fontSize: 14, padding: 20 }}>1h</span>
-                                                        </div>
-                                                    </NavItem>
-                                                    <NavItem className="flex items-center justify-center" style={{ width: "4rem" }}>
-                                                        <div style={{ cursor: "pointer" }} className={timeRangeType == TIME_RANGE_TYPE.six ? "active badge-active-bg" : ""} onClick={() => { handleTimeRangeType(TIME_RANGE_TYPE.six) }} >
-                                                            <span className={timeRangeType == TIME_RANGE_TYPE.six ? "text-white badge" : "text-badge badge"} style={{ fontSize: 14, padding: 20 }}>6h</span>
-                                                        </div>
-                                                    </NavItem>
-                                                    <NavItem className="flex items-center justify-center" style={{ width: "4rem" }}>
-                                                        <div style={{ cursor: "pointer" }} className={timeRangeType == TIME_RANGE_TYPE.day ? "active badge-active-bg" : ""} onClick={() => { handleTimeRangeType(TIME_RANGE_TYPE.day) }} >
-                                                            <span className={timeRangeType == TIME_RANGE_TYPE.day ? "text-white badge" : "text-badge badge"} style={{ fontSize: 14, padding: 20 }}>24h</span>
-                                                        </div>
-                                                    </NavItem>
-                                                    <NavItem className="flex items-center justify-center" style={{ width: "4rem" }}>
-                                                        <div style={{ cursor: "pointer" }} className={timeRangeType == TIME_RANGE_TYPE.week ? "active badge-active-bg" : ""} onClick={() => { handleTimeRangeType(TIME_RANGE_TYPE.week) }} >
-                                                            <span className={timeRangeType == TIME_RANGE_TYPE.week ? "text-white badge" : "text-badge badge"} style={{ fontSize: 14, padding: 20 }}>1W</span>
-                                                        </div>
-                                                    </NavItem>
-                                                </Nav>
-                                                <div className="flex space-around mt-4">
-                                                    <div className="flex flex-col w-20">
-                                                        <span className="text-badge text-center text-sm">Txs</span>
-                                                        <span className="text-white text-center">{statisticData?.txs}</span>
-                                                    </div>
-                                                    <div className="flex flex-col w-20">
-                                                        <span className="text-badge text-center text-sm">Buys</span>
-                                                        <span className="text-white text-center">{statisticData?.buys}</span>
-                                                    </div>
-                                                    <div className="flex flex-col w-20">
-                                                        <span className="text-badge text-center text-sm">Sells</span>
-                                                        <span className="text-white text-center">{statisticData?.sells}</span>
-                                                    </div>
-                                                    <div className="flex flex-col w-20">
-                                                        <span className="text-badge text-center text-sm">Vol.</span>
-                                                        <span className="text-white text-center">{formattedNum(statisticData?.vol * priceUSD, true)}</span>
-                                                    </div>
-                                                    {/* <div className="flex flex-col" style={{ width: "4rem" }}>
-                                                        <span className="text-badge text-center">% Var.</span>
-                                                        <span className="text-red text-center">64</span>
-                                                    </div> */}
-                                                </div>
-                                            </div>
                                         </Col>
                                     </Row>
-
                                 </DashboardWrapper>
                             </WarningGrouping>
                         </div>
                         {/* <Row>
                             <Widgets address={address} price={priceUSD} />
                         </Row> */}
-                        <Row>
-                            {/* <TokenChart dataColors='["--vz-success", "--vz-danger"]' tokenId={address} /> */}
-                            <Col sm={12} md={3}>
-                                <div className="flex flex-col">
-                                    <Card className="card-animate bg-dark-grey-blue rounded-[10px] max-w-[300px]">
-                                        <CardBody>
-                                            <div className="flex flex-col">
-                                                <Row className="flex justify-between mb-[10px]" >
-                                                    <span className="w-auto font-medium text-white">Total Liquidity:</span>
-                                                    <span className="w-auto font-medium text-white">{formattedNum(totalLiquidity ? parseFloat(totalLiquidity).toFixed(2) : 0, true)}</span>
-                                                </Row>
-                                                <Row className="flex justify-between mb-[10px]">
-                                                    <span className="w-auto font-medium text-white">24hr Volume:</span>
-                                                    <span className="w-auto font-medium text-white">{formattedNum(dailyVolume ? parseFloat(dailyVolume).toFixed(2) : 0, true)}</span>
-                                                </Row>
-                                                <Row className="flex justify-between mb-[10px]">
-                                                    <span className="w-auto font-medium text-white">Market Cap(Circulating):</span>
-                                                    <span className="w-auto font-medium text-white">{formattedNum(circulatingSupply ? parseFloat(circulatingSupply).toFixed(2) : 0, true)}</span>
-                                                </Row>
-                                                <Row className="flex justify-between mb-[10px]">
-                                                    <span className="w-auto font-medium text-white">Market Cap(Diluted):</span>
-                                                    <span className="w-auto font-medium text-white">{formattedNum(dilutedSupply ? parseFloat(dilutedSupply).toFixed(2) : 0, true)}</span>
-                                                </Row>
-                                                <Row className="flex justify-between mb-[10px]">
-                                                    <span className="w-auto font-medium text-white">Treasury:</span>
-                                                    <span className="w-auto font-medium text-white">{tokenInfo ? tokenInfo?.treasury_account_id : ''}</span>
-                                                </Row>
-                                                <Row className="flex justify-between mb-[10px]">
-                                                    <span className="w-auto font-medium text-white">Max Supply:</span>
-                                                    <span className="w-auto font-medium text-white">{formattedNum(tokenInfo ? (tokenInfo?.total_supply / Math.pow(10, tokenInfo?.decimals)).toFixed(4) : '0')}</span>
-                                                </Row>
-                                                <Row className="flex justify-between mb-[10px]">
-                                                    <span className="w-auto font-medium text-white">Total Supply:</span>
-                                                    <span className="w-auto font-medium text-white">{formattedNum(tokenInfo ? (tokenInfo?.total_supply / Math.pow(10, tokenInfo?.decimals)).toFixed(4) : '0')}</span>
-                                                </Row>
-                                                <Row className="flex justify-between mb-[10px]">
-                                                    <span className="w-auto font-medium text-white">Supply Type:</span>
-                                                    <span className="w-auto font-medium text-white">{tokenInfo ? tokenInfo?.supply_type : ''}</span>
-                                                </Row>
-                                                {
-                                                    tokenInfo && tokenInfo.supply_key && tokenInfo.supply_key.key &&
-                                                    <Row className="flex justify-between mb-[10px]">
-                                                        <span className="w-auto font-medium text-white">Supply Key:</span>
-                                                        <span className="w-auto font-medium text-white">{tokenInfo?.supply_key?.key}</span>
-                                                    </Row>
-                                                }
-                                                {
-                                                    tokenInfo && tokenInfo.freeze_key && tokenInfo.freeze_key.key &&
-                                                    <Row className="flex justify-between mb-[10px]">
-                                                        <span className="w-auto font-medium text-white">Freeze Key:</span>
-                                                        <span className="w-auto font-medium text-white">{tokenInfo?.freeze_key?.key}</span>
-                                                    </Row>
-                                                }
-                                                {
-                                                    tokenInfo && tokenInfo.pause_key && tokenInfo.pause_key.key &&
-                                                    <Row className="flex justify-between mb-[10px]">
-                                                        <span className="w-auto font-medium text-white">Pause Key:</span>
-                                                        <span className="w-auto font-medium text-white">{tokenInfo?.pause_key?.key}</span>
-                                                    </Row>
-                                                }
-                                                {
-                                                    tokenInfo && tokenInfo.wipe_key && tokenInfo.wipe_key.key &&
-                                                    <Row className="flex justify-between mb-[10px]">
-                                                        <span className="w-auto font-medium text-white">Wipe Key:</span>
-                                                        <span className="w-auto font-medium text-white">{tokenInfo?.wipe_key?.key}</span>
-                                                    </Row>
-                                                }
-                                                {
-                                                    tokenInfo && tokenInfo.admin_key && tokenInfo.admin_key.key &&
-                                                    <Row className="flex justify-between mb-[10px]">
-                                                        <span className="w-auto font-medium text-white">Admin Key:</span>
-                                                        <span className="w-auto font-medium text-white">{tokenInfo?.admin_key?.key}</span>
-                                                    </Row>
-                                                }
-                                                {
-                                                    tokenInfo &&
-                                                    <Row className="flex justify-between mb-[10px]">
-                                                        <span className="w-auto font-medium text-white">Created:</span>
-                                                        <span className="w-auto font-medium text-white">{(new Date(Number(tokenInfo?.created_timestamp) * 1000)).toLocaleString("en-US")}</span>
-                                                    </Row>
-                                                }
-                                            </div>
-                                        </CardBody>
-                                    </Card>
-                                </div>
-
-                            </Col>
-                            <Col sm={12} md={9} style={{ marginBottom: '20px' }}>
-                                <div className="flex flex-col new-bg br-10" style={{ padding: '15px' }}>
+                        <div className="flex flex-col md:flex-row gap-2">
+                            <div className="w-full md:w-9/12 mb-5" style={{ marginBottom: '20px' }}>
+                                <div className="flex flex-col bg-[#274963] panel-shadow br-10" style={{ padding: '15px' }}>
+                                    <div className="bg-[#0b1217] rounded-2xl p-2 mb-3 panel-shadow h-fit">
                                     {below600 ? (
                                         <RowBetween mb={40}>
                                             <DropdownSelect options={CHART_VIEW} active={chartFilter} setActive={setChartFilter} color={'#ff007a'} />
@@ -941,15 +827,9 @@ export default function TokenPage() {
                                         </RowBetween>
                                     ) : (
                                         <RowBetween
-                                            // mb={
-                                            //     chartFilter === CHART_VIEW.LIQUIDITY ||
-                                            //         chartFilter === CHART_VIEW.VOLUME ||
-                                            //         (chartFilter === CHART_VIEW.PRICE && frequency === DATA_FREQUENCY.LINE)
-                                            //         ? 40
-                                            //         : 0
-                                            // }
                                             mb={20}
                                             align="flex-start"
+                                            className="p-2 rounded-xl"
                                         >
                                             <AutoRow justify="flex-start" gap="6px" align="flex-start">
                                                 {/* <RowFixed> */}
@@ -1035,59 +915,179 @@ export default function TokenPage() {
                                         </RowBetween>
                                     )}
                                     <TokenChart address={address} color={'#ff007a'} base={priceUSD} priceData={priceData} chartFilter={chartFilter} timeWindow={timeWindow} frequency={frequency} symbol={symbol} />
-                                    <div className="flex justify-start">
-                                        <Nav pills className="badge-bg">
-                                            <NavItem className="flex items-center justify-center" style={{ width: "6rem" }}>
-                                                <div style={{ cursor: "pointer" }} className={tableType == TABLE_TYPE.trade ? "active badge-active-bg" : ""} onClick={() => { handleTableType(TABLE_TYPE.trade) }} >
-                                                    <span className={tableType == TABLE_TYPE.trade ? "text-white badge" : "text-badge badge"}>Trade History</span>
-                                                </div>
-                                            </NavItem>
-                                            <NavItem className="flex items-center justify-center" style={{ width: "4rem" }}>
-                                                <div style={{ cursor: "pointer" }} className={tableType == TABLE_TYPE.holder ? "active badge-active-bg" : ""} onClick={() => { handleTableType(TABLE_TYPE.holder) }} >
-                                                    <span className={tableType == TABLE_TYPE.holder ? "text-white badge" : "text-badge badge"}>Holders</span>
-                                                </div>
-                                            </NavItem>
-                                            {tokenInfo && tokenInfo.custom_fees && tokenInfo.custom_fees.fractional_fees && tokenInfo.custom_fees.fractional_fees.length > 0 && (
-                                                <NavItem className="flex items-center justify-center" style={{ width: "4rem" }}>
-                                                    <div style={{ cursor: "pointer" }} className={tableType == TABLE_TYPE.fee ? "active badge-active-bg" : ""} onClick={() => { handleTableType(TABLE_TYPE.fee) }} >
-                                                        <span className={tableType == TABLE_TYPE.fee ? "text-white badge" : "text-badge badge"}>Fees</span>
+                                    </div>
+                                    <div className="bg-[#0b1217] rounded-2xl panel-shadow">
+                                        <div className="flex justify-start">
+                                            <Nav pills className="py-3">
+                                                <NavItem className="flex items-center justify-center" style={{ width: "6rem" }}>
+                                                    <div style={{ cursor: "pointer" }} className={tableType == TABLE_TYPE.trade ? "active badge-active-bg" : ""} onClick={() => { handleTableType(TABLE_TYPE.trade) }} >
+                                                        <span className={tableType == TABLE_TYPE.trade ? "text-white badge" : "text-badge badge"}>Trade History</span>
                                                     </div>
                                                 </NavItem>
-                                            )}
-                                        </Nav>
-                                    </div>
-                                    {tableType === TABLE_TYPE.trade && (error ? (<div>Error:{error.message}</div>) : (
-                                        // isLoaded ? (<div>Loading...</div>) : (
-                                        <>
-                                            <div className={isLoaded ? "visible flex w-full items-center justify-center" : "hidden flex w-full items-center justify-center"}>
-                                                <ImpulseSpinner />
-                                            </div>
+                                                <NavItem className="flex items-center justify-center" style={{ width: "4rem" }}>
+                                                    <div style={{ cursor: "pointer" }} className={tableType == TABLE_TYPE.holder ? "active badge-active-bg" : ""} onClick={() => { handleTableType(TABLE_TYPE.holder) }} >
+                                                        <span className={tableType == TABLE_TYPE.holder ? "text-white badge" : "text-badge badge"}>Holders</span>
+                                                    </div>
+                                                </NavItem>
+                                                {tokenInfo && tokenInfo.custom_fees && tokenInfo.custom_fees.fractional_fees && tokenInfo.custom_fees.fractional_fees.length > 0 && (
+                                                    <NavItem className="flex items-center justify-center" style={{ width: "4rem" }}>
+                                                        <div style={{ cursor: "pointer" }} className={tableType == TABLE_TYPE.fee ? "active badge-active-bg" : ""} onClick={() => { handleTableType(TABLE_TYPE.fee) }} >
+                                                            <span className={tableType == TABLE_TYPE.fee ? "text-white badge" : "text-badge badge"}>Fees</span>
+                                                        </div>
+                                                    </NavItem>
+                                                )}
+                                            </Nav>
+                                        </div>
+                                        {tableType === TABLE_TYPE.trade && (error ? (<div>Error:{error.message}</div>) : (
+                                            // isLoaded ? (<div>Loading...</div>) : (
+                                            <>
+                                                <div className={isLoaded ? "visible flex w-full items-center justify-center" : "hidden flex w-full items-center justify-center"}>
+                                                    <ImpulseSpinner />
+                                                </div>
 
+                                                <DataTable
+                                                    className={isLoaded ? "height-50 hidden" : "visible"}
+                                                    customStyles={{
+                                                        headRow: {
+                                                            style: {
+                                                                background: "#0b1217",
+                                                                color: "white"
+                                                            }
+                                                        },
+                                                        table: {
+                                                            style: {
+                                                                background: "#0B1217",
+                                                                color: "white"
+                                                            }
+                                                        },
+                                                        rows: {
+                                                            style: {
+                                                                background: "#0B1217",
+                                                                color: "white"
+                                                            }
+                                                        },
+                                                        pagination: {
+                                                            style: {
+                                                                background: "#0B1217",
+                                                                color: "white",
+                                                                borderRadius: '15px'
+                                                            },
+                                                            pageButtonsStyle: {
+                                                                color: "white",
+                                                                fill: "white"
+                                                            }
+                                                        },
+                                                        noData: {
+                                                            style: {
+                                                                background: "#0B1217",
+                                                                color: "white"
+                                                            }
+                                                        },
+                                                        cells: {
+                                                            style: {
+                                                                paddingRight: "0px",
+                                                                color: "white"
+                                                            }
+                                                        }
+                                                    }}
+                                                    columns={columns}
+                                                    data={data || []}
+                                                    pagination
+                                                    paginationServer
+                                                    paginationTotalRows={totalRows}
+                                                    onChangePage={handlePageChange}
+                                                    onChangeRowsPerPage={handlePerRowsChange}
+                                                    currentPage={currentPage}
+                                                    rowsPerPage={rowsPerPage}
+                                                />
+                                            </>
+                                            // )
+                                        ))}
+                                        {tableType === TABLE_TYPE.holder && (
+                                            <>
+                                                {
+                                                    holderInfo && holderInfo.length > 0 ?
+                                                        (<DataTable
+                                                            customStyles={{
+                                                                headRow: {
+                                                                    style: {
+                                                                        background: "#0B1217",
+                                                                        color: "white"
+                                                                    }
+                                                                },
+                                                                table: {
+                                                                    style: {
+                                                                        background: "#0B1217",
+                                                                        color: "white"
+                                                                    }
+                                                                },
+                                                                rows: {
+                                                                    style: {
+                                                                        background: "#0B1217",
+                                                                        color: "white"
+                                                                    }
+                                                                },
+                                                                pagination: {
+                                                                    style: {
+                                                                        background: "#0B1217",
+                                                                        color: "white",
+                                                                        borderRadius: '15px'
+                                                                    },
+                                                                    pageButtonsStyle: {
+                                                                        color: "white",
+                                                                        fill: "white"
+                                                                    }
+                                                                },
+                                                                noData: {
+                                                                    style: {
+                                                                        background: "#0B1217",
+                                                                        color: "white"
+                                                                    }
+                                                                },
+                                                                cells: {
+                                                                    style: {
+                                                                        paddingRight: "0px",
+                                                                        color: "white"
+                                                                    }
+                                                                }
+                                                            }}
+                                                            columns={holder_columns}
+                                                            data={holderInfo || []}
+                                                            pagination />) :
+                                                        (
+                                                            <div className="visible flex w-full items-center justify-center">
+                                                                <ImpulseSpinner />
+                                                            </div>
+                                                        )
+                                                }
+                                            </>
+                                        )}
+                                        {tableType == TABLE_TYPE.fee && (
                                             <DataTable
-                                                className={isLoaded ? "height-50 hidden" : "visible"}
                                                 customStyles={{
                                                     headRow: {
                                                         style: {
-                                                            background: "#142028",
+                                                            background: "#0B1217",
                                                             color: "white"
                                                         }
                                                     },
                                                     table: {
                                                         style: {
-                                                            background: "#142028",
+                                                            background: "#0B1217",
                                                             color: "white"
                                                         }
                                                     },
                                                     rows: {
                                                         style: {
-                                                            background: "#142028",
+                                                            background: "#0B1217",
                                                             color: "white"
                                                         }
                                                     },
                                                     pagination: {
                                                         style: {
-                                                            background: "#142028",
-                                                            color: "white"
+                                                            background: "#0B1217",
+                                                            color: "white",
+                                                            borderRadius: '15px'
                                                         },
                                                         pageButtonsStyle: {
                                                             color: "white",
@@ -1096,7 +1096,7 @@ export default function TokenPage() {
                                                     },
                                                     noData: {
                                                         style: {
-                                                            background: "#142028",
+                                                            background: "#0B1217",
                                                             color: "white"
                                                         }
                                                     },
@@ -1107,131 +1107,163 @@ export default function TokenPage() {
                                                         }
                                                     }
                                                 }}
-                                                columns={columns}
-                                                data={data || []}
+                                                columns={fee_columns}
+                                                data={tokenInfo && tokenInfo.custom_fees && tokenInfo.custom_fees.fractional_fees || []}
                                                 pagination
-                                                paginationServer
-                                                paginationTotalRows={totalRows}
-                                                onChangePage={handlePageChange}
-                                                onChangeRowsPerPage={handlePerRowsChange}
-                                                currentPage={currentPage}
-                                                rowsPerPage={rowsPerPage}
                                             />
-                                        </>
-                                        // )
-                                    ))}
-                                    {tableType === TABLE_TYPE.holder && (
-                                        <>
-                                            {
-                                                holderInfo && holderInfo.length > 0 ?
-                                                    (<DataTable
-                                                        customStyles={{
-                                                            headRow: {
-                                                                style: {
-                                                                    background: "#142028",
-                                                                    color: "white"
-                                                                }
-                                                            },
-                                                            table: {
-                                                                style: {
-                                                                    background: "#142028",
-                                                                    color: "white"
-                                                                }
-                                                            },
-                                                            rows: {
-                                                                style: {
-                                                                    background: "#142028",
-                                                                    color: "white"
-                                                                }
-                                                            },
-                                                            pagination: {
-                                                                style: {
-                                                                    background: "#142028",
-                                                                    color: "white"
-                                                                },
-                                                                pageButtonsStyle: {
-                                                                    color: "white",
-                                                                    fill: "white"
-                                                                }
-                                                            },
-                                                            noData: {
-                                                                style: {
-                                                                    background: "#142028",
-                                                                    color: "white"
-                                                                }
-                                                            },
-                                                            cells: {
-                                                                style: {
-                                                                    paddingRight: "0px",
-                                                                    color: "white"
-                                                                }
-                                                            }
-                                                        }}
-                                                        columns={holder_columns}
-                                                        data={holderInfo || []}
-                                                        pagination />) :
-                                                    (
-                                                        <div className="visible flex w-full items-center justify-center">
-                                                            <ImpulseSpinner />
-                                                        </div>
-                                                    )
-                                            }
-                                        </>
-                                    )}
-                                    {tableType == TABLE_TYPE.fee && (
-                                        <DataTable
-                                            customStyles={{
-                                                headRow: {
-                                                    style: {
-                                                        background: "#142028",
-                                                        color: "white"
-                                                    }
-                                                },
-                                                table: {
-                                                    style: {
-                                                        background: "#142028",
-                                                        color: "white"
-                                                    }
-                                                },
-                                                rows: {
-                                                    style: {
-                                                        background: "#142028",
-                                                        color: "white"
-                                                    }
-                                                },
-                                                pagination: {
-                                                    style: {
-                                                        background: "#142028",
-                                                        color: "white"
-                                                    },
-                                                    pageButtonsStyle: {
-                                                        color: "white",
-                                                        fill: "white"
-                                                    }
-                                                },
-                                                noData: {
-                                                    style: {
-                                                        background: "#142028",
-                                                        color: "white"
-                                                    }
-                                                },
-                                                cells: {
-                                                    style: {
-                                                        paddingRight: "0px",
-                                                        color: "white"
-                                                    }
-                                                }
-                                            }}
-                                            columns={fee_columns}
-                                            data={tokenInfo && tokenInfo.custom_fees && tokenInfo.custom_fees.fractional_fees || []}
-                                            pagination
-                                        />
-                                    )}
+                                        )}
+                                    </div>
                                 </div>
-                            </Col>
-                        </Row>
+                            </div>
+                            {/* <TokenChart dataColors='["--vz-success", "--vz-danger"]' tokenId={address} /> */}
+                            <div className="w-full md:w-3/12 w-fit">
+                                <div className="flex flex-col w-fit">
+                                    <Card className="card-animate bg-[#274963] panel-shadow rounded-[10px]">
+                                        <CardBody>
+                                            <div className="flex flex-col">
+                                                <div className="flex justify-between mb-[3px]" >
+                                                    <span className="w-auto font-medium text-white" />
+                                                    <span className="w-auto font-medium text-white">
+                                                        {
+                                                            socialInfos !== undefined && socialInfos['DeepLink'] !== undefined &&
+                                                            <a target="_blank" className="tooltipp ml-4 mr-2.5 flex flex-col justify-end" href={socialInfos['DeepLink']} rel="noreferrer">
+                                                                <span className="tooltiptext">Swap</span>
+                                                                <img src="/assets/images/trade.png" width="18" height="18" />
+                                                            </a>
+                                                        }
+                                                        {
+                                                            socialInfos !== undefined && socialInfos['Saucerswap'] !== undefined &&
+                                                            <a target="_blank" className="tooltipp flex flex-col justify-end" href={socialInfos['Saucerswap']} rel="noreferrer">
+                                                                <span className="tooltiptext">Trade</span>
+                                                                <img src="/assets/images/saucerswap.png" width="18" height="18" />
+                                                            </a>
+                                                        }
+                                                    </span>
+                                                </div>
+                                                <div className="flex flex-row justify-between mb-[10px] rounded-xl bg-black p-1.5" >
+                                                    <span className="w-fit">
+                                                        <button id="periodStats" dataDropdownToggle="statsDropdown" className="text-gray-400 bg-transparent text-xs p-1.5 text-center inline-flex items-center" type="button" onClick={() => { statsDropdownShow === "hidden" ? setStatsDropdownShow('') : setStatsDropdownShow('hidden') }}>
+                                                            {timeRangeType}
+                                                            <svg className="w-2.5 h-2.5 ml-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                                                            </svg>
+                                                        </button>
+                                                        <div id="statsDropdown" className={statsDropdownShow + " absolute z-10 bg-black divide-y divide-gray-100 rounded-lg shadow w-10"} >
+                                                            <ul className="py-2 text-xs text-gray-400 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
+                                                                {
+                                                                    Object.keys(TIME_RANGE_TYPE).map((key, idx) => {
+                                                                        return (
+                                                                            <li key={idx} onClick={() => handleTimeRangeType(TIME_RANGE_TYPE[key])}>
+                                                                                <a href="#" className="block py-2 hover:bg-gray-700 hover:text-gray-300 rounded-lg text-center">{TIME_RANGE_TYPE[key]}</a>
+                                                                            </li>
+                                                                        )
+                                                                    })
+                                                                }
+                                                            </ul>
+                                                        </div>
+                                                    </span>
+                                                    <div className="flex space-around self-end">
+                                                        <div className="flex flex-col w-16">
+                                                            <span className="text-badge text-center text-xs">Txs</span>
+                                                            <span className="text-white text-center text-xs">{statisticData?.txs}</span>
+                                                        </div>
+                                                        <div className="flex flex-col w-16">
+                                                            <span className="text-badge text-center text-xs">Buys</span>
+                                                            <span className="text-white text-center text-xs">{statisticData?.buys}</span>
+                                                        </div>
+                                                        <div className="flex flex-col w-16">
+                                                            <span className="text-badge text-center text-xs">Sells</span>
+                                                            <span className="text-white text-center text-xs">{statisticData?.sells}</span>
+                                                        </div>
+                                                        <div className="flex flex-col w-16">
+                                                            <span className="text-badge text-center text-xs">Vol.</span>
+                                                            <span className="text-white text-center text-xs">{formattedNum(statisticData?.vol * priceUSD, true)}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <Row className="flex justify-between mb-[10px]" >
+                                                    <span className="w-auto font-medium text-white">Total Liquidity:</span>
+                                                    <span className="w-auto font-medium text-white text-right">{formattedNum(totalLiquidity ? parseFloat(totalLiquidity).toFixed(2) : 0, true)}</span>
+                                                </Row>
+                                                <Row className="flex justify-between mb-[10px]">
+                                                    <span className="w-auto font-medium text-white">24hr Volume:</span>
+                                                    <span className="w-auto font-medium text-white text-right">{formattedNum(dailyVolume ? parseFloat(dailyVolume).toFixed(2) : 0, true)}</span>
+                                                </Row>
+                                                <Row className="flex justify-between mb-[10px]">
+                                                    <span className="w-auto font-medium text-white">Market Cap(Circulating):</span>
+                                                    <span className="w-auto font-medium text-white text-right">{formattedNum(circulatingSupply ? parseFloat(circulatingSupply).toFixed(2) : 0, true)}</span>
+                                                </Row>
+                                                <Row className="flex justify-between mb-[10px]">
+                                                    <span className="w-auto font-medium text-white">Market Cap(Diluted):</span>
+                                                    <span className="w-auto font-medium text-white text-right">{formattedNum(dilutedSupply ? parseFloat(dilutedSupply).toFixed(2) : 0, true)}</span>
+                                                </Row>
+                                                <Row className="flex justify-between mb-[10px]">
+                                                    <span className="w-auto font-medium text-white">Treasury:</span>
+                                                    <span className="w-auto font-medium text-white text-right">{tokenInfo ? tokenInfo?.treasury_account_id : ''}</span>
+                                                </Row>
+                                                <Row className="flex justify-between mb-[10px]">
+                                                    <span className="w-auto font-medium text-white">Max Supply:</span>
+                                                    <span className="w-auto font-medium text-white text-right">{formattedNum(tokenInfo ? (tokenInfo?.total_supply / Math.pow(10, tokenInfo?.decimals)).toFixed(4) : '0')}</span>
+                                                </Row>
+                                                <Row className="flex justify-between mb-[10px]">
+                                                    <span className="w-auto font-medium text-white">Total Supply:</span>
+                                                    <span className="w-auto font-medium text-white text-right">{formattedNum(tokenInfo ? (tokenInfo?.total_supply / Math.pow(10, tokenInfo?.decimals)).toFixed(4) : '0')}</span>
+                                                </Row>
+                                                <Row className="flex justify-between mb-[10px]">
+                                                    <span className="w-auto font-medium text-white">Supply Type:</span>
+                                                    <span className="w-auto font-medium text-white text-right">{tokenInfo ? tokenInfo?.supply_type : ''}</span>
+                                                </Row>
+                                                {
+                                                    tokenInfo && tokenInfo.supply_key && tokenInfo.supply_key.key &&
+                                                    <Row className="grid grid-cols-2 justify-between mb-[10px]">
+                                                        <span className="w-auto font-medium text-white">Supply Key:</span>
+                                                        <span className="w-auto font-medium text-white text-right">{tokenInfo?.supply_key?.key}</span>
+                                                    </Row>
+                                                }
+                                                {
+                                                    tokenInfo && tokenInfo.freeze_key && tokenInfo.freeze_key.key &&
+                                                    <Row className="grid grid-cols-2 justify-between mb-[10px]">
+                                                        <span className="w-auto font-medium text-white">Freeze Key:</span>
+                                                        <span className="w-auto font-medium text-white text-right">{tokenInfo?.freeze_key?.key}</span>
+                                                    </Row>
+                                                }
+                                                {
+                                                    tokenInfo && tokenInfo.pause_key && tokenInfo.pause_key.key &&
+                                                    <Row className="grid grid-cols-2 justify-between mb-[10px]">
+                                                        <span className="w-auto font-medium text-white">Pause Key:</span>
+                                                        <span className="w-auto font-medium text-white text-right">{tokenInfo?.pause_key?.key}</span>
+                                                    </Row>
+                                                }
+                                                {
+                                                    tokenInfo && tokenInfo.wipe_key && tokenInfo.wipe_key.key &&
+                                                    <Row className="grid grid-cols-2 justify-between mb-[10px]">
+                                                        <span className="w-auto font-medium text-white">Wipe Key:</span>
+                                                        <span className="w-auto font-medium text-white text-right">{tokenInfo?.wipe_key?.key}</span>
+                                                    </Row>
+                                                }
+                                                {
+                                                    tokenInfo && tokenInfo.admin_key && tokenInfo.admin_key.key &&
+                                                    <Row className="grid grid-cols-2 justify-between mb-[10px]">
+                                                        <span className="w-auto font-medium text-white">Admin Key:</span>
+                                                        <span className="w-auto font-medium text-white text-right">{tokenInfo?.admin_key?.key}</span>
+                                                    </Row>
+                                                }
+                                                {
+                                                    tokenInfo &&
+                                                    <Row className="grid grid-cols-2 justify-between mb-[10px]">
+                                                        <span className="w-auto font-medium text-white">Created:</span>
+                                                        <span className="w-auto font-medium text-white text-right">{(new Date(Number(tokenInfo?.created_timestamp) * 1000)).toLocaleString("en-US")}</span>
+                                                    </Row>
+                                                }
+                                            </div>
+                                        </CardBody>
+                                    </Card>
+                                </div>
+
+                            </div>
+                        </div>
                     </ContentWrapper>
-                </Container>
+                </div>
             </div>
         </Page>
     )

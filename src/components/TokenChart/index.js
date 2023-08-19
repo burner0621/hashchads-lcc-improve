@@ -15,9 +15,9 @@ const ChartWrapper = styled.div`
   height: 100%;
   min-height: 300px;
   margin-bottom: 20px;
-  border: 1px solid white;
   padding: 10px;
   border-radius: 10px;
+  background: #0b1217;
   @media screen and (max-width: 600px) {
     min-height: 200px;
   }
@@ -48,7 +48,7 @@ const TokenChart = ({ address, color, base, priceData, chartFilter, timeWindow, 
 
     let utcStartTime = getTimeframe(timeWindow)
     const domain = [(dataMin) => (dataMin > utcStartTime ? dataMin : utcStartTime), 'dataMax']
-    const aspect = below1080 ? 60 / 32 : below600 ? 60 / 42 : 60 / 22
+    const aspect = below1080 ? 60 / 32 : below600 ? 60 / 42 : 60 / 32
 
     // chartData = chartData?.filter((entry) => entry.timestampSeconds >= utcStartTime)
     const fetchData = useCallback(async () => {
@@ -164,7 +164,7 @@ const TokenChart = ({ address, color, base, priceData, chartFilter, timeWindow, 
             )}
             {chartFilter === CHART_VIEW.PRICE &&
                 (frequency === DATA_FREQUENCY.LINE ? (
-                    <ResponsiveContainer aspect={below1080 ? 60 / 32 : 60 / 16}>
+                    <ResponsiveContainer aspect={below1080 ? 60 / 42 : 60 / 32}>
                         <AreaChart margin={{ top: 0, right: 40, bottom: 6, left: 0 }} barCategoryGap={1} data={chartData}>
                             <defs>
                                 <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
@@ -225,7 +225,7 @@ const TokenChart = ({ address, color, base, priceData, chartFilter, timeWindow, 
                 ) : priceData && priceData.length ? (
                     <ResponsiveContainer aspect={aspect} ref={ref}>
                         {/* <CandleStickChart data={priceData} width={width} base={base} /> */}
-                        <Chart stock={"Stock"} interval="60" width="100%" tokenId={address} symbol={symbol.toUpperCase() + "/USD"} height="100%" />
+                        <Chart stock={"Stock"} interval="60" width={width} height={width/aspect} tokenId={address} symbol={symbol.toUpperCase() + "/USD"} />
                     </ResponsiveContainer>
                 ) : (
                     // <LocalLoader />
