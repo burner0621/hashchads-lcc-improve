@@ -91,13 +91,13 @@ export default function MyApp(props) {
                 <SettingsProvider defaultSettings={settings}>
                   <MotionLazyContainer>
                     <ThemeProvider>
-                      <ThemeSettings>
+                      {/* <ThemeSettings> */}
                         <NotistackProvider>
                           <ChartStyle />
                           <ProgressBar />
                           {getLayout(<Component {...pageProps} />)}
                         </NotistackProvider>
-                      </ThemeSettings>
+                      {/* </ThemeSettings> */}
                     </ThemeProvider>
                   </MotionLazyContainer>
                 </SettingsProvider>

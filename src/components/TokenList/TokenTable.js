@@ -118,7 +118,8 @@ const SORT_FIELD = {
     CHANGE: 'dailyPriceChange',
     DAILYCHANGE: 'dailyChanged',
     WEEKLYCHANGE: 'weeklyChanged',
-    MONTHLYCHANGE: 'monthlyChanged'
+    MONTHLYCHANGE: 'monthlyChanged',
+    MC: 'marketcap'
 }
 
 const TokenTable = ({ tokens = [], itemMax = 25, useTracked = false, show = 1, type='all', liq='1' }) => {
@@ -253,7 +254,7 @@ const TokenTable = ({ tokens = [], itemMax = 25, useTracked = false, show = 1, t
                         </span>
                     }
                 </DataText>
-                {/* )} */}
+                <DataText area="liq" color="text" fontWeight="500" style={{ minWidth: 100 }}>{formattedNum(item.marketcap, true)}</DataText>
                 <DataText area="liq" color="text" fontWeight="500" style={{ minWidth: 100 }}>{formattedNum(item.liquidity, true)}</DataText>
                 <DataText area="vol" color="text" fontWeight="500" style={{ minWidth: 100 }}>{formattedNum(item.dailyVolume * hbarPrice, true)}</DataText>
                 {/* {!below1080 &&  */}
@@ -329,6 +330,17 @@ const TokenTable = ({ tokens = [], itemMax = 25, useTracked = false, show = 1, t
                             }}
                         >
                             30D {sortedColumn === SORT_FIELD.MONTHLYCHANGE ? (!sortDirection ? '↑' : '↓') : ''}
+                        </ClickableText>
+                    </Flex>
+                    <Flex alignItems="center" style={{ minWidth: 110 }}>
+                        <ClickableText
+                            area="marketcap"
+                            onClick={(e) => {
+                                setSortedColumn(SORT_FIELD.MC)
+                                setSortDirection(sortedColumn !== SORT_FIELD.MC ? true : !sortDirection)
+                            }}
+                        >
+                            Market Cap {sortedColumn === SORT_FIELD.MC ? (!sortDirection ? '↑' : '↓') : ''}
                         </ClickableText>
                     </Flex>
                     <Flex alignItems="center" style={{ minWidth: 110 }}>

@@ -97,9 +97,9 @@ export default function TokenPage() {
     const below1080 = useMedia('(max-width: 1080px)')
     const below600 = useMedia('(max-width: 600px)')
 
-    const [isMobile, setIsMobile] = useState (false)
-    useEffect (() => {
-      setIsMobile (below600)
+    const [isMobile, setIsMobile] = useState(false)
+    useEffect(() => {
+        setIsMobile(below600)
     }, [below600])
 
     const [name, setName] = useState('')
@@ -738,7 +738,80 @@ export default function TokenPage() {
                                                     </RowFixed>
                                                 </div>
                                             </div>
-
+                                            <div className="flex space-around mt-3">
+                                                {
+                                                    socialInfos && socialInfos['Linktree'] &&
+                                                    <div className="flex ml-[10px]">
+                                                        <a target="_blank" className="tooltipp" href={socialInfos['Linktree']} rel="noreferrer">
+                                                            <span className="tooltiptext">LinkTree</span>
+                                                            <img src="/socials/linktree.png" width="20" />
+                                                        </a>
+                                                    </div>
+                                                }
+                                                {
+                                                    socialInfos && socialInfos['Website'] &&
+                                                    <div className="flex ml-[10px]">
+                                                        <a target="_blank" className="tooltipp" href={socialInfos['Website']} rel="noreferrer">
+                                                            <span className="tooltiptext">Website</span>
+                                                            <img src="/socials/website.png" width="20" />
+                                                        </a>
+                                                    </div>
+                                                }
+                                                {
+                                                    socialInfos && socialInfos['Twitter'] &&
+                                                    <div className="flex ml-[10px]">
+                                                        <a target="_blank" className="tooltipp" href={socialInfos['Twitter']} rel="noreferrer">
+                                                            <span className="tooltiptext">Twitter</span>
+                                                            <img src="/socials/twitter.png" width="20" />
+                                                        </a>
+                                                    </div>
+                                                }
+                                                {
+                                                    socialInfos && socialInfos['Discord'] &&
+                                                    <div className="flex ml-[10px]">
+                                                        <a target="_blank" className="tooltipp" href={socialInfos['Discord']} rel="noreferrer">
+                                                            <span className="tooltiptext">Discord</span>
+                                                            <img src="/socials/discord.png" width="20" />
+                                                        </a>
+                                                    </div>
+                                                }
+                                                {
+                                                    socialInfos && socialInfos['Telegram'] &&
+                                                    <div className="flex ml-[10px]">
+                                                        <a target="_blank" className="tooltipp" href={socialInfos['Telegram']} rel="noreferrer">
+                                                            <span className="tooltiptext">Telegram</span>
+                                                            <img src="/socials/telegram.png" width="20" />
+                                                        </a>
+                                                    </div>
+                                                }
+                                                {
+                                                    socialInfos && socialInfos['Reddit'] &&
+                                                    <div className="flex ml-[10px]">
+                                                        <a target="_blank" className="tooltipp" href={socialInfos['Reddit']} rel="noreferrer">
+                                                            <span className="tooltiptext">Reddit</span>
+                                                            <img src="/socials/reddit.png" width="20" />
+                                                        </a>
+                                                    </div>
+                                                }
+                                                {
+                                                    socialInfos && socialInfos['GitHub'] &&
+                                                    <div className="flex ml-[10px]">
+                                                        <a target="_blank" className="tooltipp" href={socialInfos['GitHub']} rel="noreferrer">
+                                                            <span className="tooltiptext">GitHub</span>
+                                                            <img src="/socials/github.png" width="20" />
+                                                        </a>
+                                                    </div>
+                                                }
+                                                {
+                                                    socialInfos && socialInfos['Calaxy'] &&
+                                                    <div className="flex ml-[10px]">
+                                                        <a target="_blank" className="tooltipp" href={socialInfos['Calaxy']} rel="noreferrer">
+                                                            <span className="tooltiptext">Calaxy</span>
+                                                            <img src="/socials/calaxy.jpg" width="20" />
+                                                        </a>
+                                                    </div>
+                                                }
+                                            </div>
                                         </div>
                                         <div className="items-baseline w-fit">
                                             <div className="flex-wrap items-start mt-2 sm:mt-0 sm:items-end mb-4 flex flex-col">
@@ -756,80 +829,6 @@ export default function TokenPage() {
                                                         </Text>
                                                     </a>
                                                 </AutoRow>
-                                                <div className="flex space-around mt-3">
-                                                    {
-                                                        socialInfos && socialInfos['Linktree'] &&
-                                                        <div className="flex ml-[10px]">
-                                                            <a target="_blank" className="tooltipp" href={socialInfos['Linktree']} rel="noreferrer">
-                                                                <span className="tooltiptext">LinkTree</span>
-                                                                <img src="/socials/linktree.png" width="20" />
-                                                            </a>
-                                                        </div>
-                                                    }
-                                                    {
-                                                        socialInfos && socialInfos['Website'] &&
-                                                        <div className="flex ml-[10px]">
-                                                            <a target="_blank" className="tooltipp" href={socialInfos['Website']} rel="noreferrer">
-                                                                <span className="tooltiptext">Website</span>
-                                                                <img src="/socials/website.png" width="20" />
-                                                            </a>
-                                                        </div>
-                                                    }
-                                                    {
-                                                        socialInfos && socialInfos['Twitter'] &&
-                                                        <div className="flex ml-[10px]">
-                                                            <a target="_blank" className="tooltipp" href={socialInfos['Twitter']} rel="noreferrer">
-                                                                <span className="tooltiptext">Twitter</span>
-                                                                <img src="/socials/twitter.png" width="20" />
-                                                            </a>
-                                                        </div>
-                                                    }
-                                                    {
-                                                        socialInfos && socialInfos['Discord'] &&
-                                                        <div className="flex ml-[10px]">
-                                                            <a target="_blank" className="tooltipp" href={socialInfos['Discord']} rel="noreferrer">
-                                                                <span className="tooltiptext">Discord</span>
-                                                                <img src="/socials/discord.png" width="20" />
-                                                            </a>
-                                                        </div>
-                                                    }
-                                                    {
-                                                        socialInfos && socialInfos['Telegram'] &&
-                                                        <div className="flex ml-[10px]">
-                                                            <a target="_blank" className="tooltipp" href={socialInfos['Telegram']} rel="noreferrer">
-                                                                <span className="tooltiptext">Telegram</span>
-                                                                <img src="/socials/telegram.png" width="20" />
-                                                            </a>
-                                                        </div>
-                                                    }
-                                                    {
-                                                        socialInfos && socialInfos['Reddit'] &&
-                                                        <div className="flex ml-[10px]">
-                                                            <a target="_blank" className="tooltipp" href={socialInfos['Reddit']} rel="noreferrer">
-                                                                <span className="tooltiptext">Reddit</span>
-                                                                <img src="/socials/reddit.png" width="20" />
-                                                            </a>
-                                                        </div>
-                                                    }
-                                                    {
-                                                        socialInfos && socialInfos['GitHub'] &&
-                                                        <div className="flex ml-[10px]">
-                                                            <a target="_blank" className="tooltipp" href={socialInfos['GitHub']} rel="noreferrer">
-                                                                <span className="tooltiptext">GitHub</span>
-                                                                <img src="/socials/github.png" width="20" />
-                                                            </a>
-                                                        </div>
-                                                    }
-                                                    {
-                                                        socialInfos && socialInfos['Calaxy'] &&
-                                                        <div className="flex ml-[10px]">
-                                                            <a target="_blank" className="tooltipp" href={socialInfos['Calaxy']} rel="noreferrer">
-                                                                <span className="tooltiptext">Calaxy</span>
-                                                                <img src="/socials/calaxy.jpg" width="20" />
-                                                            </a>
-                                                        </div>
-                                                    }
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -842,7 +841,7 @@ export default function TokenPage() {
                         <div className="flex flex-col md:flex-row gap-2">
                             <div className="w-full md:w-9/12 mb-5" style={{ marginBottom: '20px' }}>
                                 <div className="flex flex-col bg-[#274963] panel-shadow br-10 p-0.5 sm:p-4">
-                                    <div className="bg-[#0b1217] rounded-2xl py-2 px-0 sm:px-2 mb-3 panel-shadow h-fit" ref={ref} style={{ height: isMobile? 350: chartCompHeight }}>
+                                    <div className="bg-[#0b1217] rounded-2xl py-2 px-0 sm:px-2 mb-3 panel-shadow h-fit" ref={ref} style={{ height: isMobile ? 350 : chartCompHeight }}>
                                         {isMobile ? (
                                             <RowBetween>
                                                 <DropdownSelect options={CHART_VIEW} active={chartFilter} setActive={setChartFilter} color={'#ff007a'} />
@@ -979,61 +978,61 @@ export default function TokenPage() {
                                                     <ImpulseSpinner />
                                                 </div>
                                                 <div className="overflow-x-auto max-w-[300px] sm:max-w-[9999px]">
-                                                <DataTable
-                                                    className={isLoaded ? "height-50 hidden" : "visible"}
-                                                    customStyles={{
-                                                        headRow: {
-                                                            style: {
-                                                                background: "#0b1217",
-                                                                color: "white"
-                                                            }
-                                                        },
-                                                        table: {
-                                                            style: {
-                                                                background: "#0B1217",
-                                                                color: "white"
-                                                            }
-                                                        },
-                                                        rows: {
-                                                            style: {
-                                                                background: "#0B1217",
-                                                                color: "white"
-                                                            }
-                                                        },
-                                                        pagination: {
-                                                            style: {
-                                                                background: "#0B1217",
-                                                                color: "white",
-                                                                borderRadius: '15px'
+                                                    <DataTable
+                                                        className={isLoaded ? "height-50 hidden" : "visible"}
+                                                        customStyles={{
+                                                            headRow: {
+                                                                style: {
+                                                                    background: "#0b1217",
+                                                                    color: "white"
+                                                                }
                                                             },
-                                                            pageButtonsStyle: {
-                                                                color: "white",
-                                                                fill: "white"
+                                                            table: {
+                                                                style: {
+                                                                    background: "#0B1217",
+                                                                    color: "white"
+                                                                }
+                                                            },
+                                                            rows: {
+                                                                style: {
+                                                                    background: "#0B1217",
+                                                                    color: "white"
+                                                                }
+                                                            },
+                                                            pagination: {
+                                                                style: {
+                                                                    background: "#0B1217",
+                                                                    color: "white",
+                                                                    borderRadius: '15px'
+                                                                },
+                                                                pageButtonsStyle: {
+                                                                    color: "white",
+                                                                    fill: "white"
+                                                                }
+                                                            },
+                                                            noData: {
+                                                                style: {
+                                                                    background: "#0B1217",
+                                                                    color: "white"
+                                                                }
+                                                            },
+                                                            cells: {
+                                                                style: {
+                                                                    paddingRight: "0px",
+                                                                    color: "white"
+                                                                }
                                                             }
-                                                        },
-                                                        noData: {
-                                                            style: {
-                                                                background: "#0B1217",
-                                                                color: "white"
-                                                            }
-                                                        },
-                                                        cells: {
-                                                            style: {
-                                                                paddingRight: "0px",
-                                                                color: "white"
-                                                            }
-                                                        }
-                                                    }}
-                                                    columns={columns}
-                                                    data={data || []}
-                                                    pagination
-                                                    paginationServer
-                                                    paginationTotalRows={totalRows}
-                                                    onChangePage={handlePageChange}
-                                                    onChangeRowsPerPage={handlePerRowsChange}
-                                                    currentPage={currentPage}
-                                                    rowsPerPage={rowsPerPage}
-                                                />
+                                                        }}
+                                                        columns={columns}
+                                                        data={data || []}
+                                                        pagination
+                                                        paginationServer
+                                                        paginationTotalRows={totalRows}
+                                                        onChangePage={handlePageChange}
+                                                        onChangeRowsPerPage={handlePerRowsChange}
+                                                        currentPage={currentPage}
+                                                        rowsPerPage={rowsPerPage}
+                                                    />
                                                 </div>
                                             </>
                                             // )

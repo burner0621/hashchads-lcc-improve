@@ -74,7 +74,7 @@ export default function GlobalStats() {
                             formattedHbarPrice === undefined && <Spinner className='px-2' color="light" type="grow" style={{ verticalAlign: 'middle' }} />
                         }
                         {
-                            formattedHbarPrice !== undefined && <span className='font-semibold text-white py-0.5 rounded-full border border-white ml-1 px-2' style={{ fontSize: 13 }}>{formattedHbarPrice}</span>
+                            formattedHbarPrice !== undefined && <span className='font-semibold text-white py-0.5 rounded-full ml-1 px-2' style={{ fontSize: 13 }}>{formattedHbarPrice}</span>
                         }
                     </Text>
 
@@ -83,7 +83,7 @@ export default function GlobalStats() {
                             (formattedTvlUSD === undefined || formattedTvlHBAR === undefined) && <Spinner className='px-2' color="light" type="grow" style={{ verticalAlign: 'middle' }} />
                         }
                         {
-                            formattedTvlUSD !== undefined && formattedTvlHBAR !== undefined && <span className='font-semibold text-white p-0.5 rounded-md border border-white ml-1 px-2' style={{ fontSize: 13 }}>{`${formattedTvlUSD} (${formattedTvlHBAR} ℏ)`}</span>
+                            formattedTvlUSD !== undefined && formattedTvlHBAR !== undefined && <span className='font-semibold text-white p-0.5 rounded-md ml-1 px-2' style={{ fontSize: 13 }}>{`${formattedTvlUSD} (${formattedTvlHBAR} ℏ)`}</span>
                         }
                     </Text>
 
@@ -92,7 +92,7 @@ export default function GlobalStats() {
                             (todayVolumeUSD === undefined || formattedTodayVolume === undefined) && <Spinner className='px-2' color="light" type="grow" style={{ verticalAlign: 'middle' }} />
                         }
                         {
-                            todayVolumeUSD !== undefined && formattedTodayVolume !== undefined && <span className='font-semibold text-white p-0.5 rounded-md border border-white ml-1 px-2' style={{ fontSize: 13 }}>{`${formattedNum(todayVolumeUSD * hBarPrice, true)} (${formattedTodayVolume} ℏ)`}</span>
+                            todayVolumeUSD !== undefined && formattedTodayVolume !== undefined && <span className='font-semibold text-white p-0.5 rounded-md ml-1 px-2' style={{ fontSize: 13 }}>{`${formattedNum(todayVolumeUSD * hBarPrice, true)} (${formattedTodayVolume} ℏ)`}</span>
                         }
                     </Text>
                 </RowFixed>

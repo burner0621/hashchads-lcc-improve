@@ -65,15 +65,15 @@ export default function Overview() {
           {
             isMobile ? (
               <Carousel className="px-3">
-                <Trending data={gainerTokens.slice(0, 6)} title={"Gainer Tokens"} />
-                <Trending data={loserTokens.slice(0, 6)} title={"Loser Tokens"} />
-                <Trending data={newTokens.slice(0, 6)} title={"Recently Added"} />
+                <Trending data={gainerTokens.slice(0, 6)} title={"TOP GAINERS"} />
+                <Trending data={loserTokens.slice(0, 6)} title={"TOP LOSERS"} />
+                <Trending data={newTokens.slice(0, 6)} title={"RECENTLY ADDED"} />
               </Carousel>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <Trending data={gainerTokens.slice(0, 6)} title={"Gainer Tokens"} />
-                <Trending data={loserTokens.slice(0, 6)} title={"Loser Tokens"} />
-                <Trending data={newTokens.slice(0, 6)} title={"Recently Added"} />
+                <Trending data={gainerTokens.slice(0, 6)} title={"TOP GAINERS"} />
+                <Trending data={loserTokens.slice(0, 6)} title={"TOP LOSERS"} />
+                <Trending data={newTokens.slice(0, 6)} title={"RECENTLY ADDED"} />
               </div>
             )
           }

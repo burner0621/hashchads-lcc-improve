@@ -1,3 +1,5 @@
+import { formattedNum } from '../../utils'
+
 const Trending = ({ data, title }) => (
   <div className="my-1 md:my-5">
     <div className="py-0.5 px-0.5 md:py-2 md:px-2">
@@ -51,7 +53,7 @@ const Trending = ({ data, title }) => (
                   }
                   {`${Number(item.change).toFixed(2)}%`}
                 </div>
-                <div className="text-xs text-gray-300 text-right">6,735,889 ℏ</div>
+                <div className="text-xs text-gray-300 text-right">{`${formattedNum(item.dailyVolume)} ℏ`}</div>
               </div>
             </div>
           )

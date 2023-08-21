@@ -54,13 +54,13 @@ const AssetCap = () => {
                     >
                         Tokens
                     </div>
-                    <div className={listType === 1 ?
+                    {/* <div className={listType === 1 ?
                         "px-3 py-0.5 md:py-2 w-17.5 text-xs sm:text-sm flex flex-row w-fit justify-center items-center cursor-pointer hover:bg-gray-weight rounded bg-darker-grey-blue border border-main-red" :
                         "px-3 py-0.5 md:py-2 w-17.5 text-xs sm:text-sm flex flex-row w-fit justify-center items-center cursor-pointer hover:bg-gray-weight rounded"}
                         onClick={() => setListType(1)}
                     >
                         Pairs
-                    </div>
+                    </div> */}
                 </div>
                 <div className="flex flex-row gap-0 bg-dark-grey-blue rounded">
                     <div className={dtype === 0 ?
