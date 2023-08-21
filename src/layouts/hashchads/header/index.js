@@ -79,11 +79,11 @@ export default function HashchadsHeader({ onOpenSidebar, isCollapse = false, ver
         {/* <Box sx={{ flexGrow: 1 }} /> */}
 
         <Stack direction="row" alignItems="center" spacing={{ xs: 0.5, sm: 1.5 }} className='justify-between w-full'>
-          <GlobalStats />
+          <GlobalStats style={{maxWidth: "50%"}}/>
           {/* <LanguagePopover /> */}
           {/* <NotificationsPopover /> */}
           {/* <ContactsPopover /> */}
-          <Search display={'all'} />
+          <Search display={'all'} style={{maxWidth: "50%"}} />
           {/* <AccountPopover /> */}
         </Stack>
       </Toolbar>

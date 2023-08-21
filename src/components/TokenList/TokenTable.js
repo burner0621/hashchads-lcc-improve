@@ -163,7 +163,7 @@ const TokenTable = ({ tokens = [], itemMax = 25, useTracked = false, show = 1, t
                 <DataText area="price" color="text" fontWeight="500" style={{ justifyContent: 'flex-end', minWidth: 60 }}>
                     {formattedNum(item.priceUsd, true)}
                 </DataText>
-                <DataText area="24H" color="text" fontWeight="500" style={{ minWidth: 40, paddingRight: 4 }}>
+                <DataText area="24H" color="text" fontWeight="500" style={{ minWidth: 80, paddingRight: 4 }}>
                     {
                         Number(item.dailyPriceChange) >= 0 &&
                         <span className='text-green-weight'>
@@ -193,7 +193,7 @@ const TokenTable = ({ tokens = [], itemMax = 25, useTracked = false, show = 1, t
                         </span>
                     }
                 </DataText>
-                <DataText area="7D" color="text" fontWeight="500" style={{ minWidth: 40, paddingRight: 4 }}>
+                <DataText area="7D" color="text" fontWeight="500" style={{ minWidth: 70, paddingRight: 4 }}>
                     {
                         item.weeklyChanged >= 0 &&
                         <span className='text-green-weight'>
@@ -223,7 +223,7 @@ const TokenTable = ({ tokens = [], itemMax = 25, useTracked = false, show = 1, t
                         </span>
                     }
                 </DataText>
-                <DataText area="30D" color="text" fontWeight="500" style={{ minWidth: 40, paddingRight: 4 }}>
+                <DataText area="30D" color="text" fontWeight="500" style={{ minWidth: 70, paddingRight: 4 }}>
                     {
                         item.monthlyChanged >= 0 &&
                         <span className='text-green-weight'>
@@ -254,8 +254,8 @@ const TokenTable = ({ tokens = [], itemMax = 25, useTracked = false, show = 1, t
                     }
                 </DataText>
                 {/* )} */}
-                <DataText area="liq" color="text" fontWeight="500" style={{ minWidth: 120 }}>{formattedNum(item.liquidity, true)}</DataText>
-                <DataText area="vol" color="text" fontWeight="500" style={{ minWidth: 110 }}>{formattedNum(item.dailyVolume * hbarPrice, true)}</DataText>
+                <DataText area="liq" color="text" fontWeight="500" style={{ minWidth: 100 }}>{formattedNum(item.liquidity, true)}</DataText>
+                <DataText area="vol" color="text" fontWeight="500" style={{ minWidth: 100 }}>{formattedNum(item.dailyVolume * hbarPrice, true)}</DataText>
                 {/* {!below1080 &&  */}
                 <DataText area="priceChart" color="text" fontWeight="500" style={{ minWidth: 110, paddingRight: 4 }}>
                     <svg viewBox="0 0 500 100" className="chart">
@@ -274,7 +274,7 @@ const TokenTable = ({ tokens = [], itemMax = 25, useTracked = false, show = 1, t
         <ListWrapper>
             <div style={{ overflowX: "auto" }}>
                 <DashGrid center="true" style={{ height: 'fit-content', padding: '0 8px 1rem 8px', display: "flex" }}>
-                    <Flex alignItems="center" justifyContent="flexStart" style={{ minWidth: 120 }}>
+                    <Flex alignItems="center" justifyContent="flexStart" style={{ minWidth: 140 }}>
                         <ClickableText
                             color="text"
                             area="name"
@@ -287,7 +287,7 @@ const TokenTable = ({ tokens = [], itemMax = 25, useTracked = false, show = 1, t
                             {'Name'} {sortedColumn === SORT_FIELD.SYMBOL ? (!sortDirection ? '↑' : '↓') : ''}
                         </ClickableText>
                     </Flex>
-                    <Flex alignItems="center" style={{ minWidth: 60 }}>
+                    <Flex alignItems="center" style={{justifyContent:"flex-end", minWidth: 60 }}>
                         <ClickableText
                             area="price"
                             onClick={(e) => {

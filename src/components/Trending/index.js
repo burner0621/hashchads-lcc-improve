@@ -1,6 +1,6 @@
 const Trending = ({ data, title }) => (
-  <div className="my-2 sm:my-5">
-    <div className="py-2 px-2">
+  <div className="my-1 md:my-5">
+    <div className="py-0.5 px-0.5 md:py-2 md:px-2">
       <div className="flex flex-row justify-between mb-4">
         <span className="flex flex-row font-thin text-lg">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 stroke-1 hover:stroke-2 mr-1">
@@ -11,7 +11,7 @@ const Trending = ({ data, title }) => (
         </span>
         <span className="text-sm text-gray-400">Last 24H</span>
       </div>
-      <div className="grid grid-cols-2 gap-5 mt-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-5 mt-2">
         {
           data.slice(0, 6).map((item, idx) => (
             // eslint-disable-next-line react/jsx-key
@@ -20,15 +20,16 @@ const Trending = ({ data, title }) => (
                 <span className="self-center">{idx + 1}</span>
                 {
                   item.iconPath &&
-                  <img src={`https://saucerswap.finance${item.iconPath}`} className="w-8 h-8 mx-1" />
+                  // eslint-disable-next-line jsx-a11y/alt-text
+                  <img src={`https://saucerswap.finance${item.iconPath}`} className="!w-8 h-8 mx-1"/>
                 }
                 {
                   item.iconPath === null &&
                   <span alt={''} className="text-3xl" role="img" aria-label="face">🤔</span>
                 }
                 <div className="flex flex-col gap-1">
-                  <span className="text-xs text-white">{item.coinName}</span>
-                  <span className="text-xs text-gray-300">{`$${item.price}`}</span>
+                  <span className="text-xs text-white text-left">{item.coinName}</span>
+                  <span className="text-xs text-gray-300 text-left">{`$${item.price}`}</span>
                 </div>
               </div>
               <div className="flex flex-col">

@@ -203,7 +203,7 @@ export default function GeneralTokens() {
                     <Container maxWidth="1980">
                         <PageWrapper>
                             <RowBetween>
-                                <Nav tabs className="flex flex-row">
+                                <Nav tabs className="flex flex-row" style={{border: "none"}}>
                                     <NavItem>
                                         <NavLink className="cursor-pointer p-0 rounded-large" onClick={() => { handleTokenType(TOKEN_TYPE.gainer) }} >
                                             {/* <Badge pill color="success" className="absolute top-0 left-full translate-middle">{gainerTokens.length}
@@ -213,7 +213,7 @@ export default function GeneralTokens() {
                                                 badgeContent={gainerTokens.length}
                                                 className={tokenType == TOKEN_TYPE.all || tokenType == TOKEN_TYPE.gainer ? "bg-black" : "bg-dark-grey-blue"}
                                             >
-                                                <Button variant="outlined" className="flex flex-row" color="success">
+                                                <Button variant="outlined" className="flex flex-row" color="success" style={{minWidth: 100}}>
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
                                                     </svg> Gainers
@@ -228,7 +228,7 @@ export default function GeneralTokens() {
                                                 badgeContent={loserTokens.length}
                                                 className={tokenType == TOKEN_TYPE.all || tokenType == TOKEN_TYPE.loser ? "bg-black" : "bg-dark-grey-blue"}
                                             >
-                                                <Button variant="outlined" className="flex flex-row" color="success">
+                                                <Button variant="outlined" className="flex flex-row min-w-[100px]" color="success" style={{minWidth: 100}}>
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181" />
                                                     </svg> Losers
@@ -237,7 +237,7 @@ export default function GeneralTokens() {
                                         </NavLink>
                                     </NavItem>
                                 </Nav>
-                                <div className="items-center flex-block">
+                                <div className="items-end flex flex-col sm:flex-row">
                                     <FormGroup switch style={{ marginRight: '5px', display: "flex" }}>
                                         <Switch
                                             checked={showLiquidity}
@@ -246,7 +246,7 @@ export default function GeneralTokens() {
                                             }}
                                             inputProps={{ 'aria-label': 'controlled' }}
                                         />
-                                        <Label check className="text-lg font-medium flex items-center">$500+ Liquidity</Label>
+                                        <Label check className="text-lg font-medium flex items-center text-right">$500+ Liquidity</Label>
                                     </FormGroup>
                                     <Button variant="contained" onClick={exportToCsv} className="btn-download btn-animation" size="md" color="warning" style={{ marginLeft: '5px' }} outline>
                                         {

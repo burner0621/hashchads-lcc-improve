@@ -44,15 +44,10 @@ const ContentWrapper = styled.div`
   align-items: start;
   grid-template-columns: 1fr;
   grid-gap: 24px;
-  max-width: 1980px;
   width: 100%;
   margin: 0 0;
   padding: 0 0;
   box-sizing: border-box;
-  @media screen and (max-width: 1440px) {
-    grid-template-columns: 1fr;
-    padding: 0 1rem;
-  }
 `
 const WarningGrouping = styled.div`
   opacity: ${({ disabled }) => disabled && '0.4'};
@@ -102,6 +97,11 @@ export default function TokenPage() {
     const below1080 = useMedia('(max-width: 1080px)')
     const below600 = useMedia('(max-width: 600px)')
 
+    const [isMobile, setIsMobile] = useState (false)
+    useEffect (() => {
+      setIsMobile (below600)
+    }, [below600])
+
     const [name, setName] = useState('')
     const [symbol, setSymbol] = useState('')
     const [priceUSD, setPriceUSD] = useState(0)
@@ -142,6 +142,9 @@ export default function TokenPage() {
 
     const [period, setPeriod] = useState(PRICE_PERIOD[0])
 
+    const [chartCompWidth, setChartCompWidth] = useState(0)
+    const [chartCompHeight, setChartCompHeight] = useState(0)
+
     const prevWindow = usePrevious(timeWindow)
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -151,7 +154,7 @@ export default function TokenPage() {
             let jsonData = await response.data;
             setTokenInDb(jsonData)
         }
-    })
+    }, [address])
 
     useEffect(() => {
         fetchTokenByAddress()
@@ -180,29 +183,30 @@ export default function TokenPage() {
     const priceData = [0]
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    async function fetchNameAndSymbolData() {
+    const fetchNameAndSymbolData = useCallback(async () => {
         let response = await fetch(process.env.MIRROR_NODE_URL + "/api/v1/tokens/" + address);
         if (response.status === 200) {
             let jsonData = await response.json()
             setName(jsonData?.name)
             setSymbol(jsonData?.symbol)
         }
-    }
-
-    useEffect(() => {
-        async function fetchSocialData() {
-            let res = await fetch(process.env.API_URL + `/tokens/get_social?tokenId=${address}`)
-            if (res.status === 200) {
-                let jsonData = await res.json()
-                setSocialInfos(jsonData)
-            }
-        }
-        if (address) fetchSocialData()
     }, [address])
 
     useEffect(() => {
         fetchNameAndSymbolData()
-    }, [address, fetchNameAndSymbolData])
+    }, [fetchNameAndSymbolData])
+
+    const fetchSocialData = useCallback(async () => {
+        let res = await fetch(process.env.API_URL + `/tokens/get_social?tokenId=${address}`)
+        if (res.status === 200) {
+            let jsonData = await res.json()
+            setSocialInfos(jsonData)
+        }
+    }, [address])
+
+    useEffect(() => {
+        fetchSocialData()
+    }, [fetchSocialData])
 
     const fetchData = useCallback(async () => {
         const res = await fetch(`${process.env.API_URL}/tokens/get_transactions?tokenId=${address}&pageNum=${currentPage}&pageSize=${rowsPerPage}`)
@@ -673,61 +677,71 @@ export default function TokenPage() {
         },
     ];
 
+    const ref = useRef()
+
+    const setChartHeight = useCallback(() => {
+        if (ref.current.offsetWidth > 0) {
+            setChartCompWidth(ref.current.offsetWidth)
+            setChartCompHeight(ref.current.offsetWidth * 0.6)
+        }
+    }, [])
+    useEffect(() => {
+        setChartHeight()
+    }, [setChartHeight])
+
     return (
         <Page title={`Token Page: ${address}`}>
             <div className="page-content">
-                <div className="max-w-[1980px] p-0">
-                    <ContentWrapper style={{ margin: "auto" }}>
+                <div className="p-0">
+                    <ContentWrapper style={{ margin: "auto" }} className="px-2 sm:px-4">
                         <div className="flex flex-col rounded ">
 
                             <WarningGrouping disabled={false}>
                                 <DashboardWrapper style={{ marginTop: below1080 ? '0' : '0' }}>
-                                    <Row >
-                                        <Col sm={12} md={6} style={{ alignItems: 'baseline' }}>
-                                            <div className="flex flex-col">
-                                                <div className="flex flex-row">
-                                                    <TokenLogo path={iconPath} size="48px" style={{ alignSelf: 'center' }} />
-                                                    <div fontSize={below1080 ? '1.5rem' : '2rem'} fontWeight={500} style={{ margin: '0 1rem' }}>
-                                                        <RowFixed gap="6px">
-                                                            <div className="mr-3 text-[24px] text-white">{name}</div>{' '}
-                                                            <span className="text-[18px] text-gray-600">{formattedSymbol ? `(${formattedSymbol})` : ''}</span>
-                                                        </RowFixed>
-                                                        <RowFixed>
-                                                            <span className="mr-4 text-[16px] font-medium">
-                                                                {`$` + priceUSD.toFixed(8)}
-                                                            </span>
-                                                            <span className="flex flex-row text-white px-[5px] py-[3px] rounded-3xl" style={{ background: priceChangeColor }}>
-                                                                {priceChange}
-                                                            </span>
-                                                            <span>
-                                                                <button id="period" dataDropdownToggle="dropdown" className="text-gray-400 bg-transparent text-xs p-1.5 text-center inline-flex items-center" type="button" onClick={() => { dropdownShow === "hidden" ? setDropdownShow('') : setDropdownShow('hidden') }}>
-                                                                    {period}
-                                                                    <svg className="w-2.5 h-2.5 ml-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                                                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                                                                    </svg>
-                                                                </button>
-                                                                <div id="dropdown" className={dropdownShow + " absolute z-10 bg-transparent divide-y divide-gray-100 rounded-lg shadow w-10"} >
-                                                                    <ul className="py-2 text-xs text-gray-400 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
-                                                                        {
-                                                                            PRICE_PERIOD.map((item, idx) => {
-                                                                                return (
-                                                                                    <li key={idx} onClick={() => periodItemClick(item)}>
-                                                                                        <a href="#" className="block py-2 hover:bg-gray-700 hover:text-gray-300 rounded-lg text-center">{item}</a>
-                                                                                    </li>
-                                                                                )
-                                                                            })
-                                                                        }
-                                                                    </ul>
-                                                                </div>
-                                                            </span>
-                                                        </RowFixed>
-                                                    </div>
+                                    <div className="flex flex-col sm:flex-row sm:justify-between" >
+                                        <div className="items-baseline w-fit">
+                                            <div className="flex flex-row w-fit">
+                                                <TokenLogo path={iconPath} size="48px" style={{ alignSelf: 'center' }} />
+                                                <div fontSize={below1080 ? '1.5rem' : '2rem'} fontWeight={500} style={{ margin: '0 1rem' }}>
+                                                    <RowFixed gap="6px">
+                                                        <div className="mr-3 text-[24px] text-white">{name}</div>{' '}
+                                                        <span className="text-[18px] text-gray-600">{formattedSymbol ? `(${formattedSymbol})` : ''}</span>
+                                                    </RowFixed>
+                                                    <RowFixed>
+                                                        <span className="mr-4 text-[16px] font-medium">
+                                                            {`$` + priceUSD.toFixed(8)}
+                                                        </span>
+                                                        <span className="flex flex-row text-white px-[5px] py-[3px] rounded-3xl" style={{ background: priceChangeColor }}>
+                                                            {priceChange}
+                                                        </span>
+                                                        <span>
+                                                            <button id="period" dataDropdownToggle="dropdown" className="text-gray-400 bg-transparent text-xs p-1.5 text-center inline-flex items-center" type="button" onClick={() => { dropdownShow === "hidden" ? setDropdownShow('') : setDropdownShow('hidden') }}>
+                                                                {period}
+                                                                <svg className="w-2.5 h-2.5 ml-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                                                                </svg>
+                                                            </button>
+                                                            <div id="dropdown" className={dropdownShow + " absolute z-10 bg-transparent divide-y divide-gray-100 rounded-lg shadow w-10"} >
+                                                                <ul className="py-2 text-xs text-gray-400 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
+                                                                    {
+                                                                        PRICE_PERIOD.map((item, idx) => {
+                                                                            return (
+                                                                                <li key={idx} onClick={() => periodItemClick(item)}>
+                                                                                    <a href="#" className="block py-2 hover:bg-gray-700 hover:text-gray-300 rounded-lg text-center">{item}</a>
+                                                                                </li>
+                                                                            )
+                                                                        })
+                                                                    }
+                                                                </ul>
+                                                            </div>
+                                                        </span>
+                                                    </RowFixed>
                                                 </div>
                                             </div>
 
-                                        </Col>
-                                        <Col sm={12} md={6}>
-                                            <div className="flex-wrap items-end mb-4 flex flex-col">
+                                        </div>
+                                        <div className="items-baseline w-fit">
+                                            <div className="flex-wrap items-start mt-2 sm:mt-0 sm:items-end mb-4 flex flex-col">
                                                 <AutoRow align="flex-end" style={{ width: 'fit-content' }}>
                                                     <div className="font-medium, text-sm text-white">
                                                         <a href="/hashchads/tokens">{'Tokens '}</a>→ {symbol}
@@ -806,10 +820,19 @@ export default function TokenPage() {
                                                             </a>
                                                         </div>
                                                     }
+                                                    {
+                                                        socialInfos && socialInfos['Calaxy'] &&
+                                                        <div className="flex ml-[10px]">
+                                                            <a target="_blank" className="tooltipp" href={socialInfos['Calaxy']} rel="noreferrer">
+                                                                <span className="tooltiptext">Calaxy</span>
+                                                                <img src="/socials/calaxy.png" width="20" />
+                                                            </a>
+                                                        </div>
+                                                    }
                                                 </div>
                                             </div>
-                                        </Col>
-                                    </Row>
+                                        </div>
+                                    </div>
                                 </DashboardWrapper>
                             </WarningGrouping>
                         </div>
@@ -818,103 +841,114 @@ export default function TokenPage() {
                         </Row> */}
                         <div className="flex flex-col md:flex-row gap-2">
                             <div className="w-full md:w-9/12 mb-5" style={{ marginBottom: '20px' }}>
-                                <div className="flex flex-col bg-[#274963] panel-shadow br-10" style={{ padding: '15px' }}>
-                                    <div className="bg-[#0b1217] rounded-2xl p-2 mb-3 panel-shadow h-fit">
-                                    {below600 ? (
-                                        <RowBetween mb={40}>
-                                            <DropdownSelect options={CHART_VIEW} active={chartFilter} setActive={setChartFilter} color={'#ff007a'} />
-                                            <DropdownSelect options={timeframeOptions} active={timeWindow} setActive={setTimeWindow} color={'#ff007a'} />
-                                        </RowBetween>
-                                    ) : (
-                                        <RowBetween
-                                            mb={20}
-                                            align="flex-start"
-                                            className="p-2 rounded-xl"
-                                        >
-                                            <AutoRow justify="flex-start" gap="6px" align="flex-start">
-                                                {/* <RowFixed> */}
-                                                <OptionButton
-                                                    active={chartFilter === CHART_VIEW.LIQUIDITY}
-                                                    onClick={() => setChartFilter(CHART_VIEW.LIQUIDITY)}
-                                                    style={{ marginRight: '6px' }}
-                                                    className={chartFilter === CHART_VIEW.LIQUIDITY ? "green-bg" : ""}
-                                                >
-                                                    Liquidity
-                                                </OptionButton>
-                                                <OptionButton
-                                                    active={chartFilter === CHART_VIEW.VOLUME}
-                                                    onClick={() => setChartFilter(CHART_VIEW.VOLUME)}
-                                                    style={{ marginRight: '6px' }}
-                                                    className={chartFilter === CHART_VIEW.VOLUME ? "green-bg" : ""}
-                                                >
-                                                    Volume
-                                                </OptionButton>
-                                                <OptionButton
-                                                    style={{ cursor: 'pointer' }}
-                                                    active={chartFilter === CHART_VIEW.PRICE}
-                                                    onClick={() => {
-                                                        setChartFilter(CHART_VIEW.PRICE)
-                                                    }}
-                                                    className={chartFilter === CHART_VIEW.PRICE ? "green-bg" : ""}
-                                                >
-                                                    Price
-                                                </OptionButton>
-                                                {/* </RowFixed> */}
-                                                {chartFilter === CHART_VIEW.PRICE && (
-                                                    <>
-                                                        <PriceOption
-                                                            active={frequency === DATA_FREQUENCY.DAY}
-                                                            onClick={() => {
-                                                                setTimeWindow(timeframeOptions.MONTH)
-                                                                setFrequency(DATA_FREQUENCY.DAY)
-                                                            }}
-                                                            style={frequency === DATA_FREQUENCY.DAY ? { background: "green" } : {}}
-                                                        >
-                                                            D
-                                                        </PriceOption>
-                                                        <PriceOption
-                                                            active={frequency === DATA_FREQUENCY.HOUR}
-                                                            onClick={() => setFrequency(DATA_FREQUENCY.HOUR)}
-                                                            style={frequency === DATA_FREQUENCY.HOUR ? { background: "green" } : {}}
-                                                        >
-                                                            H
-                                                        </PriceOption>
-                                                        <PriceOption
-                                                            active={frequency === DATA_FREQUENCY.LINE}
-                                                            onClick={() => setFrequency(DATA_FREQUENCY.LINE)}
-                                                            style={frequency === DATA_FREQUENCY.LINE ? { background: "green" } : {}}
-                                                        >
-                                                            <Activity size={18} />
-                                                        </PriceOption>
-                                                    </>
-                                                )}
-                                            </AutoRow>
-                                            <AutoRow justify="flex-end" gap="6px" align="flex-start">
-                                                <OptionButton
-                                                    active={timeWindow === timeframeOptions.WEEK}
-                                                    onClick={() => setTimeWindow(timeframeOptions.WEEK)}
-                                                    className={timeWindow === timeframeOptions.WEEK ? "green-bg" : ""}
-                                                >
-                                                    1W
-                                                </OptionButton>
-                                                <OptionButton
-                                                    active={timeWindow === timeframeOptions.MONTH}
-                                                    onClick={() => setTimeWindow(timeframeOptions.MONTH)}
-                                                    className={timeWindow === timeframeOptions.MONTH ? "green-bg" : ""}
-                                                >
-                                                    1M
-                                                </OptionButton>
-                                                <OptionButton
-                                                    active={timeWindow === timeframeOptions.ALL_TIME}
-                                                    onClick={() => setTimeWindow(timeframeOptions.ALL_TIME)}
-                                                    className={timeWindow === timeframeOptions.ALL_TIME ? "green-bg" : ""}
-                                                >
-                                                    All
-                                                </OptionButton>
-                                            </AutoRow>
-                                        </RowBetween>
-                                    )}
-                                    <TokenChart address={address} color={'#ff007a'} base={priceUSD} priceData={priceData} chartFilter={chartFilter} timeWindow={timeWindow} frequency={frequency} symbol={symbol} />
+                                <div className="flex flex-col bg-[#274963] panel-shadow br-10 p-0.5 sm:p-4">
+                                    <div className="bg-[#0b1217] rounded-2xl py-2 px-0 sm:px-2 mb-3 panel-shadow h-fit" ref={ref} style={{ height: isMobile? 350: chartCompHeight }}>
+                                        {isMobile ? (
+                                            <RowBetween>
+                                                <DropdownSelect options={CHART_VIEW} active={chartFilter} setActive={setChartFilter} color={'#ff007a'} />
+                                                <DropdownSelect options={timeframeOptions} active={timeWindow} setActive={setTimeWindow} color={'#ff007a'} />
+                                            </RowBetween>
+                                        ) : (
+                                            <RowBetween
+                                                mb={20}
+                                                align="flex-start"
+                                                className="p-2 rounded-xl"
+                                            >
+                                                <AutoRow justify="flex-start" gap="6px" align="flex-start">
+                                                    {/* <RowFixed> */}
+                                                    <OptionButton
+                                                        active={chartFilter === CHART_VIEW.LIQUIDITY}
+                                                        onClick={() => setChartFilter(CHART_VIEW.LIQUIDITY)}
+                                                        style={{ marginRight: '6px' }}
+                                                        className={chartFilter === CHART_VIEW.LIQUIDITY ? "green-bg" : ""}
+                                                    >
+                                                        Liquidity
+                                                    </OptionButton>
+                                                    <OptionButton
+                                                        active={chartFilter === CHART_VIEW.VOLUME}
+                                                        onClick={() => setChartFilter(CHART_VIEW.VOLUME)}
+                                                        style={{ marginRight: '6px' }}
+                                                        className={chartFilter === CHART_VIEW.VOLUME ? "green-bg" : ""}
+                                                    >
+                                                        Volume
+                                                    </OptionButton>
+                                                    <OptionButton
+                                                        style={{ cursor: 'pointer' }}
+                                                        active={chartFilter === CHART_VIEW.PRICE}
+                                                        onClick={() => {
+                                                            setChartFilter(CHART_VIEW.PRICE)
+                                                        }}
+                                                        className={chartFilter === CHART_VIEW.PRICE ? "green-bg" : ""}
+                                                    >
+                                                        Price
+                                                    </OptionButton>
+                                                    {/* </RowFixed> */}
+                                                    {chartFilter === CHART_VIEW.PRICE && (
+                                                        <>
+                                                            <PriceOption
+                                                                active={frequency === DATA_FREQUENCY.DAY}
+                                                                onClick={() => {
+                                                                    setTimeWindow(timeframeOptions.MONTH)
+                                                                    setFrequency(DATA_FREQUENCY.DAY)
+                                                                }}
+                                                                style={frequency === DATA_FREQUENCY.DAY ? { background: "green" } : {}}
+                                                            >
+                                                                D
+                                                            </PriceOption>
+                                                            <PriceOption
+                                                                active={frequency === DATA_FREQUENCY.HOUR}
+                                                                onClick={() => setFrequency(DATA_FREQUENCY.HOUR)}
+                                                                style={frequency === DATA_FREQUENCY.HOUR ? { background: "green" } : {}}
+                                                            >
+                                                                H
+                                                            </PriceOption>
+                                                            <PriceOption
+                                                                active={frequency === DATA_FREQUENCY.LINE}
+                                                                onClick={() => setFrequency(DATA_FREQUENCY.LINE)}
+                                                                style={frequency === DATA_FREQUENCY.LINE ? { background: "green" } : {}}
+                                                            >
+                                                                <Activity size={18} />
+                                                            </PriceOption>
+                                                        </>
+                                                    )}
+                                                </AutoRow>
+                                                <AutoRow justify="flex-end" gap="6px" align="flex-start">
+                                                    <OptionButton
+                                                        active={timeWindow === timeframeOptions.WEEK}
+                                                        onClick={() => setTimeWindow(timeframeOptions.WEEK)}
+                                                        className={timeWindow === timeframeOptions.WEEK ? "green-bg" : ""}
+                                                    >
+                                                        1W
+                                                    </OptionButton>
+                                                    <OptionButton
+                                                        active={timeWindow === timeframeOptions.MONTH}
+                                                        onClick={() => setTimeWindow(timeframeOptions.MONTH)}
+                                                        className={timeWindow === timeframeOptions.MONTH ? "green-bg" : ""}
+                                                    >
+                                                        1M
+                                                    </OptionButton>
+                                                    <OptionButton
+                                                        active={timeWindow === timeframeOptions.ALL_TIME}
+                                                        onClick={() => setTimeWindow(timeframeOptions.ALL_TIME)}
+                                                        className={timeWindow === timeframeOptions.ALL_TIME ? "green-bg" : ""}
+                                                    >
+                                                        All
+                                                    </OptionButton>
+                                                </AutoRow>
+                                            </RowBetween>
+                                        )}
+                                        <TokenChart
+                                            address={address}
+                                            color={'#ff007a'}
+                                            base={priceUSD}
+                                            priceData={priceData}
+                                            chartFilter={chartFilter}
+                                            timeWindow={timeWindow}
+                                            frequency={frequency}
+                                            symbol={symbol}
+                                            pWidth={chartCompWidth}
+                                            pHeight={chartCompHeight}
+                                        />
                                     </div>
                                     <div className="bg-[#0b1217] rounded-2xl panel-shadow">
                                         <div className="flex justify-start">
@@ -944,7 +978,7 @@ export default function TokenPage() {
                                                 <div className={isLoaded ? "visible flex w-full items-center justify-center" : "hidden flex w-full items-center justify-center"}>
                                                     <ImpulseSpinner />
                                                 </div>
-
+                                                <div className="overflow-x-auto max-w-[300px] sm:max-w-[9999px]">
                                                 <DataTable
                                                     className={isLoaded ? "height-50 hidden" : "visible"}
                                                     customStyles={{
@@ -1000,11 +1034,12 @@ export default function TokenPage() {
                                                     currentPage={currentPage}
                                                     rowsPerPage={rowsPerPage}
                                                 />
+                                                </div>
                                             </>
                                             // )
                                         ))}
                                         {tableType === TABLE_TYPE.holder && (
-                                            <>
+                                            <div className="overflow-x-auto max-w-[300px] sm:max-w-[9999px]">
                                                 {
                                                     holderInfo && holderInfo.length > 0 ?
                                                         (<DataTable
@@ -1060,7 +1095,7 @@ export default function TokenPage() {
                                                             </div>
                                                         )
                                                 }
-                                            </>
+                                            </div>
                                         )}
                                         {tableType == TABLE_TYPE.fee && (
                                             <DataTable
@@ -1116,8 +1151,8 @@ export default function TokenPage() {
                                 </div>
                             </div>
                             {/* <TokenChart dataColors='["--vz-success", "--vz-danger"]' tokenId={address} /> */}
-                            <div className="w-full md:w-3/12 w-fit">
-                                <div className="flex flex-col w-fit">
+                            <div className="w-full md:w-3/12">
+                                <div className="flex flex-col">
                                     <Card className="card-animate bg-[#274963] panel-shadow rounded-[10px]">
                                         <CardBody>
                                             <div className="flex flex-col">

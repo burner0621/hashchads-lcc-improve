@@ -66,10 +66,10 @@ export default function GlobalStats() {
     // useHbarAndSaucePrice()
     return (
         <Header id="globalStats">
-            <div className='justify-between' style={{ padding: below816 ? '0.5rem' : '.5rem' }}>
+            <div className='justify-between' style={{ padding: '0.5rem 0.5rem 0.5rem 0'}}>
                 <RowFixed>
 
-                    <Text className='flex flex-row items-center text-grey-light'>{"HBAR Price: "}
+                    <Text className='flex flex-row items-center text-grey-light' style={{margin: "14px 14px 14px 0"}}>{"HBAR Price: "}
                         {
                             formattedHbarPrice === undefined && <Spinner className='px-2' color="light" type="grow" style={{ verticalAlign: 'middle' }} />
                         }

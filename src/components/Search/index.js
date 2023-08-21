@@ -31,22 +31,20 @@ const Wrapper = styled.div`
   position: relative;
   flex-direction: row;
   align-items: center;
-  justify-content: flex-end;
   padding: 6px 10px;
   border-radius: 12px;
-  border-bottom-right-radius: ${({ open }) => (open ? '0px' : '12px')};
-  border-bottom-left-radius: ${({ open }) => (open ? '0px' : '12px')};
+  border-bottom-right-radius: ${({ open }) => (open === "true" ? '0px' : '12px')};
+  border-bottom-left-radius: ${({ open }) => (open === "true" ? '0px' : '12px')};
   z-index: 9999;
   width: 100%;
-  min-width: 300px;
   box-sizing: border-box;
   box-shadow: ${({ open, small }) =>
-        !open && !small
+        open !== "true" && small !== "true"
             ? '0px 24px 32px rgba(0, 0, 0, 0.04), 0px 16px 24px rgba(0, 0, 0, 0.04), 0px 4px 8px rgba(0, 0, 0, 0.04), 0px 0px 1px rgba(0, 0, 0, 0.04) '
             : 'none'};
   @media screen and (max-width: 500px) {
     box-shadow: ${({ open }) =>
-        !open
+        open === "false"
             ? '0px 24px 32px rgba(0, 0, 0, 0.04), 0px 16px 24px rgba(0, 0, 0, 0.04), 0px 4px 8px rgba(0, 0, 0, 0.04), 0px 0px 1px rgba(0, 0, 0, 0.04) '
             : 'none'};
   }
@@ -60,7 +58,7 @@ const Input = styled.input`
   border: none;
   outline: none;
   width: 100%;
-  font-size: ${({ large }) => (large ? '16px' : '12px')};
+  font-size: ${({ large }) => (large === "true"  ? '16px' : '12px')};
 
   ::placeholder {
     font-size: 16px;
@@ -165,6 +163,7 @@ export const Search = ({ small = false, display }) => {
     const below700 = useMedia('(max-width: 700px)')
     const below470 = useMedia('(max-width: 470px)')
     const below410 = useMedia('(max-width: 410px)')
+    const below300 = useMedia('(max-width: 300px)')
 
     const fetchData = useCallback(async () => {
         let response = await axios.get(`${process.env.API_URL}/tokens/simple_all`)
@@ -383,7 +382,7 @@ export const Search = ({ small = false, display }) => {
 
     return (
         <Container small={small.toString()} className='max-w-[150px] sm:max-w-[360px]'>
-            <Wrapper open={showMenu} shadow="true" small={small.toString()} style={{ border: "solid 1px #ff007a" }}>
+            <Wrapper open={showMenu} shadow="true" small={small.toString()} className="justify-start sm:justify-end min-w-[150px] sm:min-w-[300px]" style={{ border: "solid 1px #ff007a" }}>
                 <Input
                     large={(!small).toString()}
                     type={'text'}
@@ -391,7 +390,7 @@ export const Search = ({ small = false, display }) => {
                     placeholder={
                         small
                             ? ''
-                            : below410
+                            : below300
                                 ? 'Search...'
                                 : below470
                                     ? 'Search ...'
@@ -432,7 +431,7 @@ export const Search = ({ small = false, display }) => {
                                     return (
                                         <a key={pair.contractId} onClick={() => {onDismiss();redirectPairPage(pair.contractId)}}>
                                             <MenuItem>
-                                                <DoubleTokenLogo id={index} a0={pair?.tokenA?.icon} a1={pair?.tokenB?.icon} margin={true} />
+                                                <DoubleTokenLogo id={index} a0={pair?.tokenA?.icon} a1={pair?.tokenB?.icon} margin="true" />
                                                 <div style={{ marginLeft: '10px' }}>
                                                     {pair.tokenA.symbol + '-' + pair.tokenB.symbol} Pair
                                                 </div>

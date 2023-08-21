@@ -19,8 +19,6 @@ const PageButtons = styled.div`
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-top: 2em;
-  margin-bottom: 2em;
 `
 
 const Arrow = styled.div`
@@ -190,7 +188,7 @@ const TopTokenList = ({ tokens = [], itemMax = 25, useTracked = false, show = 1,
                 <DataText area="price" color="text" fontWeight="500" style={{ justifyContent: 'flex-end', minWidth: 60 }}>
                     {formattedNum(item.priceUsd, true)}
                 </DataText>
-                <DataText area="24H" color="text" fontWeight="500" style={{ minWidth: 40, paddingRight: 4 }}>
+                <DataText area="24H" color="text" fontWeight="500" style={{ minWidth: 80, paddingRight: 4 }}>
                     {
                         Number(item.dailyPriceChange) >= 0 &&
                         <span className='text-green-weight'>
@@ -220,7 +218,7 @@ const TopTokenList = ({ tokens = [], itemMax = 25, useTracked = false, show = 1,
                         </span>
                     }
                 </DataText>
-                <DataText area="7D" color="text" fontWeight="500" style={{ minWidth: 40, paddingRight: 4 }}>
+                <DataText area="7D" color="text" fontWeight="500" style={{ minWidth: 70, paddingRight: 4 }}>
                     {
                         item.weeklyChanged >= 0 &&
                         <span className='text-green-weight'>
@@ -250,7 +248,7 @@ const TopTokenList = ({ tokens = [], itemMax = 25, useTracked = false, show = 1,
                         </span>
                     }
                 </DataText>
-                <DataText area="30D" color="text" fontWeight="500" style={{ minWidth: 40, paddingRight: 4 }}>
+                <DataText area="30D" color="text" fontWeight="500" style={{ minWidth: 70, paddingRight: 4 }}>
                     {
                         item.monthlyChanged >= 0 &&
                         <span className='text-green-weight'>
@@ -281,8 +279,8 @@ const TopTokenList = ({ tokens = [], itemMax = 25, useTracked = false, show = 1,
                     }
                 </DataText>
                 {/* )} */}
-                <DataText area="liq" color="text" fontWeight="500" style={{ minWidth: 120 }}>{formattedNum(item.liquidity, true)}</DataText>
-                <DataText area="vol" color="text" fontWeight="500" style={{ minWidth: 110 }}>{formattedNum(item.dailyVolume * hbarPrice, true)}</DataText>
+                <DataText area="liq" color="text" fontWeight="500" style={{ minWidth: 100 }}>{formattedNum(item.liquidity, true)}</DataText>
+                <DataText area="vol" color="text" fontWeight="500" style={{ minWidth: 100 }}>{formattedNum(item.dailyVolume * hbarPrice, true)}</DataText>
                 {/* {!below1080 &&  */}
                 <DataText area="priceChart" color="text" fontWeight="500" style={{ minWidth: 110, paddingRight: 4 }}>
                     <svg viewBox="0 0 500 100" className="chart">
@@ -401,7 +399,7 @@ const TopTokenList = ({ tokens = [], itemMax = 25, useTracked = false, show = 1,
             </div>
             {
                 show === 1 &&
-                <PageButtons>
+                <PageButtons className='mt-2 sm:my-5'>
                     <div onClick={() => setPage(page === 1 ? page : page - 1)}>
                         <Arrow faded={page === 1 ? "true" : "false"}>←</Arrow>
                     </div>

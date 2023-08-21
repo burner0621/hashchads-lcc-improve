@@ -36,19 +36,30 @@ const DATA_FREQUENCY = {
     LINE: 'LINE',
 }
 
-const TokenChart = ({ address, color, base, priceData, chartFilter, timeWindow, frequency, symbol }) => {
+const TokenChart = (props) => {
+    const { address, color, base, priceData, chartFilter, timeWindow, frequency, symbol, pWidth, pHeight } = props
     const textColor = 'white'
-
+    
     const [chartData, setChartData] = useState([])
     const [dailyData, setDailyData] = useState([])
     const [hourlyData, setHourlyData] = useState([])
 
     const below1080 = useMedia('(max-width: 1080px)')
+    const below800 = useMedia('(max-width: 800px)')
     const below600 = useMedia('(max-width: 600px)')
+
+    const [isMobile, setIsMobile] = useState (false)
+    const [isBook, setIsBook] = useState (false)
+    useEffect (() => {
+      setIsMobile (below600)
+    }, [below600])
+    useEffect (() => {
+        setIsBook (below800)
+      }, [below800])
 
     let utcStartTime = getTimeframe(timeWindow)
     const domain = [(dataMin) => (dataMin > utcStartTime ? dataMin : utcStartTime), 'dataMax']
-    const aspect = below1080 ? 60 / 32 : below600 ? 60 / 42 : 60 / 32
+    const aspect = below1080 ? 60 / 32 : isMobile ? 60 / 42 : 60 / 32
 
     // chartData = chartData?.filter((entry) => entry.timestampSeconds >= utcStartTime)
     const fetchData = useCallback(async () => {
@@ -85,6 +96,7 @@ const TokenChart = ({ address, color, base, priceData, chartFilter, timeWindow, 
     const ref = useRef()
     const isClient = typeof window === 'object'
     const [width, setWidth] = useState(ref?.current?.container?.clientWidth)
+
     useEffect(() => {
         if (!isClient) {
             return false
@@ -97,7 +109,7 @@ const TokenChart = ({ address, color, base, priceData, chartFilter, timeWindow, 
     }, [isClient, width]) // Empty array ensures that effect is only run on mount and unmount
 
     return (
-        <ChartWrapper>
+        <ChartWrapper style={{height: isMobile?350:pHeight - 85}}>
             {chartFilter === CHART_VIEW.LIQUIDITY && chartData && chartData.length && (
                 <ResponsiveContainer aspect={aspect}>
                     <AreaChart margin={{ top: 0, right: 40, bottom: 6, left: 0 }} barCategoryGap={1} data={chartData}>
@@ -223,9 +235,9 @@ const TokenChart = ({ address, color, base, priceData, chartFilter, timeWindow, 
                         </AreaChart>
                     </ResponsiveContainer>
                 ) : priceData && priceData.length ? (
-                    <ResponsiveContainer aspect={aspect} ref={ref}>
+                    <ResponsiveContainer aspect={pWidth/pHeight} ref={ref} style={{height: isBook?isMobile? 400:600:pHeight}}>
                         {/* <CandleStickChart data={priceData} width={width} base={base} /> */}
-                        <Chart stock={"Stock"} interval="60" width={width} height={width/aspect} tokenId={address} symbol={symbol.toUpperCase() + "/USD"} />
+                        <Chart stock={"Stock"} interval="60" width={isMobile?pWidth - 16:pWidth - 8} height={isMobile?pHeight - 85:pHeight - 35} tokenId={address} symbol={symbol.toUpperCase() + "/USD"} />
                     </ResponsiveContainer>
                 ) : (
                     // <LocalLoader />

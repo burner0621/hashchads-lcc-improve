@@ -88,7 +88,7 @@ export default function PairPage() {
     const [weeklyVolumes, setWeeklyVolumes] = useState([])
     const [weeklyData, setWeeklyData] = useState([])
     const [hbarPrice, setHbarPrice] = useState(0)
-    console.log(contractId, ">>>>>>>>>>>")
+
     const getPairData = useCallback(async () => {
         let res = await axios.get(`${process.env.API_URL}/pools/get_pool_by_id?poolId=${contractId}`)
         if (res.status === 200) {
