@@ -68,7 +68,7 @@ const Logo = forwardRef(({ disabledLink = false, sx }, ref) => {
     return <>{logo}</>;
   }
 
-  return <NextLink href="/">{logo}</NextLink>;
+  return <NextLink href="/hashchads/overview">{logo}</NextLink>;
 });
 
 Logo.propTypes = {

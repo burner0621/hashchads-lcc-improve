@@ -1,11 +1,9 @@
-import dynamic from "next/dynamic";
 import React, { useCallback, useEffect, useState } from "react";
 import { useMedia } from 'react-use'
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from 'react-responsive-carousel';
 // @mui
 import { useTheme } from '@mui/material/styles';
-import { Container } from '@mui/material';
 // hooks
 import useSettings from '../../../hooks/useSettings';
 // layouts
