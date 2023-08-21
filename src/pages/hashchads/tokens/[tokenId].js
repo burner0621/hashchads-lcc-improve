@@ -825,7 +825,7 @@ export default function TokenPage() {
                                                         <div className="flex ml-[10px]">
                                                             <a target="_blank" className="tooltipp" href={socialInfos['Calaxy']} rel="noreferrer">
                                                                 <span className="tooltiptext">Calaxy</span>
-                                                                <img src="/socials/calaxy.png" width="20" />
+                                                                <img src="/socials/calaxy.jpg" width="20" />
                                                             </a>
                                                         </div>
                                                     }
