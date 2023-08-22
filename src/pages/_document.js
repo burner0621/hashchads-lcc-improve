@@ -40,26 +40,28 @@ export default class MyDocument extends Document {
           />
 
           <link
-                href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
-                rel="stylesheet"
-                integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We"
-                crossOrigin="anonymous"
-              />
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We"
+            crossOrigin="anonymous"
+          />
 
           <script src="/charting_library/charting_library.js" type="text/javascript" />
-          {/* <script
-            async
-            src="https://www.googletagmanager.com/gtag/js?id=G-BLH2FRPRLN"
-          ></script>
-          <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag() {
-              dataLayer.push(arguments);
-            }
-            gtag("js", new Date());
+          <script
+            strategy="lazyOnload"
+            src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS}`}
+          />
 
-            gtag("config", "G-BLH2FRPRLN");
-          </script> */}
+          <script strategy="lazyOnload">
+            {`
+                    window.dataLayer = window.dataLayer || [];
+                    function gtag(){dataLayer.push(arguments);}
+                    gtag('js', new Date());
+                    gtag('config', '${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS}', {
+                    page_path: window.location.pathname,
+                    });
+                `}
+          </script>
 
           <meta
             name="description"
@@ -71,7 +73,7 @@ export default class MyDocument extends Document {
           <meta name="author" content="Minimal UI Kit" />
         </Head>
 
-        <body className='bg-[#0b1217]' style={{fontFamily: "'Nurito Sans', sans-serif", color: 'white', lineHeight: 1.5, fontSize: 13, fontWeigth: 400}}>
+        <body className='bg-[#0b1217]' style={{ fontFamily: "'Nurito Sans', sans-serif", color: 'white', lineHeight: 1.5, fontSize: 13, fontWeigth: 400 }}>
           <Main />
           <NextScript />
         </body>
@@ -92,11 +94,11 @@ MyDocument.getInitialProps = async (ctx) => {
   ctx.renderPage = () =>
     originalRenderPage({
       enhanceApp: (App) => (props) =>
-        (
-          <CacheProvider value={cache}>
-            <App {...props} />
-          </CacheProvider>
-        ),
+      (
+        <CacheProvider value={cache}>
+          <App {...props} />
+        </CacheProvider>
+      ),
     });
 
   const initialProps = await Document.getInitialProps(ctx);

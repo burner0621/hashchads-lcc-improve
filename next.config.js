@@ -27,6 +27,7 @@ module.exports = withTM({
     API_URL: 'http://65.108.142.188:3001/api',
     // SOCKET_URL: "https://hashchads.app/prices",
     MIRROR_NODE_URL: "https://mainnet-public.mirrornode.hedera.com",
+    NEXT_PUBLIC_GOOGLE_ANALYTICS: 'G-BLH2FRPRLN',
     // MAPBOX
     MAPBOX_API: '',
     // FIREBASE
