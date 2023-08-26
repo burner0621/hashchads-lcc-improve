@@ -106,7 +106,7 @@ const Menu = styled.div`
   top: 50px;
   max-height: 540px;
   overflow: auto;
-  left: 0;
+  right: 0;
   padding-bottom: 20px;
   border-bottom-right-radius: 12px;
   border-bottom-left-radius: 12px;
@@ -411,48 +411,7 @@ export const Search = ({ small = false, display }) => {
                 />
                 {!showMenu ? <SearchIconLarge /> : <CloseIcon onClick={() => { toggleMenu(false); }} />}
             </Wrapper>
-            <Menu hide={(!showMenu).toString()} ref={menuRef} style={{ zIndex: "300", background: "#0b1217" }} className='absolute'>
-                {
-                    (display === "all" || display === "pair") &&
-                    <>
-                        <Heading>
-                            <Gray>Pairs</Gray>
-                        </Heading>
-                        <div>
-                            {filteredPairList && Object.keys(filteredPairList).length === 0 && (
-                                <MenuItem>
-                                    <div>No results</div>
-                                </MenuItem>
-                            )}
-                            {filteredPairList &&
-                                filteredPairList.slice(0, pairsShown).map((pair, index) => {
-                                    //format incorrect names
-                                    // updateNameData(pair)
-                                    return (
-                                        <a key={pair.contractId} onClick={() => {onDismiss();redirectPairPage(pair.contractId)}}>
-                                            <MenuItem>
-                                                <DoubleTokenLogo id={index} a0={pair?.tokenA?.icon} a1={pair?.tokenB?.icon} margin="true" />
-                                                <div style={{ marginLeft: '10px' }}>
-                                                    {pair.tokenA.symbol + '-' + pair.tokenB.symbol} Pair
-                                                </div>
-                                            </MenuItem>
-                                        </a>
-                                    )
-                                })}
-                            <Heading
-                                hide={(!(Object.keys(filteredPairList).length > 3 && Object.keys(filteredPairList).length >= pairsShown)).toString()}
-                            >
-                                <Blue
-                                    onClick={() => {
-                                        setPairsShown(pairsShown + 5)
-                                    }}
-                                >
-                                    See more...
-                                </Blue>
-                            </Heading>
-                        </div>
-                    </>
-                }
+            <Menu hide={(!showMenu).toString()} ref={menuRef} style={{ zIndex: "300", background: "#0b1217", minWidth:300 }} className='absolute'>
                 {
                     (display === "all" || display === "token") &&
                     <>
@@ -491,6 +450,47 @@ export const Search = ({ small = false, display }) => {
                                 <Blue
                                     onClick={() => {
                                         setTokensShown(tokensShown + 5)
+                                    }}
+                                >
+                                    See more...
+                                </Blue>
+                            </Heading>
+                        </div>
+                    </>
+                }
+                {
+                    (display === "all" || display === "pair") &&
+                    <>
+                        <Heading>
+                            <Gray>Pairs</Gray>
+                        </Heading>
+                        <div>
+                            {filteredPairList && Object.keys(filteredPairList).length === 0 && (
+                                <MenuItem>
+                                    <div>No results</div>
+                                </MenuItem>
+                            )}
+                            {filteredPairList &&
+                                filteredPairList.slice(0, pairsShown).map((pair, index) => {
+                                    //format incorrect names
+                                    // updateNameData(pair)
+                                    return (
+                                        <a key={pair.contractId} onClick={() => {onDismiss();redirectPairPage(pair.contractId)}}>
+                                            <MenuItem>
+                                                <DoubleTokenLogo id={index} a0={pair?.tokenA?.icon} a1={pair?.tokenB?.icon} margin="true" />
+                                                <div style={{ marginLeft: '10px' }}>
+                                                    {pair.tokenA.symbol + '-' + pair.tokenB.symbol} Pair
+                                                </div>
+                                            </MenuItem>
+                                        </a>
+                                    )
+                                })}
+                            <Heading
+                                hide={(!(Object.keys(filteredPairList).length > 3 && Object.keys(filteredPairList).length >= pairsShown)).toString()}
+                            >
+                                <Blue
+                                    onClick={() => {
+                                        setPairsShown(pairsShown + 5)
                                     }}
                                 >
                                     See more...
