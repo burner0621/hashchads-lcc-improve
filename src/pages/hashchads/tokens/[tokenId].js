@@ -401,7 +401,7 @@ export default function TokenPage() {
     }, [hbarPrice, fetchTotalPriceData])
 
     const fetchTotalPriceLatestData = useCallback(async () => {
-        const response = await fetch(`${process.env.API_URL}?address=${address}&interval=DAY`)
+        const response = await fetch(`${process.env.API_URL}/tokens/get_token_latest_prices?address=${address}&interval=DAY`)
         if (response.status === 200) {
             const jsonData = await response.json()
             setTotalLiquidity(jsonData.liquidityUsd)
