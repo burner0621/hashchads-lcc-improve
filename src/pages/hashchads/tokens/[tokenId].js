@@ -409,10 +409,14 @@ export default function TokenPage() {
         }
     }, [address])
 
+    // useEffect(() => {
+    //     if (totalLiquidity === undefined || totalLiquidity === 0) fetchTotalPriceLatestData()
+    //     if (priceUSD === undefined || priceUSD === 0) fetchTotalPriceLatestData()
+    // }, [address, fetchTotalPriceLatestData, priceUSD, totalLiquidity])
+
     useEffect(() => {
-        if (totalLiquidity === undefined || totalLiquidity === 0) fetchTotalPriceLatestData()
-        if (priceUSD === undefined || priceUSD === 0) fetchTotalPriceLatestData()
-    }, [address, fetchTotalPriceLatestData, priceUSD, totalLiquidity])
+        fetchTotalPriceLatestData()
+    }, [fetchTotalPriceLatestData])
 
     useEffect(() => {
         async function fetchTokenData() {
