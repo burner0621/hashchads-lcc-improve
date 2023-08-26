@@ -147,6 +147,8 @@ export default function TokenPage() {
 
     const prevWindow = usePrevious(timeWindow)
 
+    const timeInterval = useRef(undefined);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const fetchTokenByAddress = useCallback(async () => {
         let response = await axios.get(`${process.env.API_URL}/tokens/get_token_by_address?address=${address}`)
@@ -222,6 +224,14 @@ export default function TokenPage() {
             beforeCurrentPage = currentPage;
             beforeRowsPerPage = rowsPerPage;
         }
+    }, [address, currentPage, rowsPerPage])
+
+    useEffect(() => {
+        if (timeInterval.current) clearInterval(timeInterval.current);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        timeInterval.current = setInterval(async () => {
+            await fetchData()
+        }, 10000);
     }, [address, currentPage, rowsPerPage])
 
     useEffect(() => {
@@ -391,7 +401,7 @@ export default function TokenPage() {
     }, [hbarPrice, fetchTotalPriceData])
 
     const fetchTotalPriceLatestData = useCallback(async () => {
-        const response = await fetch(`https://api.saucerswap.finance/tokens/prices/latest/${address}?interval=DAY`)
+        const response = await fetch(`${process.env.API_URL}?address=${address}&interval=DAY`)
         if (response.status === 200) {
             const jsonData = await response.json()
             setTotalLiquidity(jsonData.liquidityUsd)
