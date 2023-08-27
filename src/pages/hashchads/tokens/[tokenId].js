@@ -141,6 +141,7 @@ export default function TokenPage() {
     const [statsDropdownShow, setStatsDropdownShow] = useState("hidden")
 
     const [period, setPeriod] = useState(PRICE_PERIOD[0])
+    const [showMorePanel, setShowMorePanel] = useState('hidden')
 
     const [chartCompWidth, setChartCompWidth] = useState(0)
     const [chartCompHeight, setChartCompHeight] = useState(0)
@@ -719,7 +720,22 @@ export default function TokenPage() {
                                                 <div fontSize={below1080 ? '1.5rem' : '2rem'} fontWeight={500} style={{ margin: '0 1rem' }}>
                                                     <RowFixed gap="6px">
                                                         <div className="mr-3 text-[24px] text-white">{name}</div>{' '}
-                                                        <span className="text-[18px] text-gray-600">{formattedSymbol ? `(${formattedSymbol})` : ''}</span>
+                                                        <span className="text-[18px] text-gray-100">{formattedSymbol ? `(${formattedSymbol})` : ''}</span>
+                                                        <a
+                                                            className="ml-4 text-green-400 w-fit flex flex-row items-center"
+                                                            external
+                                                            href={'https://hashscan.io/mainnet/token/' + address}
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                                                            </svg>
+
+                                                            <Text fontSize={'14px'} fontWeight={400} style={{ marginLeft: 4 }}>
+                                                                {/* {address.slice(0, 8) + '...' + address.slice(36, 42)} */}
+                                                                {address}
+                                                            </Text>
+                                                        </a>
                                                     </RowFixed>
                                                     <RowFixed>
                                                         <span className="mr-4 text-[16px] font-medium">
@@ -749,6 +765,164 @@ export default function TokenPage() {
                                                                 </ul>
                                                             </div>
                                                         </span>
+                                                        {
+                                                            isMobile &&
+                                                            <span>
+                                                                <button id="more" dataDropdownToggle="moreDropdown" className="text-gray-400 bg-transparent text-xs p-1.5 text-center inline-flex items-center" type="button" onClick={() => { showMorePanel === "hidden" ? setShowMorePanel('') : setShowMorePanel('hidden') }}>
+                                                                    More
+                                                                    <svg className="w-2.5 h-2.5 ml-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                                                                    </svg>
+                                                                </button>
+                                                                <div id="moreDropdown" className={showMorePanel + " absolute z-500 bg-transparent divide-y divide-gray-100 rounded-lg shadow right-0"} >
+                                                                    <div className="w-full md:w-3/12">
+                                                                        <div className="flex flex-col">
+                                                                            <Card className="card-animate bg-[#274963] panel-shadow rounded-[10px]">
+                                                                                <CardBody>
+                                                                                    <div className="flex flex-col">
+                                                                                        <div className="flex justify-between mb-[3px]" >
+                                                                                            <span className="w-auto font-medium text-white" />
+                                                                                            <span className="w-auto font-medium text-white">
+                                                                                                {
+                                                                                                    socialInfos !== undefined && socialInfos['DeepLink'] !== undefined &&
+                                                                                                    <a target="_blank" className="tooltipp ml-4 mr-2.5 flex flex-col justify-end" href={socialInfos['DeepLink']} rel="noreferrer">
+                                                                                                        <span className="tooltiptext">Swap</span>
+                                                                                                        <img src="/assets/images/trade.png" width="18" height="18" />
+                                                                                                    </a>
+                                                                                                }
+                                                                                                {
+                                                                                                    socialInfos !== undefined && socialInfos['Saucerswap'] !== undefined &&
+                                                                                                    <a target="_blank" className="tooltipp flex flex-col justify-end" href={socialInfos['Saucerswap']} rel="noreferrer">
+                                                                                                        <span className="tooltiptext">Trade</span>
+                                                                                                        <img src="/assets/images/saucerswap.png" width="18" height="18" />
+                                                                                                    </a>
+                                                                                                }
+                                                                                            </span>
+                                                                                        </div>
+                                                                                        <div className="flex flex-row justify-between mb-[10px] rounded-xl bg-black p-1.5" >
+                                                                                            <span className="w-fit">
+                                                                                                <button id="periodStats" dataDropdownToggle="statsDropdown" className="text-gray-400 bg-transparent text-xs p-1.5 text-center inline-flex items-center" type="button" onClick={() => { statsDropdownShow === "hidden" ? setStatsDropdownShow('') : setStatsDropdownShow('hidden') }}>
+                                                                                                    {timeRangeType}
+                                                                                                    <svg className="w-2.5 h-2.5 ml-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                                                                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                                                                                                    </svg>
+                                                                                                </button>
+                                                                                                <div id="statsDropdown" className={statsDropdownShow + " absolute z-10 bg-black divide-y divide-gray-100 rounded-lg shadow w-10"} >
+                                                                                                    <ul className="py-2 text-xs text-gray-400 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
+                                                                                                        {
+                                                                                                            Object.keys(TIME_RANGE_TYPE).map((key, idx) => {
+                                                                                                                return (
+                                                                                                                    <li key={idx} onClick={() => handleTimeRangeType(TIME_RANGE_TYPE[key])}>
+                                                                                                                        <a href="#" className="block py-2 hover:bg-gray-700 hover:text-gray-300 rounded-lg text-center">{TIME_RANGE_TYPE[key]}</a>
+                                                                                                                    </li>
+                                                                                                                )
+                                                                                                            })
+                                                                                                        }
+                                                                                                    </ul>
+                                                                                                </div>
+                                                                                            </span>
+                                                                                            <div className="flex space-around self-end justify-between">
+                                                                                                <div className="flex flex-col mx-2">
+                                                                                                    <span className="text-badge text-center text-xs">Txs</span>
+                                                                                                    <span className="text-white text-center text-xs">{statisticData?.txs}</span>
+                                                                                                </div>
+                                                                                                <div className="flex flex-col mx-2">
+                                                                                                    <span className="text-badge text-center text-xs">Buys</span>
+                                                                                                    <span className="text-white text-center text-xs">{statisticData?.buys}</span>
+                                                                                                </div>
+                                                                                                <div className="flex flex-col mx-2">
+                                                                                                    <span className="text-badge text-center text-xs">Sells</span>
+                                                                                                    <span className="text-white text-center text-xs">{statisticData?.sells}</span>
+                                                                                                </div>
+                                                                                                <div className="flex flex-col mx-2">
+                                                                                                    <span className="text-badge text-center text-xs">Vol</span>
+                                                                                                    <span className="text-white text-center text-xs">{formattedNum(statisticData?.vol * priceUSD, true, false, true)}</span>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <Row className="flex justify-between mb-[10px]" >
+                                                                                            <span className="w-auto font-medium text-white">Total Liquidity:</span>
+                                                                                            <span className="w-auto font-medium text-white text-right">{formattedNum(totalLiquidity ? parseFloat(totalLiquidity).toFixed(2) : 0, true)}</span>
+                                                                                        </Row>
+                                                                                        <Row className="flex justify-between mb-[10px]">
+                                                                                            <span className="w-auto font-medium text-white">24hr Volume:</span>
+                                                                                            <span className="w-auto font-medium text-white text-right">{formattedNum(dailyVolume ? parseFloat(dailyVolume).toFixed(2) : 0, true)}</span>
+                                                                                        </Row>
+                                                                                        <Row className="flex justify-between mb-[10px]">
+                                                                                            <span className="w-auto font-medium text-white">Market Cap(Circulating):</span>
+                                                                                            <span className="w-auto font-medium text-white text-right">{formattedNum(circulatingSupply ? parseFloat(circulatingSupply).toFixed(2) : 0, true)}</span>
+                                                                                        </Row>
+                                                                                        <Row className="flex justify-between mb-[10px]">
+                                                                                            <span className="w-auto font-medium text-white">Market Cap(Diluted):</span>
+                                                                                            <span className="w-auto font-medium text-white text-right">{formattedNum(dilutedSupply ? parseFloat(dilutedSupply).toFixed(2) : 0, true)}</span>
+                                                                                        </Row>
+                                                                                        <Row className="flex justify-between mb-[10px]">
+                                                                                            <span className="w-auto font-medium text-white">Treasury:</span>
+                                                                                            <span className="w-auto font-medium text-white text-right">{tokenInfo ? tokenInfo?.treasury_account_id : ''}</span>
+                                                                                        </Row>
+                                                                                        <Row className="flex justify-between mb-[10px]">
+                                                                                            <span className="w-auto font-medium text-white">Max Supply:</span>
+                                                                                            <span className="w-auto font-medium text-white text-right">{formattedNum(tokenInfo ? (tokenInfo?.total_supply / Math.pow(10, tokenInfo?.decimals)).toFixed(4) : '0')}</span>
+                                                                                        </Row>
+                                                                                        <Row className="flex justify-between mb-[10px]">
+                                                                                            <span className="w-auto font-medium text-white">Total Supply:</span>
+                                                                                            <span className="w-auto font-medium text-white text-right">{formattedNum(tokenInfo ? (tokenInfo?.total_supply / Math.pow(10, tokenInfo?.decimals)).toFixed(4) : '0')}</span>
+                                                                                        </Row>
+                                                                                        <Row className="flex justify-between mb-[10px]">
+                                                                                            <span className="w-auto font-medium text-white">Supply Type:</span>
+                                                                                            <span className="w-auto font-medium text-white text-right">{tokenInfo ? tokenInfo?.supply_type : ''}</span>
+                                                                                        </Row>
+                                                                                        {
+                                                                                            tokenInfo && tokenInfo.supply_key && tokenInfo.supply_key.key &&
+                                                                                            <Row className="grid grid-cols-2 justify-between mb-[10px]">
+                                                                                                <span className="w-auto font-medium text-white">Supply Key:</span>
+                                                                                                <span className="w-auto font-medium text-white text-right">{tokenInfo?.supply_key?.key}</span>
+                                                                                            </Row>
+                                                                                        }
+                                                                                        {
+                                                                                            tokenInfo && tokenInfo.freeze_key && tokenInfo.freeze_key.key &&
+                                                                                            <Row className="grid grid-cols-2 justify-between mb-[10px]">
+                                                                                                <span className="w-auto font-medium text-white">Freeze Key:</span>
+                                                                                                <span className="w-auto font-medium text-white text-right">{tokenInfo?.freeze_key?.key}</span>
+                                                                                            </Row>
+                                                                                        }
+                                                                                        {
+                                                                                            tokenInfo && tokenInfo.pause_key && tokenInfo.pause_key.key &&
+                                                                                            <Row className="grid grid-cols-2 justify-between mb-[10px]">
+                                                                                                <span className="w-auto font-medium text-white">Pause Key:</span>
+                                                                                                <span className="w-auto font-medium text-white text-right">{tokenInfo?.pause_key?.key}</span>
+                                                                                            </Row>
+                                                                                        }
+                                                                                        {
+                                                                                            tokenInfo && tokenInfo.wipe_key && tokenInfo.wipe_key.key &&
+                                                                                            <Row className="grid grid-cols-2 justify-between mb-[10px]">
+                                                                                                <span className="w-auto font-medium text-white">Wipe Key:</span>
+                                                                                                <span className="w-auto font-medium text-white text-right">{tokenInfo?.wipe_key?.key}</span>
+                                                                                            </Row>
+                                                                                        }
+                                                                                        {
+                                                                                            tokenInfo && tokenInfo.admin_key && tokenInfo.admin_key.key &&
+                                                                                            <Row className="grid grid-cols-2 justify-between mb-[10px]">
+                                                                                                <span className="w-auto font-medium text-white">Admin Key:</span>
+                                                                                                <span className="w-auto font-medium text-white text-right">{tokenInfo?.admin_key?.key}</span>
+                                                                                            </Row>
+                                                                                        }
+                                                                                        {
+                                                                                            tokenInfo &&
+                                                                                            <Row className="grid grid-cols-2 justify-between mb-[10px]">
+                                                                                                <span className="w-auto font-medium text-white">Created:</span>
+                                                                                                <span className="w-auto font-medium text-white text-right">{(new Date(Number(tokenInfo?.created_timestamp) * 1000)).toLocaleString("en-US")}</span>
+                                                                                            </Row>
+                                                                                        }
+                                                                                    </div>
+                                                                                </CardBody>
+                                                                            </Card>
+                                                                        </div>
+
+                                                                    </div>
+                                                                </div>
+                                                            </span>
+                                                        }
                                                     </RowFixed>
                                                 </div>
                                             </div>
@@ -827,7 +1001,7 @@ export default function TokenPage() {
                                                 }
                                             </div>
                                         </div>
-                                        <div className="items-baseline w-fit">
+                                        {/* <div className="items-baseline w-fit">
                                             <div className="flex-wrap items-start mt-2 sm:mt-0 sm:items-end mb-4 flex flex-col">
                                                 <AutoRow align="flex-end" style={{ width: 'fit-content' }}>
                                                     <div className="font-medium, text-sm text-white">
@@ -844,7 +1018,7 @@ export default function TokenPage() {
                                                     </a>
                                                 </AutoRow>
                                             </div>
-                                        </div>
+                                        </div> */}
                                     </div>
                                 </DashboardWrapper>
                             </WarningGrouping>
@@ -855,11 +1029,12 @@ export default function TokenPage() {
                         <div className="flex flex-col md:flex-row gap-2">
                             <div className="w-full md:w-9/12 mb-5" style={{ marginBottom: '20px' }}>
                                 <div className="flex flex-col bg-[#274963] panel-shadow br-10 p-0.5 sm:p-4">
-                                    <div className="bg-[#0b1217] rounded-2xl py-2 px-0 sm:px-2 mb-3 panel-shadow h-fit" ref={ref} style={{ height: isMobile ? 350 : chartCompHeight }}>
+                                    <div className="bg-[#0b1217] rounded-2xl py-2 px-0 sm:px-2 mb-3 panel-shadow h-fit" ref={ref}>
+                                        {/* <div className="bg-[#0b1217] rounded-2xl py-2 px-0 sm:px-2 mb-3 panel-shadow h-fit" ref={ref} style={{ height: isMobile ? 350 : chartCompHeight }}> */}
                                         {isMobile ? (
                                             <RowBetween>
                                                 <DropdownSelect options={CHART_VIEW} active={chartFilter} setActive={setChartFilter} color={'#ff007a'} />
-                                                <DropdownSelect options={timeframeOptions} active={timeWindow} setActive={setTimeWindow} color={'#ff007a'} />
+                                                <DropdownSelect options={timeframeOptions} active={timeWindow} setActive={setTimeWindow} color={'#ff007a'} right="true" />
                                             </RowBetween>
                                         ) : (
                                             <RowBetween
@@ -1164,151 +1339,154 @@ export default function TokenPage() {
                                 </div>
                             </div>
                             {/* <TokenChart dataColors='["--vz-success", "--vz-danger"]' tokenId={address} /> */}
-                            <div className="w-full md:w-3/12">
-                                <div className="flex flex-col">
-                                    <Card className="card-animate bg-[#274963] panel-shadow rounded-[10px]">
-                                        <CardBody>
-                                            <div className="flex flex-col">
-                                                <div className="flex justify-between mb-[3px]" >
-                                                    <span className="w-auto font-medium text-white" />
-                                                    <span className="w-auto font-medium text-white">
-                                                        {
-                                                            socialInfos !== undefined && socialInfos['DeepLink'] !== undefined &&
-                                                            <a target="_blank" className="tooltipp ml-4 mr-2.5 flex flex-col justify-end" href={socialInfos['DeepLink']} rel="noreferrer">
-                                                                <span className="tooltiptext">Swap</span>
-                                                                <img src="/assets/images/trade.png" width="18" height="18" />
-                                                            </a>
-                                                        }
-                                                        {
-                                                            socialInfos !== undefined && socialInfos['Saucerswap'] !== undefined &&
-                                                            <a target="_blank" className="tooltipp flex flex-col justify-end" href={socialInfos['Saucerswap']} rel="noreferrer">
-                                                                <span className="tooltiptext">Trade</span>
-                                                                <img src="/assets/images/saucerswap.png" width="18" height="18" />
-                                                            </a>
-                                                        }
-                                                    </span>
-                                                </div>
-                                                <div className="flex flex-row justify-between mb-[10px] rounded-xl bg-black p-1.5" >
-                                                    <span className="w-fit">
-                                                        <button id="periodStats" dataDropdownToggle="statsDropdown" className="text-gray-400 bg-transparent text-xs p-1.5 text-center inline-flex items-center" type="button" onClick={() => { statsDropdownShow === "hidden" ? setStatsDropdownShow('') : setStatsDropdownShow('hidden') }}>
-                                                            {timeRangeType}
-                                                            <svg className="w-2.5 h-2.5 ml-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                                                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                                                            </svg>
-                                                        </button>
-                                                        <div id="statsDropdown" className={statsDropdownShow + " absolute z-10 bg-black divide-y divide-gray-100 rounded-lg shadow w-10"} >
-                                                            <ul className="py-2 text-xs text-gray-400 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
-                                                                {
-                                                                    Object.keys(TIME_RANGE_TYPE).map((key, idx) => {
-                                                                        return (
-                                                                            <li key={idx} onClick={() => handleTimeRangeType(TIME_RANGE_TYPE[key])}>
-                                                                                <a href="#" className="block py-2 hover:bg-gray-700 hover:text-gray-300 rounded-lg text-center">{TIME_RANGE_TYPE[key]}</a>
-                                                                            </li>
-                                                                        )
-                                                                    })
-                                                                }
-                                                            </ul>
-                                                        </div>
-                                                    </span>
-                                                    <div className="flex space-around self-end">
-                                                        <div className="flex flex-col w-16">
-                                                            <span className="text-badge text-center text-xs">Txs</span>
-                                                            <span className="text-white text-center text-xs">{statisticData?.txs}</span>
-                                                        </div>
-                                                        <div className="flex flex-col w-16">
-                                                            <span className="text-badge text-center text-xs">Buys</span>
-                                                            <span className="text-white text-center text-xs">{statisticData?.buys}</span>
-                                                        </div>
-                                                        <div className="flex flex-col w-16">
-                                                            <span className="text-badge text-center text-xs">Sells</span>
-                                                            <span className="text-white text-center text-xs">{statisticData?.sells}</span>
-                                                        </div>
-                                                        <div className="flex flex-col w-16">
-                                                            <span className="text-badge text-center text-xs">Vol.</span>
-                                                            <span className="text-white text-center text-xs">{formattedNum(statisticData?.vol * priceUSD, true)}</span>
+                            {
+                                !isMobile &&
+                                <div className="w-full md:w-3/12">
+                                    <div className="flex flex-col">
+                                        <Card className="card-animate bg-[#274963] panel-shadow rounded-[10px]">
+                                            <CardBody>
+                                                <div className="flex flex-col">
+                                                    <div className="flex justify-between mb-[3px]" >
+                                                        <span className="w-auto font-medium text-white" />
+                                                        <span className="w-auto font-medium text-white">
+                                                            {
+                                                                socialInfos !== undefined && socialInfos['DeepLink'] !== undefined &&
+                                                                <a target="_blank" className="tooltipp ml-4 mr-2.5 flex flex-col justify-end" href={socialInfos['DeepLink']} rel="noreferrer">
+                                                                    <span className="tooltiptext">Swap</span>
+                                                                    <img src="/assets/images/trade.png" width="18" height="18" />
+                                                                </a>
+                                                            }
+                                                            {
+                                                                socialInfos !== undefined && socialInfos['Saucerswap'] !== undefined &&
+                                                                <a target="_blank" className="tooltipp flex flex-col justify-end" href={socialInfos['Saucerswap']} rel="noreferrer">
+                                                                    <span className="tooltiptext">Trade</span>
+                                                                    <img src="/assets/images/saucerswap.png" width="18" height="18" />
+                                                                </a>
+                                                            }
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex flex-row justify-between mb-[10px] rounded-xl bg-black p-1.5" >
+                                                        <span className="w-fit">
+                                                            <button id="periodStats" dataDropdownToggle="statsDropdown" className="text-gray-400 bg-transparent text-xs p-1.5 text-center inline-flex items-center" type="button" onClick={() => { statsDropdownShow === "hidden" ? setStatsDropdownShow('') : setStatsDropdownShow('hidden') }}>
+                                                                {timeRangeType}
+                                                                <svg className="w-2.5 h-2.5 ml-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                                                                </svg>
+                                                            </button>
+                                                            <div id="statsDropdown" className={statsDropdownShow + " absolute z-10 bg-black divide-y divide-gray-100 rounded-lg shadow w-10"} >
+                                                                <ul className="py-2 text-xs text-gray-400 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
+                                                                    {
+                                                                        Object.keys(TIME_RANGE_TYPE).map((key, idx) => {
+                                                                            return (
+                                                                                <li key={idx} onClick={() => handleTimeRangeType(TIME_RANGE_TYPE[key])}>
+                                                                                    <a href="#" className="block py-2 hover:bg-gray-700 hover:text-gray-300 rounded-lg text-center">{TIME_RANGE_TYPE[key]}</a>
+                                                                                </li>
+                                                                            )
+                                                                        })
+                                                                    }
+                                                                </ul>
+                                                            </div>
+                                                        </span>
+                                                        <div className="flex space-around self-end justify-between">
+                                                            <div className="flex flex-col mx-2">
+                                                                <span className="text-badge text-center text-xs">Txs</span>
+                                                                <span className="text-white text-center text-xs">{statisticData?.txs}</span>
+                                                            </div>
+                                                            <div className="flex flex-col mx-2">
+                                                                <span className="text-badge text-center text-xs">Buys</span>
+                                                                <span className="text-white text-center text-xs">{statisticData?.buys}</span>
+                                                            </div>
+                                                            <div className="flex flex-col mx-2">
+                                                                <span className="text-badge text-center text-xs">Sells</span>
+                                                                <span className="text-white text-center text-xs">{statisticData?.sells}</span>
+                                                            </div>
+                                                            <div className="flex flex-col mx-2">
+                                                                <span className="text-badge text-center text-xs">Vol</span>
+                                                                <span className="text-white text-center text-xs">{formattedNum(statisticData?.vol * priceUSD, true, false, true)}</span>
+                                                            </div>
                                                         </div>
                                                     </div>
+                                                    <Row className="flex justify-between mb-[10px]" >
+                                                        <span className="w-auto font-medium text-white">Total Liquidity:</span>
+                                                        <span className="w-auto font-medium text-white text-right">{formattedNum(totalLiquidity ? parseFloat(totalLiquidity).toFixed(2) : 0, true)}</span>
+                                                    </Row>
+                                                    <Row className="flex justify-between mb-[10px]">
+                                                        <span className="w-auto font-medium text-white">24hr Volume:</span>
+                                                        <span className="w-auto font-medium text-white text-right">{formattedNum(dailyVolume ? parseFloat(dailyVolume).toFixed(2) : 0, true)}</span>
+                                                    </Row>
+                                                    <Row className="flex justify-between mb-[10px]">
+                                                        <span className="w-auto font-medium text-white">Market Cap(Circulating):</span>
+                                                        <span className="w-auto font-medium text-white text-right">{formattedNum(circulatingSupply ? parseFloat(circulatingSupply).toFixed(2) : 0, true)}</span>
+                                                    </Row>
+                                                    <Row className="flex justify-between mb-[10px]">
+                                                        <span className="w-auto font-medium text-white">Market Cap(Diluted):</span>
+                                                        <span className="w-auto font-medium text-white text-right">{formattedNum(dilutedSupply ? parseFloat(dilutedSupply).toFixed(2) : 0, true)}</span>
+                                                    </Row>
+                                                    <Row className="flex justify-between mb-[10px]">
+                                                        <span className="w-auto font-medium text-white">Treasury:</span>
+                                                        <span className="w-auto font-medium text-white text-right">{tokenInfo ? tokenInfo?.treasury_account_id : ''}</span>
+                                                    </Row>
+                                                    <Row className="flex justify-between mb-[10px]">
+                                                        <span className="w-auto font-medium text-white">Max Supply:</span>
+                                                        <span className="w-auto font-medium text-white text-right">{formattedNum(tokenInfo ? (tokenInfo?.total_supply / Math.pow(10, tokenInfo?.decimals)).toFixed(4) : '0')}</span>
+                                                    </Row>
+                                                    <Row className="flex justify-between mb-[10px]">
+                                                        <span className="w-auto font-medium text-white">Total Supply:</span>
+                                                        <span className="w-auto font-medium text-white text-right">{formattedNum(tokenInfo ? (tokenInfo?.total_supply / Math.pow(10, tokenInfo?.decimals)).toFixed(4) : '0')}</span>
+                                                    </Row>
+                                                    <Row className="flex justify-between mb-[10px]">
+                                                        <span className="w-auto font-medium text-white">Supply Type:</span>
+                                                        <span className="w-auto font-medium text-white text-right">{tokenInfo ? tokenInfo?.supply_type : ''}</span>
+                                                    </Row>
+                                                    {
+                                                        tokenInfo && tokenInfo.supply_key && tokenInfo.supply_key.key &&
+                                                        <Row className="grid grid-cols-2 justify-between mb-[10px]">
+                                                            <span className="w-auto font-medium text-white">Supply Key:</span>
+                                                            <span className="w-auto font-medium text-white text-right">{tokenInfo?.supply_key?.key}</span>
+                                                        </Row>
+                                                    }
+                                                    {
+                                                        tokenInfo && tokenInfo.freeze_key && tokenInfo.freeze_key.key &&
+                                                        <Row className="grid grid-cols-2 justify-between mb-[10px]">
+                                                            <span className="w-auto font-medium text-white">Freeze Key:</span>
+                                                            <span className="w-auto font-medium text-white text-right">{tokenInfo?.freeze_key?.key}</span>
+                                                        </Row>
+                                                    }
+                                                    {
+                                                        tokenInfo && tokenInfo.pause_key && tokenInfo.pause_key.key &&
+                                                        <Row className="grid grid-cols-2 justify-between mb-[10px]">
+                                                            <span className="w-auto font-medium text-white">Pause Key:</span>
+                                                            <span className="w-auto font-medium text-white text-right">{tokenInfo?.pause_key?.key}</span>
+                                                        </Row>
+                                                    }
+                                                    {
+                                                        tokenInfo && tokenInfo.wipe_key && tokenInfo.wipe_key.key &&
+                                                        <Row className="grid grid-cols-2 justify-between mb-[10px]">
+                                                            <span className="w-auto font-medium text-white">Wipe Key:</span>
+                                                            <span className="w-auto font-medium text-white text-right">{tokenInfo?.wipe_key?.key}</span>
+                                                        </Row>
+                                                    }
+                                                    {
+                                                        tokenInfo && tokenInfo.admin_key && tokenInfo.admin_key.key &&
+                                                        <Row className="grid grid-cols-2 justify-between mb-[10px]">
+                                                            <span className="w-auto font-medium text-white">Admin Key:</span>
+                                                            <span className="w-auto font-medium text-white text-right">{tokenInfo?.admin_key?.key}</span>
+                                                        </Row>
+                                                    }
+                                                    {
+                                                        tokenInfo &&
+                                                        <Row className="grid grid-cols-2 justify-between mb-[10px]">
+                                                            <span className="w-auto font-medium text-white">Created:</span>
+                                                            <span className="w-auto font-medium text-white text-right">{(new Date(Number(tokenInfo?.created_timestamp) * 1000)).toLocaleString("en-US")}</span>
+                                                        </Row>
+                                                    }
                                                 </div>
-                                                <Row className="flex justify-between mb-[10px]" >
-                                                    <span className="w-auto font-medium text-white">Total Liquidity:</span>
-                                                    <span className="w-auto font-medium text-white text-right">{formattedNum(totalLiquidity ? parseFloat(totalLiquidity).toFixed(2) : 0, true)}</span>
-                                                </Row>
-                                                <Row className="flex justify-between mb-[10px]">
-                                                    <span className="w-auto font-medium text-white">24hr Volume:</span>
-                                                    <span className="w-auto font-medium text-white text-right">{formattedNum(dailyVolume ? parseFloat(dailyVolume).toFixed(2) : 0, true)}</span>
-                                                </Row>
-                                                <Row className="flex justify-between mb-[10px]">
-                                                    <span className="w-auto font-medium text-white">Market Cap(Circulating):</span>
-                                                    <span className="w-auto font-medium text-white text-right">{formattedNum(circulatingSupply ? parseFloat(circulatingSupply).toFixed(2) : 0, true)}</span>
-                                                </Row>
-                                                <Row className="flex justify-between mb-[10px]">
-                                                    <span className="w-auto font-medium text-white">Market Cap(Diluted):</span>
-                                                    <span className="w-auto font-medium text-white text-right">{formattedNum(dilutedSupply ? parseFloat(dilutedSupply).toFixed(2) : 0, true)}</span>
-                                                </Row>
-                                                <Row className="flex justify-between mb-[10px]">
-                                                    <span className="w-auto font-medium text-white">Treasury:</span>
-                                                    <span className="w-auto font-medium text-white text-right">{tokenInfo ? tokenInfo?.treasury_account_id : ''}</span>
-                                                </Row>
-                                                <Row className="flex justify-between mb-[10px]">
-                                                    <span className="w-auto font-medium text-white">Max Supply:</span>
-                                                    <span className="w-auto font-medium text-white text-right">{formattedNum(tokenInfo ? (tokenInfo?.total_supply / Math.pow(10, tokenInfo?.decimals)).toFixed(4) : '0')}</span>
-                                                </Row>
-                                                <Row className="flex justify-between mb-[10px]">
-                                                    <span className="w-auto font-medium text-white">Total Supply:</span>
-                                                    <span className="w-auto font-medium text-white text-right">{formattedNum(tokenInfo ? (tokenInfo?.total_supply / Math.pow(10, tokenInfo?.decimals)).toFixed(4) : '0')}</span>
-                                                </Row>
-                                                <Row className="flex justify-between mb-[10px]">
-                                                    <span className="w-auto font-medium text-white">Supply Type:</span>
-                                                    <span className="w-auto font-medium text-white text-right">{tokenInfo ? tokenInfo?.supply_type : ''}</span>
-                                                </Row>
-                                                {
-                                                    tokenInfo && tokenInfo.supply_key && tokenInfo.supply_key.key &&
-                                                    <Row className="grid grid-cols-2 justify-between mb-[10px]">
-                                                        <span className="w-auto font-medium text-white">Supply Key:</span>
-                                                        <span className="w-auto font-medium text-white text-right">{tokenInfo?.supply_key?.key}</span>
-                                                    </Row>
-                                                }
-                                                {
-                                                    tokenInfo && tokenInfo.freeze_key && tokenInfo.freeze_key.key &&
-                                                    <Row className="grid grid-cols-2 justify-between mb-[10px]">
-                                                        <span className="w-auto font-medium text-white">Freeze Key:</span>
-                                                        <span className="w-auto font-medium text-white text-right">{tokenInfo?.freeze_key?.key}</span>
-                                                    </Row>
-                                                }
-                                                {
-                                                    tokenInfo && tokenInfo.pause_key && tokenInfo.pause_key.key &&
-                                                    <Row className="grid grid-cols-2 justify-between mb-[10px]">
-                                                        <span className="w-auto font-medium text-white">Pause Key:</span>
-                                                        <span className="w-auto font-medium text-white text-right">{tokenInfo?.pause_key?.key}</span>
-                                                    </Row>
-                                                }
-                                                {
-                                                    tokenInfo && tokenInfo.wipe_key && tokenInfo.wipe_key.key &&
-                                                    <Row className="grid grid-cols-2 justify-between mb-[10px]">
-                                                        <span className="w-auto font-medium text-white">Wipe Key:</span>
-                                                        <span className="w-auto font-medium text-white text-right">{tokenInfo?.wipe_key?.key}</span>
-                                                    </Row>
-                                                }
-                                                {
-                                                    tokenInfo && tokenInfo.admin_key && tokenInfo.admin_key.key &&
-                                                    <Row className="grid grid-cols-2 justify-between mb-[10px]">
-                                                        <span className="w-auto font-medium text-white">Admin Key:</span>
-                                                        <span className="w-auto font-medium text-white text-right">{tokenInfo?.admin_key?.key}</span>
-                                                    </Row>
-                                                }
-                                                {
-                                                    tokenInfo &&
-                                                    <Row className="grid grid-cols-2 justify-between mb-[10px]">
-                                                        <span className="w-auto font-medium text-white">Created:</span>
-                                                        <span className="w-auto font-medium text-white text-right">{(new Date(Number(tokenInfo?.created_timestamp) * 1000)).toLocaleString("en-US")}</span>
-                                                    </Row>
-                                                }
-                                            </div>
-                                        </CardBody>
-                                    </Card>
-                                </div>
+                                            </CardBody>
+                                        </Card>
+                                    </div>
 
-                            </div>
+                                </div>
+                            }
                         </div>
                     </ContentWrapper>
                 </div>

@@ -378,3 +378,7 @@ body {
     max-height: 40px;
   }
 }
+
+.carousel-status {
+  display: none;
+}

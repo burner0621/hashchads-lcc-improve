@@ -81,7 +81,7 @@ const Chart = (props) => {
     setIsBook (below800)
   }, [below800])
   
-  const chartHeight = isBook?isMobile?300:height-50:height-85
+  const chartHeight = isMobile?400:600
   const chartWidth = isBook?isMobile?windowDimensions.width-60:windowDimensions.width:width
   
   useEffect(() => {
@@ -91,13 +91,14 @@ const Chart = (props) => {
         symbol: symbol,
         interval: interval,
         fullscreen: false,
-        width: chartWidth,
-        height: chartHeight,
+        width: "100%",
+        height: "100%",
         container_id: 'tv_chart_container',
         datafeed: Datafeed(tokenId),
         library_path: '/charting_library/',
         toolbar_bg: '#0b1217',
         overrides: {
+          'paneProperties.rightMargin': 0,
           'paneProperties.background': '#0b1217',
           'paneProperties.backgroundType': 'solid',
           'paneProperties.backgroundGradientEndColor': '#0b1217',
@@ -110,11 +111,13 @@ const Chart = (props) => {
           'mainSeriesProperties.candleStyle.borderDownColor': '#E20E7C', // Down Candle Border Color
           'mainSeriesProperties.candleStyle.drawBorder': false, // Disable candle borders
           'mainSeriesProperties.minTick': '100000000,1,false',
+          "scalesProperties.textSize": 18,
+          "scalesProperties.showLeftScale": false,
         },
         disabled_features: ['header_symbol_search'],
         time_frames: [],
         theme: 'Dark',
-        timezone: TIMEZONE[offset][0]
+        timezone: TIMEZONE[offset][0],
       }));
 
       widget.onChartReady(async () => {
@@ -123,7 +126,7 @@ const Chart = (props) => {
     }
   }, [symbol, interval]);
   return (
-    <div id="tv_chart_container" height={height} width={width} style={{ height: 400, backgroundColor: 'black' }} />
+    <div id="tv_chart_container"  style={{ height: chartHeight, backgroundColor: 'black' }} />
   );
 };
 

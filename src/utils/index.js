@@ -25,20 +25,21 @@ export const formatDollarAmount = (num, digits) => {
   return formatter.format(num)
 }
 
-export const formattedNum = (number, usd = false, acceptNegatives = false) => {
+export const formattedNum = (number, usd = false, acceptNegatives = false, abr = false) => {
   if (isNaN(number) || number === '' || number === undefined) {
     return usd ? '$0' : 0
   }
   let num = parseFloat(number)
-
-  if (num > 1000000000) {
-    return (usd ? '$' : '') + (num/1000000000).toFixed(2).toString() + "B"
-  }
-  if (num > 1000000) {
-    return (usd ? '$' : '') + (num/1000000).toFixed(2).toString() + "M"
-  }
-  if (num > 1000) {
-    return (usd ? '$' : '') + (num/1000).toFixed(2).toString() + "K"
+  if (abr){
+    if (num > 1000000000) {
+      return (usd ? '$' : '') + (num/1000000000).toFixed(2).toString() + "B"
+    }
+    if (num > 1000000) {
+      return (usd ? '$' : '') + (num/1000000).toFixed(2).toString() + "M"
+    }
+    if (num > 1000) {
+      return (usd ? '$' : '') + (num/1000).toFixed(2).toString() + "K"
+    }
   }
 
   if (num === 0) {

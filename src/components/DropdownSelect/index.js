@@ -28,13 +28,13 @@ const Wrapper = styled.div`
 const Dropdown = styled.div`
   position: absolute;
   top: 34px;
+  left: 0;
   padding-top: 40px;
-  width: calc(100% - 40px);
-  background-color: ${({ theme }) => theme.bg1};
+  width: 120px;
+  background-color: #274963;
   border: 1px solid rgba(0, 0, 0, 0.15);
   padding: 10px 10px;
   border-radius: 8px;
-  width: calc(100% - 20px);
   font-weight: 500;
   font-size: 1rem;
   color: black;
@@ -49,26 +49,26 @@ const ArrowStyled = styled(Arrow)`
   margin-left: 6px;
 `
 
-const DropdownSelect = ({ options, active, setActive, color }) => {
+const DropdownSelect = ({ options, active, setActive, color, right }) => {
   const [showDropdown, toggleDropdown] = useState(false)
 
   return (
     <Wrapper open={showDropdown} color={color}>
-      <div className='justify-between' onClick={() => toggleDropdown(!showDropdown)} justify="center">
+      <div className='justify-between flex flex-row' onClick={() => toggleDropdown(!showDropdown)} justify="center">
         <div>{active}</div>
         <StyledIcon>
           <ArrowStyled />
         </StyledIcon>
       </div>
       {showDropdown && (
-        <Dropdown>
+        <Dropdown style={right&&{right: 0, left: "auto"}}>
           <div className='grid auto-rows-auto gap-y-5 justify-items-center'>
             {Object.keys(options).map((key, index) => {
               let option = options[key]
               return (
                 option !== active && (
                   <div
-                    className='w-full flex p-0 items-center border rounded-2 justify-center'
+                    className='w-full flex p-0 items-center text-white rounded-2 justify-center'
                     onClick={() => {
                       toggleDropdown(!showDropdown)
                       setActive(option)
