@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import styled from 'styled-components'
 import { useMedia } from 'react-use'
 import { formattedNum } from '../../utils'
@@ -27,6 +27,8 @@ export default function GlobalStats() {
     const below600 = useMedia('(max-width: 600px)')
     const below816 = useMedia('(max-width: 816px)')
 
+    const timeInterval = useRef(undefined);
+
     const [totalVolumeHBAR, setTotalVolumeHBAR] = useState(0)
     const [totalVolumeUSD, setTotalVolumeUSD] = useState(0)
     const [todayVolumeUSD, setTodayVolumeUSD] = useState(0)
@@ -36,40 +38,49 @@ export default function GlobalStats() {
     const formattedTvlUSD = totalVolumeUSD ? formattedNum(totalVolumeUSD, true) : undefined
     const formattedTvlHBAR = totalVolumeHBAR ? formattedNum(totalVolumeHBAR, false) : undefined
     const formattedTodayVolume = todayVolumeUSD ? formattedNum(todayVolumeUSD, false) : undefined
-    useEffect(() => {
-        async function fetchData() {
-            let response = await axios.get(`${process.env.API_URL}/stats`)
-            if (response.status === 200) {
-                let jsonData = await response.data;
-                try {
-                    setTotalVolumeHBAR((Number(jsonData['tvl']) / 100000000).toFixed(4));
-                    setTotalVolumeUSD(Number(jsonData['tvlUsd']).toFixed(4));
-                } catch (error) {
-                    console.log(error)
-                }
-            }
-            response = await axios.get(`${process.env.API_URL}/stats/get_daily_volumes`)
-            if (response.status === 200) {
-                let jsonData = await response.data;
-                setTodayVolumeUSD(Number(jsonData[0]['dailyVolume'] / 100000000).toFixed(4))
-            }
-            response = await axios.get(`${process.env.API_URL}/tokens/get_hbar_price`)
-            if (response.status === 200) {
-                let jsonData = await response.data;
-                setHBarPrice(Number(jsonData.data).toFixed(4))
+
+    const fetchData = useCallback(async () => {
+        let response = await axios.get(`${process.env.API_URL}/stats`)
+        if (response.status === 200) {
+            let jsonData = await response.data;
+            try {
+                setTotalVolumeHBAR((Number(jsonData['tvl']) / 100000000).toFixed(4));
+                setTotalVolumeUSD(Number(jsonData['tvlUsd']).toFixed(4));
+            } catch (error) {
+                console.log(error)
             }
         }
+        response = await axios.get(`${process.env.API_URL}/stats/get_daily_volumes`)
+        if (response.status === 200) {
+            let jsonData = await response.data;
+            setTodayVolumeUSD(Number(jsonData[0]['dailyVolume'] / 100000000).toFixed(4))
+        }
+        response = await axios.get(`${process.env.API_URL}/tokens/get_hbar_price`)
+        if (response.status === 200) {
+            let jsonData = await response.data;
+            setHBarPrice(Number(jsonData.data).toFixed(4))
+        }
+    }, [])
 
+    useEffect(() => {
         fetchData()
+    }, [fetchData])
+
+    useEffect(() => {
+        if (timeInterval.current) clearInterval(timeInterval.current);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        timeInterval.current = setInterval(async () => {
+            await fetchData()
+        }, 5000);
     }, [])
 
     // useHbarAndSaucePrice()
     return (
         <Header id="globalStats">
-            <div className='justify-between' style={{ padding: '0.5rem 0.5rem 0.5rem 0'}}>
+            <div className='justify-between' style={{ padding: '0.5rem 0.5rem 0.5rem 0' }}>
                 <RowFixed>
 
-                    <Text className='flex flex-row items-center text-grey-light' style={{margin: "14px 14px 14px 0"}}>{"HBAR Price: "}
+                    <Text className='flex flex-row items-center text-grey-light' style={{ margin: "14px 14px 14px 0" }}>{"HBAR Price: "}
                         {
                             formattedHbarPrice === undefined && <Spinner className='px-2' color="light" type="grow" style={{ verticalAlign: 'middle' }} />
                         }

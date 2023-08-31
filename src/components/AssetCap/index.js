@@ -18,7 +18,7 @@ const AssetCap = () => {
         let response = await axios.get(`${process.env.API_URL}/tokens/get_top_stats_data?count=25`)
         if (response.status === 200) {
             const data = response.data
-            if (data.success) {console.log (data.data)
+            if (data.success) {
                 setTopTokens(data.data.tops)
                 setGainers(data.data.gainers)
                 setLosers(data.data.losers)

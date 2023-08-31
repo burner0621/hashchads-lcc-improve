@@ -774,7 +774,7 @@ export default function TokenPage() {
                                                                         <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                                                                     </svg>
                                                                 </button>
-                                                                <div id="moreDropdown" className={showMorePanel + " absolute z-500 bg-transparent divide-y divide-gray-100 rounded-lg shadow right-0"} >
+                                                                <div id="moreDropdown" className={showMorePanel + " absolute z-[100] bg-transparent divide-y divide-gray-100 rounded-lg shadow right-0"} >
                                                                     <div className="w-full md:w-3/12">
                                                                         <div className="flex flex-col">
                                                                             <Card className="card-animate bg-[#274963] panel-shadow rounded-[10px]">
@@ -840,6 +840,10 @@ export default function TokenPage() {
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
+                                                                                        <Row className="flex justify-between mb-[10px]" >
+                                                                                            <span className="w-auto font-medium text-white">Holders</span>
+                                                                                            <span className="w-auto font-medium text-white text-right"><a target="_blank" href={`https://hbarwhales.com/token/${address}`}>Check on Hbarwhales</a></span>
+                                                                                        </Row>
                                                                                         <Row className="flex justify-between mb-[10px]" >
                                                                                             <span className="w-auto font-medium text-white">Total Liquidity:</span>
                                                                                             <span className="w-auto font-medium text-white text-right">{formattedNum(totalLiquidity ? parseFloat(totalLiquidity).toFixed(2) : 0, true)}</span>
