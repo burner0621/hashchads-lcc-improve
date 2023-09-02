@@ -1,6 +1,6 @@
 
 import { useRouter } from 'next/router';
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { paramCase } from 'change-case';
 import styled from 'styled-components'
 
@@ -116,7 +116,7 @@ const SORT_FIELD = {
     NAME: 'name',
     PRICE: 'priceUsd',
     CHANGE: 'dailyPriceChange',
-    DAILYCHANGE: 'dailyChanged',
+    DAILYCHANGE: 'dailyPriceChange',
     WEEKLYCHANGE: 'weeklyChanged',
     MONTHLYCHANGE: 'monthlyChanged',
     MC: 'marketcap'
@@ -141,6 +141,21 @@ const TokenTable = ({ tokens = [], itemMax = 25, useTracked = false, show = 1, t
         }
         fetchHbarPrice()
     }, [])
+
+    const filteredList = useMemo(() => {
+        return (
+            tokens &&
+            tokens
+                .sort((a, b) => {
+                    if (sortedColumn === SORT_FIELD.SYMBOL || sortedColumn === SORT_FIELD.NAME) {
+                        return a[sortedColumn] > b[sortedColumn] ? (sortDirection ? -1 : 1) * 1 : (sortDirection ? -1 : 1) * -1
+                    }
+                    return parseFloat(a[sortedColumn]) > parseFloat(b[sortedColumn])
+                        ? (sortDirection ? -1 : 1) * 1
+                        : (sortDirection ? -1 : 1) * -1
+                })
+        )
+    }, [tokens, sortDirection, sortedColumn])
 
     const redirectTokenPage = (tokenId) => {
         push(PATH_HASHCHADS.tokens.view(paramCase(tokenId)));
@@ -373,8 +388,8 @@ const TokenTable = ({ tokens = [], itemMax = 25, useTracked = false, show = 1, t
                     </Flex>
                 </DashGrid>
                 <List p={0}>
-                    {tokens &&
-                        tokens.map((item, index) => {
+                    {filteredList &&
+                        filteredList.map((item, index) => {
                             return (
                                 <div key={index}>
                                     <ListItem key={index} index={index + 1} item={item} />

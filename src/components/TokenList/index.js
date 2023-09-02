@@ -114,9 +114,10 @@ const SORT_FIELD = {
     NAME: 'name',
     PRICE: 'priceUsd',
     CHANGE: 'dailyPriceChange',
-    DAILYCHANGE: 'dailyChanged',
+    DAILYCHANGE: 'dailyPriceChange',
     WEEKLYCHANGE: 'weeklyChanged',
-    MONTHLYCHANGE: 'monthlyChanged'
+    MONTHLYCHANGE: 'monthlyChanged',
+    MC: 'marketcap'
 }
 
 const TopTokenList = ({ tokens = [], itemMax = 25, useTracked = false, show = 1, type='all', liq='1' }) => {
