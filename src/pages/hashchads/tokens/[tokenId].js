@@ -964,7 +964,12 @@ export default function TokenPage() {
                                                             </Row>
                                                             <Row className="flex justify-between mb-[10px]">
                                                                 <span className="w-auto font-medium text-white">Treasury:</span>
-                                                                <span className="w-auto font-medium text-white text-right">{tokenInfo ? tokenInfo?.treasury_account_id : ''}</span>
+                                                                {/* <span className="w-auto font-medium text-white text-right">{tokenInfo ? tokenInfo?.treasury_account_id : ''}</span> */}
+                                                                <span className="w-auto font-medium text-white text-right">
+                                                                    <a className="text-blue-500 hover:text-gray-300" href={'https://hashscan.io/mainnet/token/' + tokenInfo?.treasury_account_id} >
+                                                                        {tokenInfo ? tokenInfo?.treasury_account_id : ''}
+                                                                    </a>
+                                                                </span>
                                                             </Row>
                                                             <Row className="flex justify-between mb-[10px]">
                                                                 <span className="w-auto font-medium text-white">Max Supply:</span>
@@ -1436,7 +1441,12 @@ export default function TokenPage() {
                                                     </Row>
                                                     <Row className="flex justify-between mb-[10px]">
                                                         <span className="w-auto font-medium text-white">Treasury:</span>
-                                                        <span className="w-auto font-medium text-white text-right">{tokenInfo ? tokenInfo?.treasury_account_id : ''}</span>
+                                                        {/* <span className="w-auto font-medium text-white text-right">{tokenInfo ? tokenInfo?.treasury_account_id : ''}</span> */}
+                                                        <span className="w-auto font-medium text-right">
+                                                            <a className="text-blue-500 hover:text-gray-300" href={'https://hashscan.io/mainnet/token/' + tokenInfo?.treasury_account_id} >
+                                                                {tokenInfo ? tokenInfo?.treasury_account_id : ''}
+                                                            </a>
+                                                        </span>
                                                     </Row>
                                                     <Row className="flex justify-between mb-[10px]">
                                                         <span className="w-auto font-medium text-white">Max Supply:</span>
