@@ -288,7 +288,7 @@ const TopTokenList = ({ tokens = [], itemMax = 25, useTracked = false, show = 1,
                         <polyline
                             fill="none"
                             stroke={Number(item.dailyPriceChange) >= 0 ? "#20eb7a" : "#ff422b"}
-                            strokeWidth="13"
+                            strokeWidth="8"
                             points={item.priceChart} />
                     </svg>
                 </DataText>
