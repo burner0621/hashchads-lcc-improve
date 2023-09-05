@@ -32,6 +32,8 @@ export default class MyDocument extends Document {
 
           <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0" />
 
+          <meta content="Harnessing the Power of Hedera HTS" name="description" />
+
           <link rel="manifest" href="/manifest.json" />
 
           <link rel="preconnect" href="https://fonts.gstatic.com" />
@@ -65,14 +67,9 @@ export default class MyDocument extends Document {
                 `}
           </script>
 
-          <meta
-            name="description"
-            content="The starting point for your next project with Minimal UI Kit, built on the newest version of Material-UI ©, ready to be customized to your style"
-          />
+          <meta name="keywords" content="hashchads hashfrens hedera" />
 
-          <meta name="keywords" content="react,material,kit,application,hashchads,admin,template" />
-
-          <meta name="author" content="Minimal UI Kit" />
+          <meta name="author" content="burner0621" />
         </Head>
 
         <body className='bg-[#0b1217]' style={{ fontFamily: "'Nurito Sans', sans-serif", color: 'white', lineHeight: 1.5, fontSize: 13, fontWeigth: 400 }}>
