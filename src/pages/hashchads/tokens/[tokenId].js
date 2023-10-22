@@ -560,6 +560,7 @@ export default function TokenPage() {
                         external
                         href={'https://hashscan.io/mainnet/transactionsById/' + row.transactionId}
                         target='_blank'
+                        rel='noreferrer'
                     >
                         <Text style={{ marginLeft: '.15rem' }} fontSize={'14px'} fontWeight={400}>
                             ({row.transactionId})
